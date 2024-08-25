@@ -14,23 +14,32 @@ Public Sub getData(setSheetName As Variant)
     Dim checksum As String
     Dim portfolio As String
     Dim statusCell As String
-    Dim asssociation As String
+    Dim association As String
     Dim agreement As String
+    ' Dim achievedMargin As String
+    Dim copiedSheetRange As String
 
+    On Error GoTo ErrorHandler
+
+    ' Set the configuration worksheet
     Set wsConfig = Sheets("Configurations")
+    
+    ' Retrieve configuration values
     targetSheetName = wsConfig.Range("B2").Value
     startingPoint = wsConfig.Range("B4").Value
     endPoint = wsConfig.Range("B3").Value
     checksum = wsConfig.Range("B5").Value
     portfolio = wsConfig.Range("B10").Value
     statusCell = wsConfig.Range("B11").Value
-    asssociation = wsConfig.Range("B12").Value
+    association = wsConfig.Range("B12").Value
     agreement = wsConfig.Range("B13").Value
+    ' achievedMargin = wsConfig.Range("B25").Value
+    copiedSheetRange = wsConfig.Range("B26").Value
 
     ' Set the source sheet
     Set sourceSheet = Sheets(targetSheetName)
 
-    ' Find the last row in column B
+    ' Find the last row in the specified column
     lastRow = sourceSheet.Cells(sourceSheet.Rows.Count, endPoint).End(xlUp).Row
 
     ' Define the range to copy
@@ -39,38 +48,33 @@ Public Sub getData(setSheetName As Variant)
     ' Create a new sheet and paste data
     Set newSheet = Sheets.Add(After:=Sheets(Sheets.Count))
     newSheet.Name = setSheetName
+    
+    ' Copy and paste data ranges
     rng.Copy Destination:=newSheet.Range("A1")
+    sourceSheet.Range(portfolio & "14:" & portfolio & lastRow).Copy Destination:=newSheet.Range("E1")
+    sourceSheet.Range(statusCell & "14:" & statusCell & lastRow).Copy Destination:=newSheet.Range("F1")
+    sourceSheet.Range(association & "14:" & association & lastRow).Copy Destination:=newSheet.Range("G1")
+    sourceSheet.Range(agreement & "14:" & agreement & lastRow).Copy Destination:=newSheet.Range("H1")
+    ' sourceSheet.Range(achievedMargin & "14:" & achievedMargin & lastRow).Copy Destination:=newSheet.Range("I1")
 
-    sourceSheet.Range(portfolio & "14:" & portfolio & lastRow).Copy
+    ' Remove duplicates
+    newSheet.Range(copiedSheetRange & lastRow).RemoveDuplicates Columns:=Array(1, 2, 3, 4, 5, 6), Header:=xlNo
 
-    newSheet.Range("E1").Select
-    ActiveSheet.Paste
+    ' Move data to start from row 5
+    With newSheet
+        .Range("A1:I" & lastRow).Cut Destination:=.Range("A5")
+    End With
 
-    sourceSheet.Range(statusCell & "14:" & statusCell & lastRow).Copy
-
-    newSheet.Range("F1").Select
-    ActiveSheet.Paste
-
-    sourceSheet.Range(asssociation & "14:" & asssociation & lastRow).Copy
-
-    newSheet.Range("G1").Select
-    ActiveSheet.Paste
-
-    sourceSheet.Range(agreement & "14:" & agreement & lastRow).Copy
-
-    newSheet.Range("H1").Select
-    ActiveSheet.Paste
-
+    ' Clean up
     Application.CutCopyMode = False
-    ActiveSheet.Range("$A$1:$H$" &lastRow).RemoveDuplicates Columns:=Array(1, 2, 3, 4, 5, 6) _
-        , Header:=xlNo
-    Range("A1").Select
-    Range(Selection, "H1").Select
-    Range(Selection, Selection.End(xlDown)).Select
-    Selection.Cut
-    Range("A5").Select
-    ActiveSheet.Paste
+
+    Exit Sub
+
+ErrorHandler:
+    MsgBox "An error occurred: " & Err.Description, vbCritical
+
 End Sub
+
 
 ' GENERATE DATA
 Public Sub GenerateTables()
@@ -100,28 +104,59 @@ Public Sub GenerateTables()
 End Sub
 
 Public Sub TableTemplate(tableReference As Variant)
+    ' Worksheet Variables
     Dim ws As Worksheet
-    Dim lastRow As Long
-    Dim startRow As Long
-    Dim columnsArray As Variant
-    Dim i As Integer
-    Dim colLetter As String
-    Dim formulaString As String
-    Dim valueToPass As Variant
-    Dim criteria As Variant
     Dim wsConfig As Worksheet
+    
+    ' String Variables
+    Dim TPStartColumn As String
+    Dim TAMStartColumn As String
+    Dim TP90StartColumn As String
+    Dim TP50StartColumn As String
+    Dim TP10StartColumn As String
+    Dim NextTPStartColumn As String
+    Dim NextTAMStartColumn As String
+    Dim NextTP90StartColumn As String
+    Dim NextTP50StartColumn As String
+    Dim NextTP10StartColumn As String
     Dim targetSheetName As String
     Dim analysisReference As String
     Dim marginStartingCell As String
-    Dim nmi As String    
+    Dim nmi As String
+    Dim formulaString As String
+    
+    ' Variant Variables
+    Dim columnsArray As Variant
+    Dim valueToPass As Variant
+    Dim criteria As Variant
+    
+    ' Long Variables
+    Dim lastRow As Long
+    Dim startRow As Long
     Dim j As Long
+    
+    ' Integer Variables
+    Dim i As Integer
+    Dim colLetter As String
 
+    
     GenerateColumnAddressesArray
     Set wsConfig = Sheets("Configurations") 
     targetSheetName = wsConfig.Range("B2").Value
     analysisReference = wsConfig.Range("B7").Value
     nmi = wsConfig.Range("B3").Value
     marginStartingCell = wsConfig.Range("B6").Value
+    TPStartColumn = wsConfig.Range("B14").Value
+    TAMStartColumn = wsConfig.Range("B15").Value
+    TP90StartColumn = wsConfig.Range("B16").Value
+    TP50StartColumn = wsConfig.Range("B17").Value
+    TP10StartColumn = wsConfig.Range("B18").Value
+    NextTPStartColumn = wsConfig.Range("B20").Value
+    NextTAMStartColumn = wsConfig.Range("B21").Value
+    NextTP90StartColumn = wsConfig.Range("B22").Value
+    NextTP50StartColumn = wsConfig.Range("B23").Value
+    NextTP10StartColumn = wsConfig.Range("B24").Value
+
     valueToPass = tableReference & " Test"
     getData valueToPass
     Select Case tableReference 
@@ -152,21 +187,33 @@ Public Sub TableTemplate(tableReference As Variant)
     For i = LBound(columnsArray) To UBound(columnsArray)
         colLetter = columnsArray(i)
         Select Case colLetter
+            Case "TP"
+                formulaString =  "=SUM(" & GenerateColumnSequence(TPStartColumn, startRow) & ")"
             Case "TAM"
-                formulaString = "=E" & startRow & "+I" & startRow & "+M" & startRow & "+Q" & startRow & "+U" & startRow & "+Y" & startRow & "+AC" & startRow & "+AG" & startRow & "+AK" & startRow & "+AO" & startRow & "+AS" & startRow & "+AW" & startRow
+                formulaString =  "=SUM(" & GenerateColumnSequence(TAMStartColumn, startRow) & ")"
             Case "TPOE90"
-                formulaString = "=F" & startRow & "+J" & startRow & "+N" & startRow & "+R" & startRow & "+V" & startRow & "+Z" & startRow & "+AD" & startRow & "+AH" & startRow & "+AL" & startRow & "+AP" & startRow & "+AT" & startRow & "+AX" & startRow
+                formulaString =  "=SUM(" & GenerateColumnSequence(TP90StartColumn, startRow) & ")"
             Case "TPOE50"
-                formulaString = "=G" & startRow & "+K" & startRow & "+O" & startRow & "+S" & startRow & "+W" & startRow & "+AA" & startRow & "+AE" & startRow & "+AI" & startRow & "+AM" & startRow & "+AQ" & startRow & "+AU" & startRow & "+AY" & startRow
+                formulaString =  "=SUM(" & GenerateColumnSequence(TP50StartColumn, startRow) & ")"
             Case "TPOE10"
-                formulaString = "=H" & startRow & "+L" & startRow & "+P" & startRow & "+T" & startRow & "+X" & startRow & "+AB" & startRow & "+AF" & startRow & "+AJ" & startRow & "+AN" & startRow & "+AR" & startRow & "+AV" & startRow & "+AZ" & startRow
+                formulaString =  "=SUM(" & GenerateColumnSequence(TP10StartColumn, startRow) & ")"
+            Case "_TP"
+                formulaString =  "=SUM(" & GenerateColumnSequence(NextTPStartColumn, startRow) & ")"
+            Case "_TAM"
+                formulaString =  "=SUM(" & GenerateColumnSequence(NextTAMStartColumn, startRow) & ")"
+            Case "_TPOE90"
+                formulaString =  "=SUM(" & GenerateColumnSequence(NextTP90StartColumn, startRow) & ")"
+            Case "_TPOE50"
+                formulaString =  "=SUM(" & GenerateColumnSequence(NextTP50StartColumn, startRow) & ")"
+            Case "_TPOE10"
+                formulaString =  "=SUM(" & GenerateColumnSequence(NextTP10StartColumn, startRow) & ")"
             Case Else
                 formulaString = "=SUMIFS('"& targetSheetName &"'!" & colLetter & ":" & colLetter & _
                 ", '"& targetSheetName &"'!$"& nmi &":$"& nmi &", A" & startRow & _
                 ", '"& targetSheetName &"'!$"& analysisReference &":$"& analysisReference &", """ & tableReference  & """)"
 
         End Select
-        
+        ' Debug.Print formulaString
         ' Apply the formula to the appropriate range
         ws.Range(marginStartingCell & startRow & ":" & marginStartingCell & lastRow).Offset(0, i).Formula = formulaString
     Next i
@@ -284,13 +331,15 @@ Public Sub GenerateColumnAddressesArray()
     Dim addressCount As Long
     Dim wsConfig As Worksheet
     Dim startRef As String   
-    Dim endRef As String  
+    Dim endRef As String
+    Dim nextYearIncluded As Boolean  
 
     Set wsConfig = Sheets("Configurations")
     ' AP
     startRef = wsConfig.Range("B8").Value
     ' EC
     endRef = wsConfig.Range("B9").Value 
+    nextYearIncluded = wsConfig.Range("B19").Value 
     
     ' Define the starting and ending columns
     startCol = ColLetterToNum(startRef) ' Column number for "AP"
@@ -315,13 +364,33 @@ Public Sub GenerateColumnAddressesArray()
         ' Stop the outer loop if the next step would go beyond endCol
         If colIndex + 8 > endCol Then Exit For
     Next colIndex
-    
-    ' Resize the array to the exact number of addresses
-    ReDim Preserve addressArray(1 To addressCount + 4)
-    addressArray(addressCount + 1) = "TAM"
-    addressArray(addressCount + 2) = "TPOE90"
-    addressArray(addressCount + 3) = "TPOE50"
-    addressArray(addressCount + 4) = "TPOE10"
+
+    If nextYearIncluded Then
+        ' Expand the array by 10 elements
+        ReDim Preserve addressArray(1 To addressCount + 10)
+        
+        ' Add new values to the array
+        addressArray(addressCount + 1) = "TAM"
+        addressArray(addressCount + 2) = "TPOE90"
+        addressArray(addressCount + 3) = "TPOE50"
+        addressArray(addressCount + 4) = "TPOE10"
+        addressArray(addressCount + 5) = "TP"
+        addressArray(addressCount + 6) = "_TAM"
+        addressArray(addressCount + 7) = "_TPOE90"
+        addressArray(addressCount + 8) = "_TPOE50"
+        addressArray(addressCount + 9) = "_TPOE10"
+        addressArray(addressCount + 10) = "_TP"
+    Else
+        ' Expand the array by 5 elements
+        ReDim Preserve addressArray(1 To addressCount + 5)
+        
+        ' Add new values to the array
+        addressArray(addressCount + 1) = "TAM"
+        addressArray(addressCount + 2) = "TPOE90"
+        addressArray(addressCount + 3) = "TPOE50"
+        addressArray(addressCount + 4) = "TPOE10"
+        addressArray(addressCount + 5) = "TP"
+    End If
     ' Store the array in the module-level variable
     columnAddressesArray = addressArray
 End Sub
@@ -357,3 +426,40 @@ Function ColLetterToNum(colLetter As String) As Long
     
     ColLetterToNum = colNum
 End Function
+
+Function GenerateColumnSequence(col As String, rowNum As Long) As String
+    Dim sequence As String
+    Dim i As Integer
+    
+    ' Start at the initial column, then increment by 5 columns
+    For i = 0 To 11 ' 12 columns in total (M, R, W, AB, AG, etc.)
+        ' Calculate the column address by offsetting the initial column
+        sequence = sequence & Range(col & rowNum).Offset(0, i * 5).Address(False, False) & ","
+    Next i
+    
+    ' Remove the trailing comma
+    sequence = Left(sequence, Len(sequence) - 1)
+    
+    ' Return the sequence
+    GenerateColumnSequence = sequence
+End Function
+
+
+Function GetTotalPredicted(startCol As String) As Double
+    Dim result As String
+    Dim total As String
+    Dim sumResult As Double
+    
+    ' Generate the column sequence starting from the specified column for row 5
+    result = GenerateColumnSequence(startCol)
+    
+    ' Create the SUM formula as a string
+    total = "=SUM(" & result & ")"
+    
+    ' Evaluate the formula and get the sum result
+    sumResult = Evaluate(total)
+    
+    ' Return the sum result
+    GetTotalPredicted = sumResult
+End Function
+
