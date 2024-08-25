@@ -302,19 +302,19 @@ Public Sub GenerateColumnAddressesArray()
     ReDim addressArray(1 To 100) 
     
     For colIndex = startCol To endCol Step 8 ' Loop through every 8 columns
-    For i = 0 To 4 ' Get addresses for the first 4 columns in each group
-        If colIndex + i <= endCol Then
-            addressCount = addressCount + 1
-            If addressCount > UBound(addressArray) Then
-                ' Resize the array if necessary
-                ReDim Preserve addressArray(1 To addressCount * 2)
+        For i = 0 To 4 ' Get addresses for the first 4 columns in each group
+            If colIndex + i <= endCol Then
+                addressCount = addressCount + 1
+                If addressCount > UBound(addressArray) Then
+                    ' Resize the array if necessary
+                    ReDim Preserve addressArray(1 To addressCount * 2)
+                End If
+                addressArray(addressCount) = ColNumToLetter(colIndex + i) ' Convert column number to letter
             End If
-            addressArray(addressCount) = ColNumToLetter(colIndex + i) ' Convert column number to letter
-        End If
-    Next i
-    ' Stop the outer loop if the next step would go beyond endCol
-    If colIndex + 8 > endCol Then Exit For
-Next colIndex
+        Next i
+        ' Stop the outer loop if the next step would go beyond endCol
+        If colIndex + 8 > endCol Then Exit For
+    Next colIndex
     
     ' Resize the array to the exact number of addresses
     ReDim Preserve addressArray(1 To addressCount + 4)
