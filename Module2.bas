@@ -16,7 +16,7 @@ Public Sub getData(setSheetName As Variant)
     Dim statusCell As String
     Dim association As String
     Dim agreement As String
-    ' Dim achievedMargin As String
+    Dim achievedMargin As String
     Dim copiedSheetRange As String
 
     On Error GoTo ErrorHandler
@@ -33,7 +33,7 @@ Public Sub getData(setSheetName As Variant)
     statusCell = wsConfig.Range("B11").Value
     association = wsConfig.Range("B12").Value
     agreement = wsConfig.Range("B13").Value
-    ' achievedMargin = wsConfig.Range("B25").Value
+    achievedMargin = wsConfig.Range("B25").Value
     copiedSheetRange = wsConfig.Range("B26").Value
 
     ' Set the source sheet
@@ -55,7 +55,7 @@ Public Sub getData(setSheetName As Variant)
     sourceSheet.Range(statusCell & "14:" & statusCell & lastRow).Copy Destination:=newSheet.Range("F1")
     sourceSheet.Range(association & "14:" & association & lastRow).Copy Destination:=newSheet.Range("G1")
     sourceSheet.Range(agreement & "14:" & agreement & lastRow).Copy Destination:=newSheet.Range("H1")
-    ' sourceSheet.Range(achievedMargin & "14:" & achievedMargin & lastRow).Copy Destination:=newSheet.Range("I1")
+    sourceSheet.Range(achievedMargin & "14:" & achievedMargin & lastRow).Copy Destination:=newSheet.Range("I1")
 
     ' Remove duplicates
     newSheet.Range(copiedSheetRange & lastRow).RemoveDuplicates Columns:=Array(1, 2, 3, 4, 5, 6), Header:=xlNo
@@ -88,8 +88,8 @@ Public Sub GenerateTables()
     ' Check the user's response
     If response = vbYes Then
         ' Add the code to be executed if the user clicks Yes
-            ' products = Array("Retail Margin")
-            products = Array("Retail Margin", "Network", "Capacity", "Wholesale Energy", "Market Fees", "Ancillary Services", "LGC", "STC", "Commission", "Revenue")
+            products = Array("Retail Margin")
+            ' products = Array("Retail Margin", "Network", "Capacity", "Wholesale Energy", "Market Fees", "Ancillary Services", "LGC", "STC", "Commission", "Revenue")
 
             For i = LBound(products) To UBound(products)
                 TableTemplate products(i)
@@ -124,6 +124,7 @@ Public Sub TableTemplate(tableReference As Variant)
     Dim marginStartingCell As String
     Dim nmi As String
     Dim formulaString As String
+    Dim achievedCell As String
     
     ' Variant Variables
     Dim columnsArray As Variant
@@ -156,6 +157,7 @@ Public Sub TableTemplate(tableReference As Variant)
     NextTP90StartColumn = wsConfig.Range("B22").Value
     NextTP50StartColumn = wsConfig.Range("B23").Value
     NextTP10StartColumn = wsConfig.Range("B24").Value
+    achievedCell = wsConfig.Range("B25").Value
 
     valueToPass = tableReference & " Test"
     getData valueToPass
@@ -187,6 +189,10 @@ Public Sub TableTemplate(tableReference As Variant)
     For i = LBound(columnsArray) To UBound(columnsArray)
         colLetter = columnsArray(i)
         Select Case colLetter
+            Case "Achieved"
+                ' NEEDS TO BE UDPATED SOON SINCE FORMULA NOT WOKRING
+                ' formulaString = "=INDEX('Source FY25'!" & achievedCell & ":" & achievedCell & ", MATCH(1,('Source FY25'!" & analysisReference & ":" & analysisReference & "=""" & tableReference  & """)*('Source FY25'!D:D=A" & startRow & "), 0))"
+                formulaString = "=INDEX('" & targetSheetName & "'!" & achievedCell & ":" & achievedCell & ", MATCH(1,('" & targetSheetName & "'!" & analysisReference & ":" & analysisReference & "=""" & tableReference  & """)*('" & targetSheetName & "'!D:D=A" & startRow & "), 0))"
             Case "TP"
                 formulaString =  "=SUM(" & GenerateColumnSequence(TPStartColumn, startRow) & ")"
             Case "TAM"
@@ -215,22 +221,23 @@ Public Sub TableTemplate(tableReference As Variant)
         End Select
         ' Debug.Print formulaString
         ' Apply the formula to the appropriate range
+        Debug.Print formulaString
         ws.Range(marginStartingCell & startRow & ":" & marginStartingCell & lastRow).Offset(0, i).Formula = formulaString
     Next i
     Range("E5").Select
     Range(Selection, Selection.End(xlToRight)).Select
     Range(Selection, Selection.End(xlDown)).Select
     Selection.NumberFormat = "0"
-    Range("A5").Select
-    Range(Selection, Selection.End(xlToRight)).Select
-    Range(Selection, Selection.End(xlDown)).Select
-    ActiveSheet.UsedRange.Value = ws.UsedRange.Value
-    Selection.Copy
+    ' Range("A5").Select
+    ' Range(Selection, Selection.End(xlToRight)).Select
+    ' Range(Selection, Selection.End(xlDown)).Select
+    ' ActiveSheet.UsedRange.Value = ws.UsedRange.Value
+    ' Selection.Copy
 
-    ReplaceOriginalTables criteria
-    Application.DisplayAlerts = False ' Disable the confirmation prompt
-    Sheets(valueToPass).Delete
-    Application.DisplayAlerts = True  ' Re-enable the confirmation prompt    
+    ' ReplaceOriginalTables criteria
+    ' Application.DisplayAlerts = False ' Disable the confirmation prompt
+    ' Sheets(valueToPass).Delete
+    ' Application.DisplayAlerts = True  ' Re-enable the confirmation prompt    
 End Sub
 
 Public  Sub ReplaceOriginalTables(tableReference As Variant)
@@ -367,29 +374,31 @@ Public Sub GenerateColumnAddressesArray()
 
     If nextYearIncluded Then
         ' Expand the array by 10 elements
-        ReDim Preserve addressArray(1 To addressCount + 10)
+        ReDim Preserve addressArray(1 To addressCount + 11)
         
         ' Add new values to the array
-        addressArray(addressCount + 1) = "TAM"
-        addressArray(addressCount + 2) = "TPOE90"
-        addressArray(addressCount + 3) = "TPOE50"
-        addressArray(addressCount + 4) = "TPOE10"
-        addressArray(addressCount + 5) = "TP"
-        addressArray(addressCount + 6) = "_TAM"
-        addressArray(addressCount + 7) = "_TPOE90"
-        addressArray(addressCount + 8) = "_TPOE50"
-        addressArray(addressCount + 9) = "_TPOE10"
-        addressArray(addressCount + 10) = "_TP"
+        addressArray(addressCount + 1) = "Achieved"
+        addressArray(addressCount + 2) = "TAM"
+        addressArray(addressCount + 3) = "TPOE90"
+        addressArray(addressCount + 4) = "TPOE50"
+        addressArray(addressCount + 5) = "TPOE10"
+        addressArray(addressCount + 6) = "TP"
+        addressArray(addressCount + 7) = "_TAM"
+        addressArray(addressCount + 8) = "_TPOE90"
+        addressArray(addressCount + 9) = "_TPOE50"
+        addressArray(addressCount + 10) = "_TPOE10"
+        addressArray(addressCount + 11) = "_TP"
     Else
         ' Expand the array by 5 elements
-        ReDim Preserve addressArray(1 To addressCount + 5)
+        ReDim Preserve addressArray(1 To addressCount + 6)
         
         ' Add new values to the array
-        addressArray(addressCount + 1) = "TAM"
-        addressArray(addressCount + 2) = "TPOE90"
-        addressArray(addressCount + 3) = "TPOE50"
-        addressArray(addressCount + 4) = "TPOE10"
-        addressArray(addressCount + 5) = "TP"
+        addressArray(addressCount + 1) = "Achieved"
+        addressArray(addressCount + 2) = "TAM"
+        addressArray(addressCount + 3) = "TPOE90"
+        addressArray(addressCount + 4) = "TPOE50"
+        addressArray(addressCount + 5) = "TPOE10"
+        addressArray(addressCount + 6) = "TP"
     End If
     ' Store the array in the module-level variable
     columnAddressesArray = addressArray

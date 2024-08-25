@@ -28,5 +28,4 @@ Cleanup:
     Application.ScreenUpdating = True
     Application.Calculation = xlCalculationAutomatic
     Application.EnableEvents = True
-End Sub  
-
+End Sub
