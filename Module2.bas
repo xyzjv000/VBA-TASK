@@ -44,24 +44,12 @@ Public Sub getData(setSheetName As Variant)
     Set rng = sourceSheet.Range(startingPoint & ":" & checksum & lastRow)
 
     ' Create a new sheet and paste data
-    Set newSheet = Sheets.Add(After:=Sheets(Sheets.Count))
-    newSheet.Name = setSheetName
-    
+    Set newSheet = Sheets(setSheetName)
+    newSheet.Activate
     ' Copy and paste data ranges
-    rng.Copy Destination:=newSheet.Range("A1")
-    sourceSheet.Range(portfolio & "14:" & portfolio & lastRow).Copy Destination:=newSheet.Range("E1")
-    sourceSheet.Range(statusCell & "14:" & statusCell & lastRow).Copy Destination:=newSheet.Range("F1")
-    sourceSheet.Range(association & "14:" & association & lastRow).Copy Destination:=newSheet.Range("G1")
-    sourceSheet.Range(agreement & "14:" & agreement & lastRow).Copy Destination:=newSheet.Range("H1")
-
+    rng.Copy Destination:=newSheet.Range("A5")
     ' Remove duplicates
-    newSheet.Range(copiedSheetRange & lastRow).RemoveDuplicates Columns:=Array(1, 2, 3, 4, 5), Header:=xlNo
-
-    ' Move data to start from row 5
-    With newSheet
-        .Range("A1:H" & lastRow).Cut Destination:=.Range("A5")
-    End With
-    
+    newSheet.Range(copiedSheetRange & lastRow).RemoveDuplicates Columns:=Array(1, 2), Header:=xlNo
 
     ' Clean up
     Application.CutCopyMode = False
@@ -105,7 +93,7 @@ Public Sub TableTemplate(tableReference As Variant)
     ' Worksheet Variables
     Dim ws As Worksheet
     Dim wsConfig As Worksheet
-    
+    Dim sourceSheet As Worksheet
     ' String Variables
     Dim TPStartColumn As String
     Dim TAMStartColumn As String
@@ -126,19 +114,18 @@ Public Sub TableTemplate(tableReference As Variant)
     
     ' Variant Variables
     Dim columnsArray As Variant
-    Dim valueToPass As Variant
     Dim criteria As Variant
     
     ' Long Variables
     Dim lastRow As Long
     Dim startRow As Long
-    Dim j As Long
+    Dim sourceLastRow As Long
     
     ' Integer Variables
     Dim i As Integer
     Dim colLetter As String
 
-    
+
     GenerateColumnAddressesArray
     Set wsConfig = Sheets("Configurations") 
     targetSheetName = wsConfig.Range("B2").Value
@@ -157,15 +144,16 @@ Public Sub TableTemplate(tableReference As Variant)
     NextTP10StartColumn = wsConfig.Range("B24").Value
     achievedCell = wsConfig.Range("B25").Value
 
-    valueToPass = tableReference & " Test"
-    getData valueToPass
+    Set sourceSheet = Sheets(targetSheetName)
+    sourceLastRow = sourceSheet.Cells(sourceSheet.Rows.Count, nmi).End(xlUp).Row
+
     Select Case tableReference 
         Case "Ancillary Services" 
             criteria = "ESS"
         Case Else 
             criteria = tableReference
     End Select
-    
+    getData criteria
 
     ' Set your worksheet
     Set ws = ActiveSheet
@@ -176,11 +164,13 @@ Public Sub TableTemplate(tableReference As Variant)
     ' Find the last row with data in column A or B (whichever you expect to have the last row)
     lastRow = ws.Cells(ws.Rows.Count, "A").End(xlUp).Row
 
-    ' Apply the concatenation formula from startRow to lastRow in column C
     ws.Range("C" & startRow & ":C" & lastRow).Formula = "=A" & startRow & "&B" & startRow
     ws.Range("D" & startRow & ":D" & lastRow).Formula = "=IF(C" & startRow & "="""","""","""& Replace(criteria, " ", "") &""")"
-    ws.Range("H" & startRow & ":H" & lastRow).Formula2 = _
-    "=IF(A" & startRow & "="""","""",IF(LEFT(VLOOKUP($A" & startRow & ",'" & targetSheetName & "'!$D$13:$M$6136,10,FALSE),9)=""Unbundled"",""Unbundled"",""Bundled""))"
+    ws.Range("E" & startRow & ":E" & lastRow).Formula = "=IF(A" & startRow & "="""","""",VLOOKUP($A" & startRow & ",'" & targetSheetName & "'!$D$13:$M$"& sourceLastRow &",5,FALSE))"
+    ws.Range("F" & startRow & ":F" & lastRow).Formula = "=IF(A" & startRow & "="""","""",VLOOKUP($A" & startRow & ",'" & targetSheetName & "'!$D$13:$M$"& sourceLastRow &",6,FALSE))"
+    ws.Range("G" & startRow & ":G" & lastRow).Formula = "=IF(A" & startRow & "="""","""",VLOOKUP($A" & startRow & ",'" & targetSheetName & "'!$D$13:$M$"& sourceLastRow &",7,FALSE))"
+    ws.Range("H" & startRow & ":H" & lastRow).Formula = _
+    "=IF(A" & startRow & "="""","""",IF(LEFT(VLOOKUP($A" & startRow & ",'" & targetSheetName & "'!$D$13:$M$"& sourceLastRow &",10,FALSE),9)=""Unbundled"",""Unbundled"",""Bundled""))"
 
     ' Array of columns to apply the SUMIFS formula
     columnsArray = columnAddressesArray
@@ -220,12 +210,15 @@ Public Sub TableTemplate(tableReference As Variant)
         ' Debug.Print formulaString
         ' Apply the formula to the appropriate range
         Debug.Print formulaString
-        ws.Range(marginStartingCell & startRow & ":" & marginStartingCell & lastRow).Offset(0, i).Formula2 = formulaString
+        If colLetter = "Achieved" Then
+            ws.Range(marginStartingCell & startRow & ":" & marginStartingCell & lastRow).Offset(0, i).Formula2 = formulaString
+        Else
+            ws.Range(marginStartingCell & startRow & ":" & marginStartingCell & lastRow).Offset(0, i).Formula = formulaString
+        End If
+
     Next i
-    Range("E5").Select
-    Range(Selection, Selection.End(xlToRight)).Select
-    Range(Selection, Selection.End(xlDown)).Select
-    Selection.NumberFormat = "0"
+    ws.Range("E5", ws.Range("E5").End(xlToRight).End(xlDown)).NumberFormat = "0"
+
     Range("A5").Select
     Range(Selection, Selection.End(xlToRight)).Select
     Range(Selection, Selection.End(xlDown)).Select
@@ -233,9 +226,6 @@ Public Sub TableTemplate(tableReference As Variant)
     Selection.Copy
 
     ReplaceOriginalTables criteria
-    Application.DisplayAlerts = False ' Disable the confirmation prompt
-    Sheets(valueToPass).Delete
-    Application.DisplayAlerts = True  ' Re-enable the confirmation prompt    
 End Sub
 
 Public  Sub ReplaceOriginalTables(tableReference As Variant)
@@ -247,12 +237,16 @@ Public  Sub ReplaceOriginalTables(tableReference As Variant)
     Application.CutCopyMode = False
 End Sub
 
-Public  Sub PopulateCombineTable()
+Public Sub PopulateCombineTable()
     Dim combinedSheet As Worksheet
     Dim sheetNames As Variant
-    Dim pasteRow As Integer
+    Dim pasteRow As Long
+    Dim ws As Worksheet
+    Dim lastRow As Long
+    Dim lastCol As Long
+    Dim rng As Range
     Dim i As Integer
-    
+
     sheetNames = Array("Retail Margin", "Network", "Capacity", "Wholesale Energy", _
                        "Market Fees", "ESS", "LGC", "STC", "Commission", "Revenue")
                        
@@ -264,20 +258,27 @@ Public  Sub PopulateCombineTable()
 
     ' Loop through each sheet in the array
     For i = LBound(sheetNames) To UBound(sheetNames)
-        Sheets(sheetNames(i)).Select
-        Range("A5").Select
-        Range(Selection, Selection.End(xlDown)).Select
-        Range(Selection, Selection.End(xlToRight)).Select
-        Selection.Copy
+        Set ws = Sheets(sheetNames(i))
+        
+        ' Find the last row and column with data
+        With ws
+            lastRow = .Cells(.Rows.Count, "A").End(xlUp).Row
+            lastCol = .Cells(5, .Columns.Count).End(xlToLeft).Column
+            Set rng = .Range(.Cells(5, 1), .Cells(lastRow, lastCol))
+        End With
+        
+        ' Copy data to combinedSheet
+        rng.Copy
         combinedSheet.Cells(pasteRow, 1).PasteSpecial Paste:=xlPasteValues
         
         ' Update the pasteRow to the next row after the last pasted data
-        pasteRow = pasteRow + Selection.Rows.Count
+        pasteRow = pasteRow + rng.Rows.Count
     Next i
+    
     Application.CutCopyMode = False
     RefreshAllPivotTables
-    Sheets("Run Sheet").Select
 End Sub
+
 
 Public Sub RefreshAllPivotTables()
     Dim pt As PivotTable
@@ -450,23 +451,3 @@ Function GenerateColumnSequence(col As String, rowNum As Long) As String
     ' Return the sequence
     GenerateColumnSequence = sequence
 End Function
-
-
-Function GetTotalPredicted(startCol As String) As Double
-    Dim result As String
-    Dim total As String
-    Dim sumResult As Double
-    
-    ' Generate the column sequence starting from the specified column for row 5
-    result = GenerateColumnSequence(startCol)
-    
-    ' Create the SUM formula as a string
-    total = "=SUM(" & result & ")"
-    
-    ' Evaluate the formula and get the sum result
-    sumResult = Evaluate(total)
-    
-    ' Return the sum result
-    GetTotalPredicted = sumResult
-End Function
-
