@@ -16,7 +16,6 @@ Public Sub getData(setSheetName As Variant)
     Dim statusCell As String
     Dim association As String
     Dim agreement As String
-    Dim achievedMargin As String
     Dim copiedSheetRange As String
 
     On Error GoTo ErrorHandler
@@ -33,7 +32,6 @@ Public Sub getData(setSheetName As Variant)
     statusCell = wsConfig.Range("B11").Value
     association = wsConfig.Range("B12").Value
     agreement = wsConfig.Range("B13").Value
-    achievedMargin = wsConfig.Range("B25").Value
     copiedSheetRange = wsConfig.Range("B26").Value
 
     ' Set the source sheet
@@ -55,15 +53,15 @@ Public Sub getData(setSheetName As Variant)
     sourceSheet.Range(statusCell & "14:" & statusCell & lastRow).Copy Destination:=newSheet.Range("F1")
     sourceSheet.Range(association & "14:" & association & lastRow).Copy Destination:=newSheet.Range("G1")
     sourceSheet.Range(agreement & "14:" & agreement & lastRow).Copy Destination:=newSheet.Range("H1")
-    sourceSheet.Range(achievedMargin & "14:" & achievedMargin & lastRow).Copy Destination:=newSheet.Range("I1")
 
     ' Remove duplicates
-    newSheet.Range(copiedSheetRange & lastRow).RemoveDuplicates Columns:=Array(1, 2, 3, 4, 5, 6), Header:=xlNo
+    newSheet.Range(copiedSheetRange & lastRow).RemoveDuplicates Columns:=Array(1, 2, 3, 4, 5), Header:=xlNo
 
     ' Move data to start from row 5
     With newSheet
-        .Range("A1:I" & lastRow).Cut Destination:=.Range("A5")
+        .Range("A1:H" & lastRow).Cut Destination:=.Range("A5")
     End With
+    
 
     ' Clean up
     Application.CutCopyMode = False
@@ -88,8 +86,8 @@ Public Sub GenerateTables()
     ' Check the user's response
     If response = vbYes Then
         ' Add the code to be executed if the user clicks Yes
-            products = Array("Retail Margin")
-            ' products = Array("Retail Margin", "Network", "Capacity", "Wholesale Energy", "Market Fees", "Ancillary Services", "LGC", "STC", "Commission", "Revenue")
+            ' products = Array("Retail Margin")
+            products = Array("Retail Margin", "Network", "Capacity", "Wholesale Energy", "Market Fees", "Ancillary Services", "LGC", "STC", "Commission", "Revenue")
 
             For i = LBound(products) To UBound(products)
                 TableTemplate products(i)
@@ -181,6 +179,8 @@ Public Sub TableTemplate(tableReference As Variant)
     ' Apply the concatenation formula from startRow to lastRow in column C
     ws.Range("C" & startRow & ":C" & lastRow).Formula = "=A" & startRow & "&B" & startRow
     ws.Range("D" & startRow & ":D" & lastRow).Formula = "=IF(C" & startRow & "="""","""","""& Replace(criteria, " ", "") &""")"
+    ws.Range("H" & startRow & ":H" & lastRow).Formula2 = _
+    "=IF(A" & startRow & "="""","""",IF(LEFT(VLOOKUP($A" & startRow & ",'" & targetSheetName & "'!$D$13:$M$6136,10,FALSE),9)=""Unbundled"",""Unbundled"",""Bundled""))"
 
     ' Array of columns to apply the SUMIFS formula
     columnsArray = columnAddressesArray
@@ -189,9 +189,7 @@ Public Sub TableTemplate(tableReference As Variant)
     For i = LBound(columnsArray) To UBound(columnsArray)
         colLetter = columnsArray(i)
         Select Case colLetter
-            Case "Achieved"
-                ' NEEDS TO BE UDPATED SOON SINCE FORMULA NOT WOKRING
-                ' formulaString = "=INDEX('Source FY25'!" & achievedCell & ":" & achievedCell & ", MATCH(1,('Source FY25'!" & analysisReference & ":" & analysisReference & "=""" & tableReference  & """)*('Source FY25'!D:D=A" & startRow & "), 0))"
+            Case "Achieved"                                
                 formulaString = "=INDEX('" & targetSheetName & "'!" & achievedCell & ":" & achievedCell & ", MATCH(1,('" & targetSheetName & "'!" & analysisReference & ":" & analysisReference & "=""" & tableReference  & """)*('" & targetSheetName & "'!D:D=A" & startRow & "), 0))"
             Case "TP"
                 formulaString =  "=SUM(" & GenerateColumnSequence(TPStartColumn, startRow) & ")"
@@ -222,22 +220,22 @@ Public Sub TableTemplate(tableReference As Variant)
         ' Debug.Print formulaString
         ' Apply the formula to the appropriate range
         Debug.Print formulaString
-        ws.Range(marginStartingCell & startRow & ":" & marginStartingCell & lastRow).Offset(0, i).Formula = formulaString
+        ws.Range(marginStartingCell & startRow & ":" & marginStartingCell & lastRow).Offset(0, i).Formula2 = formulaString
     Next i
     Range("E5").Select
     Range(Selection, Selection.End(xlToRight)).Select
     Range(Selection, Selection.End(xlDown)).Select
     Selection.NumberFormat = "0"
-    ' Range("A5").Select
-    ' Range(Selection, Selection.End(xlToRight)).Select
-    ' Range(Selection, Selection.End(xlDown)).Select
-    ' ActiveSheet.UsedRange.Value = ws.UsedRange.Value
-    ' Selection.Copy
+    Range("A5").Select
+    Range(Selection, Selection.End(xlToRight)).Select
+    Range(Selection, Selection.End(xlDown)).Select
+    ActiveSheet.UsedRange.Value = ws.UsedRange.Value
+    Selection.Copy
 
-    ' ReplaceOriginalTables criteria
-    ' Application.DisplayAlerts = False ' Disable the confirmation prompt
-    ' Sheets(valueToPass).Delete
-    ' Application.DisplayAlerts = True  ' Re-enable the confirmation prompt    
+    ReplaceOriginalTables criteria
+    Application.DisplayAlerts = False ' Disable the confirmation prompt
+    Sheets(valueToPass).Delete
+    Application.DisplayAlerts = True  ' Re-enable the confirmation prompt    
 End Sub
 
 Public  Sub ReplaceOriginalTables(tableReference As Variant)
