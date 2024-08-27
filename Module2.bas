@@ -227,7 +227,8 @@ Public Sub TableTemplate(tableReference As Variant)
 
     Next i
     ws.Range("E5", ws.Range("E5").End(xlToRight).End(xlDown)).NumberFormat = "0"
-
+    Range("A5", Range("A5").End(xlToRight).End(xlDown)).Copy
+    ReplaceOriginalTables criteria
 
 End Sub
 
