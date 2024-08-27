@@ -94,6 +94,7 @@ Public Sub TableTemplate(tableReference As Variant)
     Dim ws As Worksheet
     Dim wsConfig As Worksheet
     Dim sourceSheet As Worksheet
+
     ' String Variables
     Dim TPStartColumn As String
     Dim TAMStartColumn As String
@@ -127,7 +128,7 @@ Public Sub TableTemplate(tableReference As Variant)
 
 
     GenerateColumnAddressesArray
-    Set wsConfig = Sheets("Configurations") 
+    Set wsConfig = Sheets("Configurations")
     targetSheetName = wsConfig.Range("B2").Value
     analysisReference = wsConfig.Range("B7").Value
     nmi = wsConfig.Range("B3").Value
@@ -147,10 +148,10 @@ Public Sub TableTemplate(tableReference As Variant)
     Set sourceSheet = Sheets(targetSheetName)
     sourceLastRow = sourceSheet.Cells(sourceSheet.Rows.Count, nmi).End(xlUp).Row
 
-    Select Case tableReference 
-        Case "Ancillary Services" 
+    Select Case tableReference
+        Case "Ancillary Services"
             criteria = "ESS"
-        Case Else 
+        Case Else
             criteria = tableReference
     End Select
     getData criteria
@@ -165,12 +166,24 @@ Public Sub TableTemplate(tableReference As Variant)
     lastRow = ws.Cells(ws.Rows.Count, "A").End(xlUp).Row
 
     ws.Range("C" & startRow & ":C" & lastRow).Formula = "=A" & startRow & "&B" & startRow
-    ws.Range("D" & startRow & ":D" & lastRow).Formula = "=IF(C" & startRow & "="""","""","""& Replace(criteria, " ", "") &""")"
-    ws.Range("E" & startRow & ":E" & lastRow).Formula = "=IF(A" & startRow & "="""","""",VLOOKUP($A" & startRow & ",'" & targetSheetName & "'!$D$13:$M$"& sourceLastRow &",5,FALSE))"
-    ws.Range("F" & startRow & ":F" & lastRow).Formula = "=IF(A" & startRow & "="""","""",VLOOKUP($A" & startRow & ",'" & targetSheetName & "'!$D$13:$M$"& sourceLastRow &",6,FALSE))"
-    ws.Range("G" & startRow & ":G" & lastRow).Formula = "=IF(A" & startRow & "="""","""",VLOOKUP($A" & startRow & ",'" & targetSheetName & "'!$D$13:$M$"& sourceLastRow &",7,FALSE))"
-    ws.Range("H" & startRow & ":H" & lastRow).Formula = _
-    "=IF(A" & startRow & "="""","""",IF(LEFT(VLOOKUP($A" & startRow & ",'" & targetSheetName & "'!$D$13:$M$"& sourceLastRow &",10,FALSE),9)=""Unbundled"",""Unbundled"",""Bundled""))"
+    ws.Range("D" & startRow & ":D" & lastRow).Formula = "=IF(C" & startRow & "="""","""",""" & Replace(criteria, " ", "") & """)"
+    ws.Range("E" & startRow & ":E" & lastRow).Formula = "=IF(A" & startRow & "="""","""",VLOOKUP($A" & startRow & ",'" & targetSheetName & "'!$D$13:$M$" & sourceLastRow & ",5,FALSE))"
+    ws.Range("F" & startRow & ":F" & lastRow).Formula = "=IF(A" & startRow & "="""","""",VLOOKUP($A" & startRow & ",'" & targetSheetName & "'!$D$13:$M$" & sourceLastRow & ",6,FALSE))"
+    ws.Range("G" & startRow & ":G" & lastRow).Formula = "=IF(A" & startRow & "="""","""",VLOOKUP($A" & startRow & ",'" & targetSheetName & "'!$D$13:$M$" & sourceLastRow & ",7,FALSE))"
+    ws.Range("H" & startRow & ":H" & lastRow).Formula = "=IF(A" & startRow & "="""","""",IF(LEFT(VLOOKUP($A" & startRow & ",'" & targetSheetName & "'!$D$13:$M$" & sourceLastRow & ",10,FALSE),9)=""Unbundled"",""Unbundled"",IF(LEFT(VLOOKUP($A" & startRow & ",'" & targetSheetName & "'!$D$13:$M$" & sourceLastRow & ",10,FALSE),8)=""Gazetted"",""Gazetted"",IF(LEFT(VLOOKUP($A" & startRow & ",'" & targetSheetName & "'!$D$13:$M$" & sourceLastRow & ",10,FALSE),7)=""Bundled"",""Bundled"",""NA""))))"
+    'IF(A5="","",IF(LEFT(VLOOKUP($A5,'Source FY25'!$D$13:$M$6136,10,FALSE),9)="Unbundled","Unbundled", IF(LEFT(VLOOKUP($A5,'Source FY25'!$D$13:$M$6136,10,FALSE),8)="Gazetted","Gazetted",IF(LEFT(VLOOKUP($A5,'Source FY25'!$D$13:$M$6136,10,FALSE),7)="Bundled","Bundled","NA"))))
+    
+    ' Apply to Retail Margin tab only
+    
+    If tableReference = "Retail Margin" Then
+        ws.Range("EJ" & startRow & ":EJ" & lastRow).Formula = "=IF(A" & startRow & "="""","""",VLOOKUP($A" & startRow & ",'" & targetSheetName & "'!$D$13:$AO$" & sourceLastRow & ",31,FALSE))"
+        ws.Range("EK" & startRow & ":EK" & lastRow).Formula = "=IF(A" & startRow & "="""","""",VLOOKUP($A" & startRow & ",'" & targetSheetName & "'!$D$13:$AO$" & sourceLastRow & ",32,FALSE))"
+        ws.Range("EL" & startRow & ":EL" & lastRow).Formula = "=IF(A" & startRow & "="""","""",VLOOKUP($A" & startRow & ",'" & targetSheetName & "'!$D$13:$AO$" & sourceLastRow & ",33,FALSE))"
+        ws.Range("EM" & startRow & ":EM" & lastRow).Formula = "=IF(A" & startRow & "="""","""",VLOOKUP($A" & startRow & ",'" & targetSheetName & "'!$D$13:$AO$" & sourceLastRow & ",34,FALSE))"
+        ws.Range("EN" & startRow & ":EN" & lastRow).Formula = "=IF(A" & startRow & "="""","""",VLOOKUP($A" & startRow & ",'" & targetSheetName & "'!$D$13:$AO$" & sourceLastRow & ",35,FALSE))"
+    End If
+    
+   
 
     ' Array of columns to apply the SUMIFS formula
     columnsArray = columnAddressesArray
@@ -179,56 +192,47 @@ Public Sub TableTemplate(tableReference As Variant)
     For i = LBound(columnsArray) To UBound(columnsArray)
         colLetter = columnsArray(i)
         Select Case colLetter
-            Case "Achieved"                                
-                formulaString = "=INDEX('" & targetSheetName & "'!" & achievedCell & ":" & achievedCell & ", MATCH(1,('" & targetSheetName & "'!" & analysisReference & ":" & analysisReference & "=""" & tableReference  & """)*('" & targetSheetName & "'!D:D=A" & startRow & "), 0))"
+            Case "Achieved"
+                formulaString = "=SUMIFS('" & targetSheetName & "'!" & achievedCell & ":" & achievedCell & ", '" & targetSheetName & "'!" & analysisReference & ":" & analysisReference & ", """ & tableReference & """, '" & targetSheetName & "'!D:D, A" & startRow & ")"
             Case "TP"
-                formulaString =  "=SUM(" & GenerateColumnSequence(TPStartColumn, startRow) & ")"
+                formulaString = "=SUM(" & GenerateColumnSequence(TPStartColumn, startRow) & ")"
             Case "TAM"
-                formulaString =  "=SUM(" & GenerateColumnSequence(TAMStartColumn, startRow) & ")"
+                formulaString = "=SUM(" & GenerateColumnSequence(TAMStartColumn, startRow) & ")"
             Case "TPOE90"
-                formulaString =  "=SUM(" & GenerateColumnSequence(TP90StartColumn, startRow) & ")"
+                formulaString = "=SUM(" & GenerateColumnSequence(TP90StartColumn, startRow) & ")"
             Case "TPOE50"
-                formulaString =  "=SUM(" & GenerateColumnSequence(TP50StartColumn, startRow) & ")"
+                formulaString = "=SUM(" & GenerateColumnSequence(TP50StartColumn, startRow) & ")"
             Case "TPOE10"
-                formulaString =  "=SUM(" & GenerateColumnSequence(TP10StartColumn, startRow) & ")"
+                formulaString = "=SUM(" & GenerateColumnSequence(TP10StartColumn, startRow) & ")"
             Case "_TP"
-                formulaString =  "=SUM(" & GenerateColumnSequence(NextTPStartColumn, startRow) & ")"
+                formulaString = "=SUM(" & GenerateColumnSequence(NextTPStartColumn, startRow) & ")"
             Case "_TAM"
-                formulaString =  "=SUM(" & GenerateColumnSequence(NextTAMStartColumn, startRow) & ")"
+                formulaString = "=SUM(" & GenerateColumnSequence(NextTAMStartColumn, startRow) & ")"
             Case "_TPOE90"
-                formulaString =  "=SUM(" & GenerateColumnSequence(NextTP90StartColumn, startRow) & ")"
+                formulaString = "=SUM(" & GenerateColumnSequence(NextTP90StartColumn, startRow) & ")"
             Case "_TPOE50"
-                formulaString =  "=SUM(" & GenerateColumnSequence(NextTP50StartColumn, startRow) & ")"
+                formulaString = "=SUM(" & GenerateColumnSequence(NextTP50StartColumn, startRow) & ")"
             Case "_TPOE10"
-                formulaString =  "=SUM(" & GenerateColumnSequence(NextTP10StartColumn, startRow) & ")"
+                formulaString = "=SUM(" & GenerateColumnSequence(NextTP10StartColumn, startRow) & ")"
             Case Else
-                formulaString = "=SUMIFS('"& targetSheetName &"'!" & colLetter & ":" & colLetter & _
-                ", '"& targetSheetName &"'!$"& nmi &":$"& nmi &", A" & startRow & _
-                ", '"& targetSheetName &"'!$"& analysisReference &":$"& analysisReference &", """ & tableReference  & """)"
+                formulaString = "=SUMIFS('" & targetSheetName & "'!" & colLetter & ":" & colLetter & _
+                ", '" & targetSheetName & "'!$" & nmi & ":$" & nmi & ", A" & startRow & _
+                ", '" & targetSheetName & "'!$" & analysisReference & ":$" & analysisReference & ", """ & tableReference & """)"
 
         End Select
         ' Debug.Print formulaString
         ' Apply the formula to the appropriate range
         Debug.Print formulaString
-        If colLetter = "Achieved" Then
-            ws.Range(marginStartingCell & startRow & ":" & marginStartingCell & lastRow).Offset(0, i).Formula2 = formulaString
-        Else
-            ws.Range(marginStartingCell & startRow & ":" & marginStartingCell & lastRow).Offset(0, i).Formula = formulaString
-        End If
+        ws.Range(marginStartingCell & startRow & ":" & marginStartingCell & lastRow).Offset(0, i).Formula = formulaString
 
     Next i
     ws.Range("E5", ws.Range("E5").End(xlToRight).End(xlDown)).NumberFormat = "0"
 
-    Range("A5").Select
-    Range(Selection, Selection.End(xlToRight)).Select
-    Range(Selection, Selection.End(xlDown)).Select
-    ActiveSheet.UsedRange.Value = ws.UsedRange.Value
-    Selection.Copy
 
-    ReplaceOriginalTables criteria
 End Sub
 
-Public  Sub ReplaceOriginalTables(tableReference As Variant)
+
+Public Sub ReplaceOriginalTables(tableReference As Variant)
     Dim sheetNames As Variant
     Dim i As Integer
     ' Set the sheet where the data will be combined
@@ -316,7 +320,7 @@ Public Sub DeleteData()
             Sheets(sheetNames(i)).Select
             Range("A5").Select
             Range(Selection, ActiveCell.SpecialCells(xlLastCell)).Select
-            Selection.ClearContents            
+            Selection.ClearContents
         Next i
         RefreshAllPivotTables
         MsgBox "The action was completed successfully.", vbInformation, "Success"
@@ -336,16 +340,16 @@ Public Sub GenerateColumnAddressesArray()
     Dim addressArray() As String
     Dim addressCount As Long
     Dim wsConfig As Worksheet
-    Dim startRef As String   
+    Dim startRef As String
     Dim endRef As String
-    Dim nextYearIncluded As Boolean  
+    Dim nextYearIncluded As Boolean
 
     Set wsConfig = Sheets("Configurations")
     ' AP
     startRef = wsConfig.Range("B8").Value
     ' EC
-    endRef = wsConfig.Range("B9").Value 
-    nextYearIncluded = wsConfig.Range("B19").Value 
+    endRef = wsConfig.Range("B9").Value
+    nextYearIncluded = wsConfig.Range("B19").Value
     
     ' Define the starting and ending columns
     startCol = ColLetterToNum(startRef) ' Column number for "AP"
@@ -354,7 +358,7 @@ Public Sub GenerateColumnAddressesArray()
     addressCount = 0 ' Initialize count of addresses
     
     ' Pre-allocate the array with a rough estimate of size
-    ReDim addressArray(1 To 100) 
+    ReDim addressArray(1 To 100)
     
     For colIndex = startCol To endCol Step 8 ' Loop through every 8 columns
         For i = 0 To 4 ' Get addresses for the first 4 columns in each group
@@ -451,3 +455,7 @@ Function GenerateColumnSequence(col As String, rowNum As Long) As String
     ' Return the sequence
     GenerateColumnSequence = sequence
 End Function
+
+
+
+
