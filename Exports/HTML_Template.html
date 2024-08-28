@@ -48,20 +48,57 @@
 <body>
     <div class="container">
         <h1>Chart Reports</h1>
-        <img src="{{chartImage}}" alt="Chart">
+        <div id="chartdiv"></div>
+        <img src="{{actualCostPath}}" alt="Chart">
         <h2>Data Tables</h2>
         <table>
             <thead>
                 <tr>
-                    <th>Column 1</th>
-                    <th>Column 2</th>
-                    <th>Column 3</th>
+                    <th>Types of Margin</th>
+                    <th>Year</th>
+                    <th>Type</th>
+                    <th>Total</th>
                 </tr>
             </thead>
-            <tbody>
-                {{tableData}}
+            <tbody class="loadData">
             </tbody>
         </table>
     </div>
+    <script>
+        var jsonData = {{jsonData}};
+        console.log(jsonData)
+        function populateTable(data) {
+            var tbody = document.querySelector('.loadData');
+            tbody.innerHTML = ''; // Clear existing content
+            
+            data.forEach(function(item) {
+                var row = document.createElement('tr');
+                
+                var cell1 = document.createElement('td');
+                cell1.textContent = item['typesofmargin'];
+                row.appendChild(cell1);
+
+                var cell2 = document.createElement('td');
+                cell2.textContent = item['year'];
+                row.appendChild(cell2);
+
+                var cell3 = document.createElement('td');
+                cell3.textContent = item['type'];
+                row.appendChild(cell3);
+
+                var cell4 = document.createElement('td');
+                cell4.textContent = item['total'];
+                row.appendChild(cell4);
+
+                tbody.appendChild(row);
+            });
+        }
+
+        populateTable(jsonData);
+    </script>
+    <script src="//cdn.amcharts.com/lib/4/core.js"></script>
+    <script src="//cdn.amcharts.com/lib/4/charts.js"></script>
+    <script src="//cdn.amcharts.com/lib/4/maps.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
