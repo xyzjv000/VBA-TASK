@@ -1,105 +1,149 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Chart Report</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            background-color: #f4f4f4;
-        }
-        .container {
-            width: 90%;
-            max-width: 800px;
-            margin: auto;
-            padding: 20px;
-            background: #fff;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
-        img {
-            max-width: 100%;
-            height: auto;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-        table, th, td {
-            border: 1px solid #ddd;
-        }
-        th, td {
-            padding: 10px;
-            text-align: left;
-        }
-        th {
-            background-color: #f2f2f2;
-        }
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        background-color: #f4f4f4;
+      }
+      .container {
+        width: 90%;
+        margin: auto;
+        padding: 20px;
+        background: #fff;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      }
+      img {
+        max-width: 100%;
+        height: auto;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+      }
+      table,
+      th,
+      td {
+        border: 1px solid #ddd;
+      }
+      th,
+      td {
+        padding: 10px;
+        text-align: left;
+      }
+      th {
+        background-color: #f2f2f2;
+      }
+      #chart2024, #chart2025, #chart2026  {
+        height: 400px;
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <div class="container">
-        <h1>Chart Reports</h1>
-        <div id="chartdiv"></div>
-        <img src="C:\Users\xyzjv\Documents\VBA\VBA-TASK\Exports\Images\actualCost.png" alt="Chart">
-        <h2>Data Tables</h2>
-        <table>
-            <thead>
-                <tr>
-                    <th>Types of Margin</th>
-                    <th>Year</th>
-                    <th>Type</th>
-                    <th>Total</th>
-                </tr>
-            </thead>
-            <tbody class="loadData">
-            </tbody>
-        </table>
+      <h1>Achieved Margin FY2024</h1>
+      <div id="chart2024"></div>
+      <h1>Total Actuals Margin FY2025</h1>
+      <div id="chart2025"></div>
+      <h1>Total Actuals Margin FY2026</h1>
+      <div id="chart2026"></div>
     </div>
+
+    <script src="https://cdn.amcharts.com/lib/4/core.js"></script>
+    <script src="https://cdn.amcharts.com/lib/4/charts.js"></script>
+    <script src="https://cdn.amcharts.com/lib/4/maps.js"></script>
+    <script src="https://cdn.amcharts.com/lib/4/themes/animated.js"></script>
     <script>
-        var jsonData = [{"typesofmargin": "Achieved Margin FY2024", "year": "FY2024", "type": "RetailMargin", "total": "-119138.898634393"}, {"typesofmargin": "Achieved Margin FY2024", "year": "FY2024", "type": "Revenue", "total": "470507.859999996"}, {"typesofmargin": "Achieved Margin FY2024", "year": "FY2024", "type": "Network", "total": "247828.181332248"}, {"typesofmargin": "Achieved Margin FY2024", "year": "FY2024", "type": "Capacity", "total": "75711.3964280121"}, {"typesofmargin": "Achieved Margin FY2024", "year": "FY2024", "type": "WholesaleEnergy", "total": "215895.490714002"}, {"typesofmargin": "Achieved Margin FY2024", "year": "FY2024", "type": "MarketFees", "total": "3763.50807778093"}, {"typesofmargin": "Achieved Margin FY2024", "year": "FY2024", "type": "ESS", "total": "8314.8480039346"}, {"typesofmargin": "Achieved Margin FY2024", "year": "FY2024", "type": "LGC", "total": "24944.5440118039"}, {"typesofmargin": "Achieved Margin FY2024", "year": "FY2024", "type": "STC", "total": "13188.7900666111"}, {"typesofmargin": "Achieved Margin FY2024", "year": "FY2024", "type": "Commission", "total": "0"}, {"typesofmargin": "Total Actuals Margin FY2025", "year": "FY2025", "type": "RetailMargin", "total": "1738260.54677846"}, {"typesofmargin": "Total Actuals Margin FY2025", "year": "FY2025", "type": "Revenue", "total": "20412914.0665332"}, {"typesofmargin": "Total Actuals Margin FY2025", "year": "FY2025", "type": "Network", "total": "6661475.80571703"}, {"typesofmargin": "Total Actuals Margin FY2025", "year": "FY2025", "type": "Capacity", "total": "1873614.35413168"}, {"typesofmargin": "Total Actuals Margin FY2025", "year": "FY2025", "type": "WholesaleEnergy", "total": "7245728.31539049"}, {"typesofmargin": "Total Actuals Margin FY2025", "year": "FY2025", "type": "MarketFees", "total": "172305.035986394"}, {"typesofmargin": "Total Actuals Margin FY2025", "year": "FY2025", "type": "ESS", "total": "964227.689359612"}, {"typesofmargin": "Total Actuals Margin FY2025", "year": "FY2025", "type": "LGC", "total": "1077595.4589141"}, {"typesofmargin": "Total Actuals Margin FY2025", "year": "FY2025", "type": "STC", "total": "656173.061511451"}, {"typesofmargin": "Total Actuals Margin FY2025", "year": "FY2025", "type": "Commission", "total": "18506.9206950458"}, {"typesofmargin": "Total POE 90% FY2025", "year": "FY2025", "type": "RetailMargin", "total": "10164642.0143693"}, {"typesofmargin": "Total POE 90% FY2025", "year": "FY2025", "type": "Revenue", "total": "21035767.6053504"}, {"typesofmargin": "Total POE 90% FY2025", "year": "FY2025", "type": "Network", "total": "6220686.43874623"}, {"typesofmargin": "Total POE 90% FY2025", "year": "FY2025", "type": "Capacity", "total": "1968102.93305819"}, {"typesofmargin": "Total POE 90% FY2025", "year": "FY2025", "type": "WholesaleEnergy", "total": "-279294.529453155"}, {"typesofmargin": "Total POE 90% FY2025", "year": "FY2025", "type": "MarketFees", "total": "176986.745396466"}, {"typesofmargin": "Total POE 90% FY2025", "year": "FY2025", "type": "ESS", "total": "945176.362705653"}, {"typesofmargin": "Total POE 90% FY2025", "year": "FY2025", "type": "LGC", "total": "1180132.39792837"}, {"typesofmargin": "Total POE 90% FY2025", "year": "FY2025", "type": "STC", "total": "642590.61972299"}, {"typesofmargin": "Total POE 90% FY2025", "year": "FY2025", "type": "Commission", "total": "16602.1380367574"}, {"typesofmargin": "Total POE 50% FY2025", "year": "FY2025", "type": "RetailMargin", "total": "2174264.48901084"}, {"typesofmargin": "Total POE 50% FY2025", "year": "FY2025", "type": "Revenue", "total": "21035767.6053504"}, {"typesofmargin": "Total POE 50% FY2025", "year": "FY2025", "type": "Network", "total": "6220686.43874623"}, {"typesofmargin": "Total POE 50% FY2025", "year": "FY2025", "type": "Capacity", "total": "1968102.93305819"}, {"typesofmargin": "Total POE 50% FY2025", "year": "FY2025", "type": "WholesaleEnergy", "total": "7711082.99590529"}, {"typesofmargin": "Total POE 50% FY2025", "year": "FY2025", "type": "MarketFees", "total": "176986.745396466"}, {"typesofmargin": "Total POE 50% FY2025", "year": "FY2025", "type": "ESS", "total": "945176.362705653"}, {"typesofmargin": "Total POE 50% FY2025", "year": "FY2025", "type": "LGC", "total": "1180132.39792837"}, {"typesofmargin": "Total POE 50% FY2025", "year": "FY2025", "type": "STC", "total": "642590.61972299"}, {"typesofmargin": "Total POE 50% FY2025", "year": "FY2025", "type": "Commission", "total": "16602.1380367574"}, {"typesofmargin": "Total POE 10% FY2025", "year": "FY2025", "type": "RetailMargin", "total": "-6409462.38057216"}, {"typesofmargin": "Total POE 10% FY2025", "year": "FY2025", "type": "Revenue", "total": "21035767.6053504"}, {"typesofmargin": "Total POE 10% FY2025", "year": "FY2025", "type": "Network", "total": "6220686.43874623"}, {"typesofmargin": "Total POE 10% FY2025", "year": "FY2025", "type": "Capacity", "total": "1968102.93305819"}, {"typesofmargin": "Total POE 10% FY2025", "year": "FY2025", "type": "WholesaleEnergy", "total": "16294809.8654883"}, {"typesofmargin": "Total POE 10% FY2025", "year": "FY2025", "type": "MarketFees", "total": "176986.745396466"}, {"typesofmargin": "Total POE 10% FY2025", "year": "FY2025", "type": "ESS", "total": "945176.362705653"}, {"typesofmargin": "Total POE 10% FY2025", "year": "FY2025", "type": "LGC", "total": "1180132.39792837"}, {"typesofmargin": "Total POE 10% FY2025", "year": "FY2025", "type": "STC", "total": "642590.61972299"}, {"typesofmargin": "Total POE 10% FY2025", "year": "FY2025", "type": "Commission", "total": "16602.1380367574"}, {"typesofmargin": "Total Predicted TM FY2025", "year": "FY2025", "type": "RetailMargin", "total": "16907412"}, {"typesofmargin": "Total Predicted TM FY2025", "year": "FY2025", "type": "Revenue", "total": "16913004"}, {"typesofmargin": "Total Predicted TM FY2025", "year": "FY2025", "type": "Network", "total": "16918596"}, {"typesofmargin": "Total Predicted TM FY2025", "year": "FY2025", "type": "Capacity", "total": "16924188"}, {"typesofmargin": "Total Predicted TM FY2025", "year": "FY2025", "type": "WholesaleEnergy", "total": "16929780"}, {"typesofmargin": "Total Predicted TM FY2025", "year": "FY2025", "type": "MarketFees", "total": "16935372"}, {"typesofmargin": "Total Predicted TM FY2025", "year": "FY2025", "type": "ESS", "total": "16940964"}, {"typesofmargin": "Total Predicted TM FY2025", "year": "FY2025", "type": "LGC", "total": "16946556"}, {"typesofmargin": "Total Predicted TM FY2025", "year": "FY2025", "type": "STC", "total": "16952148"}, {"typesofmargin": "Total Predicted TM FY2025", "year": "FY2025", "type": "Commission", "total": "16957740"}, {"typesofmargin": "Total Actuals Margin FY2026", "year": "FY2026", "type": "RetailMargin", "total": "16907412"}, {"typesofmargin": "Total Actuals Margin FY2026", "year": "FY2026", "type": "Revenue", "total": "16913004"}, {"typesofmargin": "Total Actuals Margin FY2026", "year": "FY2026", "type": "Network", "total": "16918596"}, {"typesofmargin": "Total Actuals Margin FY2026", "year": "FY2026", "type": "Capacity", "total": "16924188"}, {"typesofmargin": "Total Actuals Margin FY2026", "year": "FY2026", "type": "WholesaleEnergy", "total": "16929780"}, {"typesofmargin": "Total Actuals Margin FY2026", "year": "FY2026", "type": "MarketFees", "total": "16935372"}, {"typesofmargin": "Total Actuals Margin FY2026", "year": "FY2026", "type": "ESS", "total": "16940964"}, {"typesofmargin": "Total Actuals Margin FY2026", "year": "FY2026", "type": "LGC", "total": "16946556"}, {"typesofmargin": "Total Actuals Margin FY2026", "year": "FY2026", "type": "STC", "total": "16952148"}, {"typesofmargin": "Total Actuals Margin FY2026", "year": "FY2026", "type": "Commission", "total": "16957740"}, {"typesofmargin": "Total POE 90% FY2026", "year": "FY2026", "type": "RetailMargin", "total": "13774559.5137317"}, {"typesofmargin": "Total POE 90% FY2026", "year": "FY2026", "type": "Revenue", "total": "21176900.9411111"}, {"typesofmargin": "Total POE 90% FY2026", "year": "FY2026", "type": "Network", "total": "6006162.07007434"}, {"typesofmargin": "Total POE 90% FY2026", "year": "FY2026", "type": "Capacity", "total": "2385508.76651167"}, {"typesofmargin": "Total POE 90% FY2026", "year": "FY2026", "type": "WholesaleEnergy", "total": "-3992776.94719329"}, {"typesofmargin": "Total POE 90% FY2026", "year": "FY2026", "type": "MarketFees", "total": "261316.054102638"}, {"typesofmargin": "Total POE 90% FY2026", "year": "FY2026", "type": "ESS", "total": "980925.772115377"}, {"typesofmargin": "Total POE 90% FY2026", "year": "FY2026", "type": "LGC", "total": "1077628.67100425"}, {"typesofmargin": "Total POE 90% FY2026", "year": "FY2026", "type": "STC", "total": "669276.321643619"}, {"typesofmargin": "Total POE 90% FY2026", "year": "FY2026", "type": "Commission", "total": "14300.7191207866"}, {"typesofmargin": "Total POE 50% FY2026", "year": "FY2026", "type": "RetailMargin", "total": "2071995.85787923"}, {"typesofmargin": "Total POE 50% FY2026", "year": "FY2026", "type": "Revenue", "total": "21176900.9411111"}, {"typesofmargin": "Total POE 50% FY2026", "year": "FY2026", "type": "Network", "total": "6006162.07007434"}, {"typesofmargin": "Total POE 50% FY2026", "year": "FY2026", "type": "Capacity", "total": "2385508.76651167"}, {"typesofmargin": "Total POE 50% FY2026", "year": "FY2026", "type": "WholesaleEnergy", "total": "7709786.70865916"}, {"typesofmargin": "Total POE 50% FY2026", "year": "FY2026", "type": "MarketFees", "total": "261316.054102638"}, {"typesofmargin": "Total POE 50% FY2026", "year": "FY2026", "type": "ESS", "total": "980925.772115377"}, {"typesofmargin": "Total POE 50% FY2026", "year": "FY2026", "type": "LGC", "total": "1077628.67100425"}, {"typesofmargin": "Total POE 50% FY2026", "year": "FY2026", "type": "STC", "total": "669276.321643619"}, {"typesofmargin": "Total POE 50% FY2026", "year": "FY2026", "type": "Commission", "total": "14300.7191207866"}, {"typesofmargin": "Total POE 10% FY2026", "year": "FY2026", "type": "RetailMargin", "total": "-12125199.4709693"}, {"typesofmargin": "Total POE 10% FY2026", "year": "FY2026", "type": "Revenue", "total": "21176900.9411111"}, {"typesofmargin": "Total POE 10% FY2026", "year": "FY2026", "type": "Network", "total": "6006162.07007434"}, {"typesofmargin": "Total POE 10% FY2026", "year": "FY2026", "type": "Capacity", "total": "2385508.76651167"}, {"typesofmargin": "Total POE 10% FY2026", "year": "FY2026", "type": "WholesaleEnergy", "total": "21906982.0375077"}, {"typesofmargin": "Total POE 10% FY2026", "year": "FY2026", "type": "MarketFees", "total": "261316.054102638"}, {"typesofmargin": "Total POE 10% FY2026", "year": "FY2026", "type": "ESS", "total": "980925.772115377"}, {"typesofmargin": "Total POE 10% FY2026", "year": "FY2026", "type": "LGC", "total": "1077628.67100425"}, {"typesofmargin": "Total POE 10% FY2026", "year": "FY2026", "type": "STC", "total": "669276.321643619"}, {"typesofmargin": "Total POE 10% FY2026", "year": "FY2026", "type": "Commission", "total": "14300.7191207866"}, {"typesofmargin": "Total Predicted TM FY2026", "year": "FY2026", "type": "RetailMargin", "total": "16907412"}, {"typesofmargin": "Total Predicted TM FY2026", "year": "FY2026", "type": "Revenue", "total": "16913004"}, {"typesofmargin": "Total Predicted TM FY2026", "year": "FY2026", "type": "Network", "total": "16918596"}, {"typesofmargin": "Total Predicted TM FY2026", "year": "FY2026", "type": "Capacity", "total": "16924188"}, {"typesofmargin": "Total Predicted TM FY2026", "year": "FY2026", "type": "WholesaleEnergy", "total": "16929780"}, {"typesofmargin": "Total Predicted TM FY2026", "year": "FY2026", "type": "MarketFees", "total": "16935372"}, {"typesofmargin": "Total Predicted TM FY2026", "year": "FY2026", "type": "ESS", "total": "16940964"}, {"typesofmargin": "Total Predicted TM FY2026", "year": "FY2026", "type": "LGC", "total": "16946556"}, {"typesofmargin": "Total Predicted TM FY2026", "year": "FY2026", "type": "STC", "total": "16952148"}, {"typesofmargin": "Total Predicted TM FY2026", "year": "FY2026", "type": "Commission", "total": "16957740"}];
-        console.log(jsonData)
-        function populateTable(data) {
-            var tbody = document.querySelector('.loadData');
-            tbody.innerHTML = ''; // Clear existing content
-            
-            data.forEach(function(item) {
-                var row = document.createElement('tr');
-                
-                var cell1 = document.createElement('td');
-                cell1.textContent = item['typesofmargin'];
-                row.appendChild(cell1);
+      var jsonData = [{"typesofmargin": "Achieved Margin FY2024", "year": "FY2024", "type": "RetailMargin", "total": "-119138.898634393"}, {"typesofmargin": "Achieved Margin FY2024", "year": "FY2024", "type": "Revenue", "total": "470507.859999996"}, {"typesofmargin": "Achieved Margin FY2024", "year": "FY2024", "type": "Network", "total": "247828.181332248"}, {"typesofmargin": "Achieved Margin FY2024", "year": "FY2024", "type": "Capacity", "total": "75711.3964280121"}, {"typesofmargin": "Achieved Margin FY2024", "year": "FY2024", "type": "WholesaleEnergy", "total": "215895.490714002"}, {"typesofmargin": "Achieved Margin FY2024", "year": "FY2024", "type": "MarketFees", "total": "3763.50807778093"}, {"typesofmargin": "Achieved Margin FY2024", "year": "FY2024", "type": "ESS", "total": "8314.8480039346"}, {"typesofmargin": "Achieved Margin FY2024", "year": "FY2024", "type": "LGC", "total": "24944.5440118039"}, {"typesofmargin": "Achieved Margin FY2024", "year": "FY2024", "type": "STC", "total": "13188.7900666111"}, {"typesofmargin": "Achieved Margin FY2024", "year": "FY2024", "type": "Commission", "total": "0"}, {"typesofmargin": "Total Actuals Margin FY2025", "year": "FY2025", "type": "RetailMargin", "total": "1738260.54677846"}, {"typesofmargin": "Total Actuals Margin FY2025", "year": "FY2025", "type": "Revenue", "total": "20412914.0665332"}, {"typesofmargin": "Total Actuals Margin FY2025", "year": "FY2025", "type": "Network", "total": "6661475.80571703"}, {"typesofmargin": "Total Actuals Margin FY2025", "year": "FY2025", "type": "Capacity", "total": "1873614.35413168"}, {"typesofmargin": "Total Actuals Margin FY2025", "year": "FY2025", "type": "WholesaleEnergy", "total": "7245728.31539049"}, {"typesofmargin": "Total Actuals Margin FY2025", "year": "FY2025", "type": "MarketFees", "total": "172305.035986394"}, {"typesofmargin": "Total Actuals Margin FY2025", "year": "FY2025", "type": "ESS", "total": "964227.689359612"}, {"typesofmargin": "Total Actuals Margin FY2025", "year": "FY2025", "type": "LGC", "total": "1077595.4589141"}, {"typesofmargin": "Total Actuals Margin FY2025", "year": "FY2025", "type": "STC", "total": "656173.061511451"}, {"typesofmargin": "Total Actuals Margin FY2025", "year": "FY2025", "type": "Commission", "total": "18506.9206950458"}, {"typesofmargin": "Total POE 90% FY2025", "year": "FY2025", "type": "RetailMargin", "total": "10164642.0143693"}, {"typesofmargin": "Total POE 90% FY2025", "year": "FY2025", "type": "Revenue", "total": "21035767.6053504"}, {"typesofmargin": "Total POE 90% FY2025", "year": "FY2025", "type": "Network", "total": "6220686.43874623"}, {"typesofmargin": "Total POE 90% FY2025", "year": "FY2025", "type": "Capacity", "total": "1968102.93305819"}, {"typesofmargin": "Total POE 90% FY2025", "year": "FY2025", "type": "WholesaleEnergy", "total": "-279294.529453155"}, {"typesofmargin": "Total POE 90% FY2025", "year": "FY2025", "type": "MarketFees", "total": "176986.745396466"}, {"typesofmargin": "Total POE 90% FY2025", "year": "FY2025", "type": "ESS", "total": "945176.362705653"}, {"typesofmargin": "Total POE 90% FY2025", "year": "FY2025", "type": "LGC", "total": "1180132.39792837"}, {"typesofmargin": "Total POE 90% FY2025", "year": "FY2025", "type": "STC", "total": "642590.61972299"}, {"typesofmargin": "Total POE 90% FY2025", "year": "FY2025", "type": "Commission", "total": "16602.1380367574"}, {"typesofmargin": "Total POE 50% FY2025", "year": "FY2025", "type": "RetailMargin", "total": "2174264.48901084"}, {"typesofmargin": "Total POE 50% FY2025", "year": "FY2025", "type": "Revenue", "total": "21035767.6053504"}, {"typesofmargin": "Total POE 50% FY2025", "year": "FY2025", "type": "Network", "total": "6220686.43874623"}, {"typesofmargin": "Total POE 50% FY2025", "year": "FY2025", "type": "Capacity", "total": "1968102.93305819"}, {"typesofmargin": "Total POE 50% FY2025", "year": "FY2025", "type": "WholesaleEnergy", "total": "7711082.99590529"}, {"typesofmargin": "Total POE 50% FY2025", "year": "FY2025", "type": "MarketFees", "total": "176986.745396466"}, {"typesofmargin": "Total POE 50% FY2025", "year": "FY2025", "type": "ESS", "total": "945176.362705653"}, {"typesofmargin": "Total POE 50% FY2025", "year": "FY2025", "type": "LGC", "total": "1180132.39792837"}, {"typesofmargin": "Total POE 50% FY2025", "year": "FY2025", "type": "STC", "total": "642590.61972299"}, {"typesofmargin": "Total POE 50% FY2025", "year": "FY2025", "type": "Commission", "total": "16602.1380367574"}, {"typesofmargin": "Total POE 10% FY2025", "year": "FY2025", "type": "RetailMargin", "total": "-6409462.38057216"}, {"typesofmargin": "Total POE 10% FY2025", "year": "FY2025", "type": "Revenue", "total": "21035767.6053504"}, {"typesofmargin": "Total POE 10% FY2025", "year": "FY2025", "type": "Network", "total": "6220686.43874623"}, {"typesofmargin": "Total POE 10% FY2025", "year": "FY2025", "type": "Capacity", "total": "1968102.93305819"}, {"typesofmargin": "Total POE 10% FY2025", "year": "FY2025", "type": "WholesaleEnergy", "total": "16294809.8654883"}, {"typesofmargin": "Total POE 10% FY2025", "year": "FY2025", "type": "MarketFees", "total": "176986.745396466"}, {"typesofmargin": "Total POE 10% FY2025", "year": "FY2025", "type": "ESS", "total": "945176.362705653"}, {"typesofmargin": "Total POE 10% FY2025", "year": "FY2025", "type": "LGC", "total": "1180132.39792837"}, {"typesofmargin": "Total POE 10% FY2025", "year": "FY2025", "type": "STC", "total": "642590.61972299"}, {"typesofmargin": "Total POE 10% FY2025", "year": "FY2025", "type": "Commission", "total": "16602.1380367574"}, {"typesofmargin": "Total Predicted TM FY2025", "year": "FY2025", "type": "RetailMargin", "total": "16907412"}, {"typesofmargin": "Total Predicted TM FY2025", "year": "FY2025", "type": "Revenue", "total": "16913004"}, {"typesofmargin": "Total Predicted TM FY2025", "year": "FY2025", "type": "Network", "total": "16918596"}, {"typesofmargin": "Total Predicted TM FY2025", "year": "FY2025", "type": "Capacity", "total": "16924188"}, {"typesofmargin": "Total Predicted TM FY2025", "year": "FY2025", "type": "WholesaleEnergy", "total": "16929780"}, {"typesofmargin": "Total Predicted TM FY2025", "year": "FY2025", "type": "MarketFees", "total": "16935372"}, {"typesofmargin": "Total Predicted TM FY2025", "year": "FY2025", "type": "ESS", "total": "16940964"}, {"typesofmargin": "Total Predicted TM FY2025", "year": "FY2025", "type": "LGC", "total": "16946556"}, {"typesofmargin": "Total Predicted TM FY2025", "year": "FY2025", "type": "STC", "total": "16952148"}, {"typesofmargin": "Total Predicted TM FY2025", "year": "FY2025", "type": "Commission", "total": "16957740"}, {"typesofmargin": "Total Actuals Margin FY2026", "year": "FY2026", "type": "RetailMargin", "total": "16907412"}, {"typesofmargin": "Total Actuals Margin FY2026", "year": "FY2026", "type": "Revenue", "total": "16913004"}, {"typesofmargin": "Total Actuals Margin FY2026", "year": "FY2026", "type": "Network", "total": "16918596"}, {"typesofmargin": "Total Actuals Margin FY2026", "year": "FY2026", "type": "Capacity", "total": "16924188"}, {"typesofmargin": "Total Actuals Margin FY2026", "year": "FY2026", "type": "WholesaleEnergy", "total": "16929780"}, {"typesofmargin": "Total Actuals Margin FY2026", "year": "FY2026", "type": "MarketFees", "total": "16935372"}, {"typesofmargin": "Total Actuals Margin FY2026", "year": "FY2026", "type": "ESS", "total": "16940964"}, {"typesofmargin": "Total Actuals Margin FY2026", "year": "FY2026", "type": "LGC", "total": "16946556"}, {"typesofmargin": "Total Actuals Margin FY2026", "year": "FY2026", "type": "STC", "total": "16952148"}, {"typesofmargin": "Total Actuals Margin FY2026", "year": "FY2026", "type": "Commission", "total": "16957740"}, {"typesofmargin": "Total POE 90% FY2026", "year": "FY2026", "type": "RetailMargin", "total": "13774559.5137317"}, {"typesofmargin": "Total POE 90% FY2026", "year": "FY2026", "type": "Revenue", "total": "21176900.9411111"}, {"typesofmargin": "Total POE 90% FY2026", "year": "FY2026", "type": "Network", "total": "6006162.07007434"}, {"typesofmargin": "Total POE 90% FY2026", "year": "FY2026", "type": "Capacity", "total": "2385508.76651167"}, {"typesofmargin": "Total POE 90% FY2026", "year": "FY2026", "type": "WholesaleEnergy", "total": "-3992776.94719329"}, {"typesofmargin": "Total POE 90% FY2026", "year": "FY2026", "type": "MarketFees", "total": "261316.054102638"}, {"typesofmargin": "Total POE 90% FY2026", "year": "FY2026", "type": "ESS", "total": "980925.772115377"}, {"typesofmargin": "Total POE 90% FY2026", "year": "FY2026", "type": "LGC", "total": "1077628.67100425"}, {"typesofmargin": "Total POE 90% FY2026", "year": "FY2026", "type": "STC", "total": "669276.321643619"}, {"typesofmargin": "Total POE 90% FY2026", "year": "FY2026", "type": "Commission", "total": "14300.7191207866"}, {"typesofmargin": "Total POE 50% FY2026", "year": "FY2026", "type": "RetailMargin", "total": "2071995.85787923"}, {"typesofmargin": "Total POE 50% FY2026", "year": "FY2026", "type": "Revenue", "total": "21176900.9411111"}, {"typesofmargin": "Total POE 50% FY2026", "year": "FY2026", "type": "Network", "total": "6006162.07007434"}, {"typesofmargin": "Total POE 50% FY2026", "year": "FY2026", "type": "Capacity", "total": "2385508.76651167"}, {"typesofmargin": "Total POE 50% FY2026", "year": "FY2026", "type": "WholesaleEnergy", "total": "7709786.70865916"}, {"typesofmargin": "Total POE 50% FY2026", "year": "FY2026", "type": "MarketFees", "total": "261316.054102638"}, {"typesofmargin": "Total POE 50% FY2026", "year": "FY2026", "type": "ESS", "total": "980925.772115377"}, {"typesofmargin": "Total POE 50% FY2026", "year": "FY2026", "type": "LGC", "total": "1077628.67100425"}, {"typesofmargin": "Total POE 50% FY2026", "year": "FY2026", "type": "STC", "total": "669276.321643619"}, {"typesofmargin": "Total POE 50% FY2026", "year": "FY2026", "type": "Commission", "total": "14300.7191207866"}, {"typesofmargin": "Total POE 10% FY2026", "year": "FY2026", "type": "RetailMargin", "total": "-12125199.4709693"}, {"typesofmargin": "Total POE 10% FY2026", "year": "FY2026", "type": "Revenue", "total": "21176900.9411111"}, {"typesofmargin": "Total POE 10% FY2026", "year": "FY2026", "type": "Network", "total": "6006162.07007434"}, {"typesofmargin": "Total POE 10% FY2026", "year": "FY2026", "type": "Capacity", "total": "2385508.76651167"}, {"typesofmargin": "Total POE 10% FY2026", "year": "FY2026", "type": "WholesaleEnergy", "total": "21906982.0375077"}, {"typesofmargin": "Total POE 10% FY2026", "year": "FY2026", "type": "MarketFees", "total": "261316.054102638"}, {"typesofmargin": "Total POE 10% FY2026", "year": "FY2026", "type": "ESS", "total": "980925.772115377"}, {"typesofmargin": "Total POE 10% FY2026", "year": "FY2026", "type": "LGC", "total": "1077628.67100425"}, {"typesofmargin": "Total POE 10% FY2026", "year": "FY2026", "type": "STC", "total": "669276.321643619"}, {"typesofmargin": "Total POE 10% FY2026", "year": "FY2026", "type": "Commission", "total": "14300.7191207866"}, {"typesofmargin": "Total Predicted TM FY2026", "year": "FY2026", "type": "RetailMargin", "total": "16907412"}, {"typesofmargin": "Total Predicted TM FY2026", "year": "FY2026", "type": "Revenue", "total": "16913004"}, {"typesofmargin": "Total Predicted TM FY2026", "year": "FY2026", "type": "Network", "total": "16918596"}, {"typesofmargin": "Total Predicted TM FY2026", "year": "FY2026", "type": "Capacity", "total": "16924188"}, {"typesofmargin": "Total Predicted TM FY2026", "year": "FY2026", "type": "WholesaleEnergy", "total": "16929780"}, {"typesofmargin": "Total Predicted TM FY2026", "year": "FY2026", "type": "MarketFees", "total": "16935372"}, {"typesofmargin": "Total Predicted TM FY2026", "year": "FY2026", "type": "ESS", "total": "16940964"}, {"typesofmargin": "Total Predicted TM FY2026", "year": "FY2026", "type": "LGC", "total": "16946556"}, {"typesofmargin": "Total Predicted TM FY2026", "year": "FY2026", "type": "STC", "total": "16952148"}, {"typesofmargin": "Total Predicted TM FY2026", "year": "FY2026", "type": "Commission", "total": "16957740"}];
+      const achievedMargin2024 = jsonData.filter(
+        (data) => data.typesofmargin == "Achieved Margin FY2024"
+      );
+      const achievedMargin2025 = jsonData.filter(
+        (data) => data.typesofmargin == "Total Actuals Margin FY2025"
+      );
+      const achievedMargin2026 = jsonData.filter(
+        (data) => data.typesofmargin == "Total Actuals Margin FY2026"
+      );
 
-                var cell2 = document.createElement('td');
-                cell2.textContent = item['year'];
-                row.appendChild(cell2);
+      const animatedPieChart = (data, chartId) => {
+        am4core.useTheme(am4themes_animated);
+        var chart = am4core.create(chartId, am4charts.PieChart3D);
 
-                var cell3 = document.createElement('td');
-                cell3.textContent = item['type'];
-                row.appendChild(cell3);
+        chart.data = data;
+        chart.innerRadius = am4core.percent(40);
 
-                var cell4 = document.createElement('td');
-                cell4.textContent = item['total'];
-                row.appendChild(cell4);
+        var pieSeries = chart.series.push(new am4charts.PieSeries3D());
+        pieSeries.dataFields.value = "total";
+        pieSeries.dataFields.category = "type";
 
-                tbody.appendChild(row);
-            });
-        }
+        pieSeries.labels.template.disabled = true;
+        pieSeries.ticks.template.disabled = true;
 
-        populateTable(jsonData);
+        // Add a legend
+        chart.legend = new am4charts.Legend();
+        chart.legend.position = "right";
+      };
+
+      const xyChart = (data, chartId) => {
+        am4core.useTheme(am4themes_animated);
+        var chart = am4core.create(chartId, am4charts.XYChart);
+
+        chart.data = data;
+        var categoryAxis = chart.xAxes.push(new am4charts.CategoryAxis());
+        categoryAxis.dataFields.category = "type";
+        categoryAxis.title.text = "Margins";
+
+        // Set minimum grid distance to a smaller value to fit more labels
+        categoryAxis.renderer.minGridDistance = 20; // Adjust this value as needed
+
+        // Disable automatic label hiding
+        categoryAxis.renderer.labels.template.adapter.add("dy", function (dy, target) {
+        return 0; // Keep all labels visible
+        });
+
+        // Optionally, rotate labels if there are too many
+        categoryAxis.renderer.labels.template.rotation = 45; // Rotate labels 45 degrees
+        categoryAxis.renderer.labels.template.horizontalCenter = "right";
+        categoryAxis.renderer.labels.template.verticalCenter = "middle";
+        categoryAxis.renderer.labels.template.fontSize = 12;
+
+
+        var valueAxis = chart.yAxes.push(new am4charts.ValueAxis());
+        valueAxis.title.text = "Value";
+
+        var series = chart.series.push(new am4charts.ColumnSeries());
+        series.dataFields.valueY = "total";
+        series.dataFields.categoryX = "type";
+        series.name = "Total Actuals Margin FY2025";
+        series.stacked = true;
+
+        series.columns.template.tooltipText = "{categoryX}: [bold]{valueY}[/]";
+        series.columns.template.fontSize = 14; // Set font size for series labels
+
+        series.tooltip.fontSize = 12; // Customize tooltip font size
+
+        chart.yAxes.getIndex(0).renderer.labels.template.fontSize = 12; // Y-axis labels
+        chart.xAxes.getIndex(0).renderer.labels.template.fontSize = 12; 
+
+        chart.cursor = new am4charts.XYCursor();
+      };
+
+
+      animatedPieChart(achievedMargin2024, "chart2024");
+      xyChart(achievedMargin2025, "chart2025");
+      animatedPieChart(achievedMargin2026, "chart2026");
     </script>
-    <script src="//cdn.amcharts.com/lib/4/core.js"></script>
-    <script src="//cdn.amcharts.com/lib/4/charts.js"></script>
-    <script src="//cdn.amcharts.com/lib/4/maps.js"></script>
-    <script src="script.js"></script>
-</body>
+  </body>
 </html>
 

@@ -1,104 +1,148 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Chart Report</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            background-color: #f4f4f4;
-        }
-        .container {
-            width: 90%;
-            max-width: 800px;
-            margin: auto;
-            padding: 20px;
-            background: #fff;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
-        img {
-            max-width: 100%;
-            height: auto;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-        table, th, td {
-            border: 1px solid #ddd;
-        }
-        th, td {
-            padding: 10px;
-            text-align: left;
-        }
-        th {
-            background-color: #f2f2f2;
-        }
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        background-color: #f4f4f4;
+      }
+      .container {
+        width: 90%;
+        margin: auto;
+        padding: 20px;
+        background: #fff;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      }
+      img {
+        max-width: 100%;
+        height: auto;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+      }
+      table,
+      th,
+      td {
+        border: 1px solid #ddd;
+      }
+      th,
+      td {
+        padding: 10px;
+        text-align: left;
+      }
+      th {
+        background-color: #f2f2f2;
+      }
+      #chart2024, #chart2025, #chart2026  {
+        height: 400px;
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <div class="container">
-        <h1>Chart Reports</h1>
-        <div id="chartdiv"></div>
-        <img src="{{actualCostPath}}" alt="Chart">
-        <h2>Data Tables</h2>
-        <table>
-            <thead>
-                <tr>
-                    <th>Types of Margin</th>
-                    <th>Year</th>
-                    <th>Type</th>
-                    <th>Total</th>
-                </tr>
-            </thead>
-            <tbody class="loadData">
-            </tbody>
-        </table>
+      <h1>Achieved Margin FY2024</h1>
+      <div id="chart2024"></div>
+      <h1>Total Actuals Margin FY2025</h1>
+      <div id="chart2025"></div>
+      <h1>Total Actuals Margin FY2026</h1>
+      <div id="chart2026"></div>
     </div>
+
+    <script src="https://cdn.amcharts.com/lib/4/core.js"></script>
+    <script src="https://cdn.amcharts.com/lib/4/charts.js"></script>
+    <script src="https://cdn.amcharts.com/lib/4/maps.js"></script>
+    <script src="https://cdn.amcharts.com/lib/4/themes/animated.js"></script>
     <script>
-        var jsonData = {{jsonData}};
-        console.log(jsonData)
-        function populateTable(data) {
-            var tbody = document.querySelector('.loadData');
-            tbody.innerHTML = ''; // Clear existing content
-            
-            data.forEach(function(item) {
-                var row = document.createElement('tr');
-                
-                var cell1 = document.createElement('td');
-                cell1.textContent = item['typesofmargin'];
-                row.appendChild(cell1);
+      var jsonData = {{jsonData}};
+      const achievedMargin2024 = jsonData.filter(
+        (data) => data.typesofmargin == "Achieved Margin FY2024"
+      );
+      const achievedMargin2025 = jsonData.filter(
+        (data) => data.typesofmargin == "Total Actuals Margin FY2025"
+      );
+      const achievedMargin2026 = jsonData.filter(
+        (data) => data.typesofmargin == "Total Actuals Margin FY2026"
+      );
 
-                var cell2 = document.createElement('td');
-                cell2.textContent = item['year'];
-                row.appendChild(cell2);
+      const animatedPieChart = (data, chartId) => {
+        am4core.useTheme(am4themes_animated);
+        var chart = am4core.create(chartId, am4charts.PieChart3D);
 
-                var cell3 = document.createElement('td');
-                cell3.textContent = item['type'];
-                row.appendChild(cell3);
+        chart.data = data;
+        chart.innerRadius = am4core.percent(40);
 
-                var cell4 = document.createElement('td');
-                cell4.textContent = item['total'];
-                row.appendChild(cell4);
+        var pieSeries = chart.series.push(new am4charts.PieSeries3D());
+        pieSeries.dataFields.value = "total";
+        pieSeries.dataFields.category = "type";
 
-                tbody.appendChild(row);
-            });
-        }
+        pieSeries.labels.template.disabled = true;
+        pieSeries.ticks.template.disabled = true;
 
-        populateTable(jsonData);
+        // Add a legend
+        chart.legend = new am4charts.Legend();
+        chart.legend.position = "right";
+      };
+
+      const xyChart = (data, chartId) => {
+        am4core.useTheme(am4themes_animated);
+        var chart = am4core.create(chartId, am4charts.XYChart);
+
+        chart.data = data;
+        var categoryAxis = chart.xAxes.push(new am4charts.CategoryAxis());
+        categoryAxis.dataFields.category = "type";
+        categoryAxis.title.text = "Margins";
+
+        // Set minimum grid distance to a smaller value to fit more labels
+        categoryAxis.renderer.minGridDistance = 20; // Adjust this value as needed
+
+        // Disable automatic label hiding
+        categoryAxis.renderer.labels.template.adapter.add("dy", function (dy, target) {
+        return 0; // Keep all labels visible
+        });
+
+        // Optionally, rotate labels if there are too many
+        categoryAxis.renderer.labels.template.rotation = 45; // Rotate labels 45 degrees
+        categoryAxis.renderer.labels.template.horizontalCenter = "right";
+        categoryAxis.renderer.labels.template.verticalCenter = "middle";
+        categoryAxis.renderer.labels.template.fontSize = 12;
+
+
+        var valueAxis = chart.yAxes.push(new am4charts.ValueAxis());
+        valueAxis.title.text = "Value";
+
+        var series = chart.series.push(new am4charts.ColumnSeries());
+        series.dataFields.valueY = "total";
+        series.dataFields.categoryX = "type";
+        series.name = "Total Actuals Margin FY2025";
+        series.stacked = true;
+
+        series.columns.template.tooltipText = "{categoryX}: [bold]{valueY}[/]";
+        series.columns.template.fontSize = 14; // Set font size for series labels
+
+        series.tooltip.fontSize = 12; // Customize tooltip font size
+
+        chart.yAxes.getIndex(0).renderer.labels.template.fontSize = 12; // Y-axis labels
+        chart.xAxes.getIndex(0).renderer.labels.template.fontSize = 12; 
+
+        chart.cursor = new am4charts.XYCursor();
+      };
+
+
+      animatedPieChart(achievedMargin2024, "chart2024");
+      xyChart(achievedMargin2025, "chart2025");
+      animatedPieChart(achievedMargin2026, "chart2026");
     </script>
-    <script src="//cdn.amcharts.com/lib/4/core.js"></script>
-    <script src="//cdn.amcharts.com/lib/4/charts.js"></script>
-    <script src="//cdn.amcharts.com/lib/4/maps.js"></script>
-    <script src="script.js"></script>
-</body>
+  </body>
 </html>
