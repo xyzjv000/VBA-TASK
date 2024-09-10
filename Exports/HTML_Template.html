@@ -45,19 +45,44 @@
       th {
         background-color: #f2f2f2;
       }
-      #chart2024, #chart2025, #chart2026  {
+      #hpfy24a,
+      #pfify24 {
         height: 400px;
+      }
+
+      .chart-container {
+        display: flex;
+      }
+
+      .chart-item {
+        flex: 1;
       }
     </style>
   </head>
   <body>
     <div class="container">
-      <h1>Achieved Margin FY2024</h1>
-      <div id="chart2024"></div>
-      <h1>Total Actuals Margin FY2025</h1>
-      <div id="chart2025"></div>
-      <h1>Total Actuals Margin FY2026</h1>
-      <div id="chart2026"></div>
+      <div class="chart">
+        <div class="chart-container">
+          <div class="chart-item">
+            <center><h3>Historical Performance FY2024 Actuals</h3></center>
+            <div id="hpfy24a"></div>
+          </div>
+          <div class="chart-item">
+            <center><h3>Percentage Fees in FY2024</h3></center>
+            <div id="pfify24"></div>
+          </div>
+        </div>
+        <div>
+          <table id="dataTable">
+            <thead>
+              <tr id="headerRow"></tr>
+            </thead>
+            <tbody>
+              <tr id="dataRow"></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
 
     <script src="https://cdn.amcharts.com/lib/4/core.js"></script>
@@ -65,16 +90,17 @@
     <script src="https://cdn.amcharts.com/lib/4/maps.js"></script>
     <script src="https://cdn.amcharts.com/lib/4/themes/animated.js"></script>
     <script>
-      var jsonData = {{jsonData}};
-      const achievedMargin2024 = jsonData.filter(
+      var summaryJsonData = {{summaryJson}};
+      const achievedMargin2024 = summaryJsonData.filter(
         (data) => data.typesofmargin == "Achieved Margin FY2024"
       );
-      const achievedMargin2025 = jsonData.filter(
+      const achievedMargin2025 = summaryJsonData.filter(
         (data) => data.typesofmargin == "Total Actuals Margin FY2025"
       );
-      const achievedMargin2026 = jsonData.filter(
+      const achievedMargin2026 = summaryJsonData.filter(
         (data) => data.typesofmargin == "Total Actuals Margin FY2026"
       );
+      console.log(achievedMargin2024);
 
       const animatedPieChart = (data, chartId) => {
         am4core.useTheme(am4themes_animated);
@@ -134,15 +160,39 @@
         series.tooltip.fontSize = 12; // Customize tooltip font size
 
         chart.yAxes.getIndex(0).renderer.labels.template.fontSize = 12; // Y-axis labels
-        chart.xAxes.getIndex(0).renderer.labels.template.fontSize = 12; 
+        chart.xAxes.getIndex(0).renderer.labels.template.fontSize = 12;
 
         chart.cursor = new am4charts.XYCursor();
       };
 
+      const populateTableData = (data) => {
+        const headerRow = document.getElementById('headerRow');
+        const dataRow = document.getElementById('dataRow');
 
-      animatedPieChart(achievedMargin2024, "chart2024");
-      xyChart(achievedMargin2025, "chart2025");
-      animatedPieChart(achievedMargin2026, "chart2026");
+        const totalHeader = document.createElement('th');
+        totalHeader.textContent = "        ";
+        headerRow.appendChild(totalHeader);
+        
+        data.forEach(item => {
+            const th = document.createElement('th');
+            th.textContent = item.type;
+            headerRow.appendChild(th);
+        });
+
+        const labelCell = document.createElement('td');
+        labelCell.textContent="Total"
+        dataRow.appendChild(labelCell);
+
+        // Populate data dynamically
+        data.forEach(item => {
+            const td = document.createElement('td');
+            td.textContent = item.total;
+            dataRow.appendChild(td);
+        });
+      }
+      xyChart(achievedMargin2024, "hpfy24a");
+      animatedPieChart(achievedMargin2024, "pfify24");
+      populateTableData(achievedMargin2024)
     </script>
   </body>
 </html>

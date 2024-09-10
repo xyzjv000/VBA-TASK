@@ -1,24 +1,23 @@
 Sub ExportChartToHTML()
-    Dim ws As Worksheet
+    Dim summaryWs As Worksheet
+    Dim combinedWs As Worksheet
+    Dim marginOnlyWs As Worksheet
     Dim actualCost As ChartObject
     Dim htmlTemplate As String
     Dim htmlContent As String
     Dim filePath As String
-    Dim actualCostPath As String
-    Dim dataRange As Range
+    Dim summaryData As Range
+    Dim combinedData As Range
+    Dim marginData As Range
+    Dim summaryJson As String
     Dim jsonData As String
     Dim templateFilePath As String
     Dim templateFileNumber As Integer
     
     ' Set the worksheet
-    Set ws = ThisWorkbook.Sheets("Summary") ' Change "Summary" to your sheet name
-    
-    ' Save chart as an image
-    Set actualCost = ws.ChartObjects("Actual Cost")
-
-    actualCostPath = GetCurrentExcelDirectory & "\Exports\Images\actualCost.png" ' Change to your desired path
-    actualCost.Chart.Export Filename:=actualCostPath, FilterName:="PNG"
-    
+    Set summaryWs = ThisWorkbook.Sheets("Summary")
+    Set combinedWs = ThisWorkbook.Sheets("Combined")
+    Set marginOnlyWs = ThisWorkbook.Sheets("Retail Margin Only")
     ' Define the path to the HTML template file
     templateFilePath = GetCurrentExcelDirectory & "\Exports\HTML_Template.html" ' Change to your template file path
     
@@ -29,17 +28,17 @@ Sub ExportChartToHTML()
     Close #templateFileNumber
     
     ' Define the range of data to be exported
-    Set dataRange = ws.Range("A7").CurrentRegion ' Adjust the range as needed
+    Set summaryData = summaryWs.Range("A7").CurrentRegion
     
     ' Convert the range to JSON
-    jsonData = RangeToJSON(dataRange)
+    summaryJson = RangeToJSON(summaryData)
+    ' combinedJson = RangeToJSON(combinedData)
     
     ' Replace placeholders in the HTML template with actual data
-    htmlContent = Replace(htmlTemplate, "{{actualCostPath}}", actualCostPath)
-    htmlContent = Replace(htmlContent, "{{jsonData}}", jsonData)
+    htmlContent = Replace(htmlTemplate, "{{summaryJson}}", summaryJson)
     
     ' Define the file path to save the HTML file
-    filePath = GetCurrentExcelDirectory & "\Exports\ExportedData.html" ' Change to your desired file path
+    filePath = GetCurrentDesktopirectory & "\ExportedReport.html" ' Change to your desired file path
     
     ' Write HTML content to file
     Open filePath For Output As #1
@@ -62,6 +61,19 @@ Function GetCurrentExcelDirectory() As String
         GetCurrentExcelDirectory = "The workbook has not been saved yet."
     Else
         GetCurrentExcelDirectory = currentDirectory
+    End If
+End Function
+
+Function GetCurrentDesktopirectory() As String
+    ' Get the directory of the currently open workbook
+    Dim desktopPath As String
+    desktopPath = CreateObject("WScript.Shell").SpecialFolders("Desktop")
+    
+    ' Check if the workbook is saved
+    If desktopPath = "" Then
+        GetCurrentDesktopirectory = "The workbook has not been saved yet."
+    Else
+        GetCurrentDesktopirectory = desktopPath
     End If
 End Function
 

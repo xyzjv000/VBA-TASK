@@ -28,13 +28,13 @@ Cleanup:
     Application.EnableEvents = True
 End Sub
 
-Sub PrintTest()
+Sub ClearFilter()
     ' Turn off screen updating, automatic calculation, and events
     Application.ScreenUpdating = False
     Application.Calculation = xlCalculationManual
     Application.EnableEvents = False
     On Error GoTo Cleanup
-    Call Module2.RefreshAllPivotTablesAndSlicers
+    Call Module2.ClearAllSlicerFilters
 Cleanup:
     ' Restore settings
     Application.ScreenUpdating = True

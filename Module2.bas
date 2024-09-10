@@ -267,16 +267,16 @@ Public Sub PopulateCombineTable()
         With ws
             lastRow = .Cells(.Rows.Count, "A").End(xlUp).Row
             lastCol = .Cells(5, .Columns.Count).End(xlToLeft).Column
-            ' Check if there's data to copy
+            ' Check If there's data To copy
             If lastRow >= 5 And lastCol >= 1 Then
                 Set rng = .Range(.Cells(5, 1), .Cells(lastRow, lastCol))
-                
+
                 rng.Copy
                 combinedSheet.Cells(pasteRow, 1).PasteSpecial Paste:=xlPasteValues
-                
+
                 combinedSheet.Range(combinedSheet.Cells(pasteRow, 5), _
-                    combinedSheet.Cells(pasteRow + rng.Rows.Count - 1, lastCol)).NumberFormat = "0"
-                
+                combinedSheet.Cells(pasteRow + rng.Rows.Count - 1, lastCol)).NumberFormat = "0"
+
                 pasteRow = pasteRow + rng.Rows.Count
             End If
         End With
@@ -295,43 +295,43 @@ Public Sub RefreshAllPivotTablesAndSlicers()
     Dim sc As SlicerCache
     Dim conn As WorkbookConnection
     Dim tbl As ListObject
-    
+
     ' Refresh all data connections
     For Each conn In ThisWorkbook.Connections
         On Error Resume Next
         conn.Refresh
-        On Error GoTo 0
-    Next conn
+        On Error Goto 0
+        Next conn
 
-    ' Loop through each worksheet in the workbook
-    For Each ws In ThisWorkbook.Worksheets
-        ' Loop through all PivotTables in the worksheet and refresh them
-        For Each pt In ws.PivotTables
-            On Error Resume Next
-            pt.RefreshTable
-            On Error GoTo 0
-        Next pt
+        ' Loop through each worksheet in the workbook
+        For Each ws In ThisWorkbook.Worksheets
+            ' Loop through all PivotTables in the worksheet And refresh them
+            For Each pt In ws.PivotTables
+                On Error Resume Next
+                pt.RefreshTable
+                On Error Goto 0
+                Next pt
 
-        For Each tbl In ws.ListObjects
-            On Error Resume Next
-            tbl.Refresh
-            On Error GoTo 0
-        Next tbl
+                For Each tbl In ws.ListObjects
+                    On Error Resume Next
+                    tbl.Refresh
+                    On Error Goto 0
+                    Next tbl
 
-        ' Loop through all charts in the worksheet and refresh them
-        For Each cht In ws.ChartObjects
-            On Error Resume Next
-            cht.Chart.Refresh
-            On Error GoTo 0
-        Next cht
-    Next ws
-    
-    ' Loop through all SlicerCaches in the workbook and refresh them
-    For Each sc In ThisWorkbook.SlicerCaches
-        On Error Resume Next
-        sc.Refresh
-        On Error GoTo 0
-    Next sc
+                    ' Loop through all charts in the worksheet And refresh them
+                    For Each cht In ws.ChartObjects
+                        On Error Resume Next
+                        cht.Chart.Refresh
+                        On Error Goto 0
+                        Next cht
+                    Next ws
+
+                    ' Loop through all SlicerCaches in the workbook And refresh them
+                    For Each sc In ThisWorkbook.SlicerCaches
+                        On Error Resume Next
+                        sc.Refresh
+                        On Error Goto 0
+                        Next sc
 End Sub
 
 
@@ -476,30 +476,43 @@ Public Sub PopulateRetailMarginOnly()
         additionalCol = retailMarginColumn(i)
         nameOfType = retailMarginTypes(i)
         Set additionalRng = combinedWorksheet.Range(additionalCol & "5:" & additionalCol & lastRow)
-        
-        ' Copy and paste the main range
+
+        ' Copy And paste the main range
         rng.Copy
         retailMarginOnlyWorksheet.Cells(pasteRow, 1).PasteSpecial Paste:=xlPasteValues
-        
-        ' Copy and paste the additional column
+
+        ' Copy And paste the additional column
         additionalRng.Copy
         retailMarginOnlyWorksheet.Cells(pasteRow, 9).PasteSpecial Paste:=xlPasteValues
-        
-        ' Apply number format to the newly pasted values in column I
+
+        ' Apply number format To the newly pasted values in column I
         retailMarginOnlyWorksheet.Range(retailMarginOnlyWorksheet.Cells(pasteRow, 9), _
-                                        retailMarginOnlyWorksheet.Cells(pasteRow + rng.Rows.Count - 1, 9)).NumberFormat = "0"
-        
-        ' Update column D with the exact value from retailMarginTypes
+        retailMarginOnlyWorksheet.Cells(pasteRow + rng.Rows.Count - 1, 9)).NumberFormat = "0"
+
+        ' Update column D With the exact value from retailMarginTypes
         With retailMarginOnlyWorksheet
             .Range(.Cells(pasteRow, 4), .Cells(pasteRow + rng.Rows.Count - 1, 4)).Value = nameOfType
         End With
-        
-        ' Move pasteRow down for the next block of data
+
+        ' Move pasteRow down For the Next block of data
         pasteRow = pasteRow + rng.Rows.Count
     Next i
 
     Application.CutCopyMode = False
     RefreshAllPivotTablesAndSlicers
+End Sub
+
+Public Sub ClearAllSlicerFilters()
+    Dim slicer As Slicer
+    Dim slicerCache As SlicerCache
+    
+    ' Loop through all slicer caches in the workbook
+    For Each slicerCache In ThisWorkbook.SlicerCaches
+        ' Clear the slicer filter
+        slicerCache.ClearManualFilter
+    Next slicerCache
+    
+    MsgBox "All slicer filters have been cleared!", vbInformation
 End Sub
 
 ' FUNCTIONS
