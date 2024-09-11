@@ -28,6 +28,12 @@ Sub ExportChartToHTML()
     Close #templateFileNumber
     
     ' Define the range of data to be exported
+    ' Set combinedData = Union(combinedWs.Range("C4:C" & combinedWs.Cells(Rows.Count, "C").End(xlUp).Row), _
+    '                          combinedWs.Range("D4:D" & combinedWs.Cells(Rows.Count, "D").End(xlUp).Row), _
+    '                          combinedWs.Range("E4:E" & combinedWs.Cells(Rows.Count, "E").End(xlUp).Row), _
+    '                          combinedWs.Range("F4:F" & combinedWs.Cells(Rows.Count, "F").End(xlUp).Row), _
+    '                          combinedWs.Range("G4:G" & combinedWs.Cells(Rows.Count, "G").End(xlUp).Row), _
+    '                          combinedWs.Range("H4:H" & combinedWs.Cells(Rows.Count, "H").End(xlUp).Row))
     Set summaryData = summaryWs.Range("A7").CurrentRegion
     
     ' Convert the range to JSON
@@ -35,8 +41,10 @@ Sub ExportChartToHTML()
     ' combinedJson = RangeToJSON(combinedData)
     
     ' Replace placeholders in the HTML template with actual data
-    htmlContent = Replace(htmlTemplate, "{{summaryJson}}", summaryJson)
     
+    ' htmlContent = Replace(htmlTemplate, "{{combinedJson}}", combinedJson)
+    ' htmlContent = Replace(htmlContent, "{{summaryJson}}", summaryJson)
+    htmlContent = Replace(htmlTemplate, "{{summaryJson}}", summaryJson)
     ' Define the file path to save the HTML file
     filePath = GetCurrentDesktopirectory & "\ExportedReport.html" ' Change to your desired file path
     
