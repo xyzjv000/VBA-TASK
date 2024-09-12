@@ -168,21 +168,29 @@
             "STC",
             "Commission"
         ]
-      const achievedMargin2024 = summaryJsonData.filter(
-        (data) => data.typesofmargin == "Achieved Margin FY2024"
-      );
+      const transformDataForPieChart = (data, marginType) => {
+          // Find the entry for the specified typesofmargin
+          const marginData = data.find(entry => entry.typesofmargin.includes(marginType));
+          console.log(marginType, marginData);
+          
+          if (!marginData) {
+            console.error("No data found for the specified typesofmargin.");
+            return [];
+          }
+        
+          // Convert totals to array of objects with 'type' and 'total'
+          return Object.keys(marginData.totals).map(key => ({
+            type: key,
+            total: parseFloat(marginData.totals[key])
+          }));
+      };
+        
+      const achievedMargin2024 = transformDataForPieChart(summaryJsonData, "Sum of Achieved Margin FY2024")
+      const dataFy2024 =  transformDataForPieChart(summaryJsonData, "FY2024")
+      const dataFy2025 =  transformDataForPieChart(summaryJsonData, "FY2025")
+      const dataFy2026 = transformDataForPieChart(summaryJsonData, "FY2026")
 
-      const dataFy2024 = summaryJsonData.filter(
-        (data) => data.year.includes("2024")
-      );
-
-      const dataFy2025 = summaryJsonData.filter(
-        (data) => data.year.includes("2025")
-      );
-
-      const dataFy2026 = summaryJsonData.filter(
-        (data) => data.year.includes("2026")
-      );
+      console.log(dataFy2024, dataFy2025, dataFy2026);
       
 
       const animatedPieChart = (data, chartId) => {
@@ -265,10 +273,6 @@
             dataRow.appendChild(td);
         });
       }
-      xyChart(achievedMargin2024, "hpfy24a", "Historical Performance FY2024 Actuals");
-      animatedPieChart(achievedMargin2024, "pfify24");
-      populateTable1Data(achievedMargin2024);
-
       const clusteredChart = (data, chartId) => {
           am4core.useTheme(am4themes_animated);
           var chart = am4core.create(chartId, am4charts.XYChart);
@@ -392,8 +396,6 @@
               }
           }
       }
-      clusteredChart(dataFy2025, "fy25avspoe");
-
       const populateTable2Data = (data, id) => {
           const headerRow = document.querySelector(`#${id} #headerRow`);
           const tbody = document.querySelector(`#${id} tbody`);
@@ -447,10 +449,6 @@
               tbody.appendChild(row);
           });
       };
-      populateTable2Data(dataFy2025, 'table2');
-
-      clusteredChart(dataFy2026, "fy26avspoe");
-      populateTable2Data(dataFy2026, 'table3');
 
       const totalCost = (data) => {
           // Initialize an empty object to hold totals for each type
@@ -470,9 +468,6 @@
               total: totals[type].toFixed(2) // Format to two decimal places
           }));
       };
-
-      animatedPieChart(totalCost(summaryJsonData), "acap");
-
       const totalCostByMargin = (data) => {
           const totalsByMargin = {};
 
@@ -568,10 +563,18 @@
           chart.scrollbarX = new am4core.Scrollbar();
       }
 
+      xyChart(achievedMargin2024, "hpfy24a", "Historical Performance FY2024 Actuals");
+      animatedPieChart(achievedMargin2024, "pfify24");
+      populateTable1Data(achievedMargin2024);
+      clusteredChart(dataFy2025, "fy25avspoe");
+      populateTable2Data(dataFy2025, 'table2');
+      clusteredChart(dataFy2026, "fy26avspoe");
+      populateTable2Data(dataFy2026, 'table3');
+      animatedPieChart(totalCost(summaryJsonData), "acap");
+
       // Example usage
       console.log(totalCostByMargin(summaryJsonData));
-      fyActualMarginVsPOE(totalCostByMargin(summaryJsonData), "fyamvspoe");
-
+      // fyActualMarginVsPOE(totalCostByMargin(summaryJsonData), "fyamvspoe");
     </script>
   </body>
 </html>

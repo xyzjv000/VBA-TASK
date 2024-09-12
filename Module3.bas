@@ -13,7 +13,9 @@ Sub ExportChartToHTML()
     Dim jsonData As String
     Dim templateFilePath As String
     Dim templateFileNumber As Integer
-    
+    Dim jsonResult As String
+    jsonResult = ExtractFilteredDataToJSONArray("FINAL output 2", "PivotTable1")
+    Debug.Print jsonResult
     ' Set the worksheet
     Set summaryWs = ThisWorkbook.Sheets("Summary")
     Set combinedWs = ThisWorkbook.Sheets("Combined")
@@ -37,7 +39,7 @@ Sub ExportChartToHTML()
     Set summaryData = summaryWs.Range("A7").CurrentRegion
     
     ' Convert the range to JSON
-    summaryJson = RangeToJSON(summaryData)
+    summaryJson = jsonResult
     ' combinedJson = RangeToJSON(combinedData)
     
     ' Replace placeholders in the HTML template with actual data
@@ -56,8 +58,6 @@ Sub ExportChartToHTML()
     ' Notify the user
     MsgBox "Data and chart have been exported to HTML successfully!", vbInformation
 End Sub
-
-
 
 Function GetCurrentExcelDirectory() As String
     ' Get the directory of the currently open workbook
@@ -154,4 +154,142 @@ Function ToCamelCase(text As String) As String
     Next i
 
     ToCamelCase = result
+End Function
+
+' Sub ExtractFilteredDataToJSONArray()
+'     Dim pt As PivotTable
+'     Dim ws As Worksheet
+'     Dim jsonString As String
+'     Dim jsonArray As Object
+'     Dim pRow As Range
+'     Dim keyName As String
+'     Dim value As String
+'     Dim data As Object
+
+'     ' Set worksheet and PivotTable
+'     Set ws = ThisWorkbook.Worksheets("FINAL output 2") ' Adjust the sheet name
+'     Set pt = ws.PivotTables("PivotTable1") ' Adjust the PivotTable name
+    
+'     ' Create JSON array
+'     Set jsonArray = CreateObject("Scripting.Dictionary")
+'     Set data = CreateObject("Scripting.Dictionary")
+    
+'     ' Get visible row data
+'     For Each pRow In pt.DataBodyRange.Rows
+'         keyName = LCase(pRow.Cells(1, 0).Value)  ' The value of the first column will be the key
+'         value = pRow.Cells(1, 1).Value    ' The value of the second column will be the value
+'         data.Add keyName, value           ' Add to dictionary
+'     Next pRow
+'     ' Convert to JSON string
+'     jsonString = JsonConvertToArray(data)
+    
+'     ' Output JSON string to Immediate window
+'     Debug.Print jsonString
+' End Sub
+
+' Function JsonConvertToArray(dict As Object) As String
+'     Dim json As String
+'     Dim key As Variant
+'     Dim i As Integer
+    
+'     json = "["
+'     i = 0
+'     For Each key In dict
+'         json = json & "{" & """" & key & """:""" & dict(key) & """}"
+'         If i < dict.Count - 1 Then json = json & ","
+'         i = i + 1
+'     Next key
+'     json = json & "]"
+    
+'     JsonConvertToArray = json
+' End Function
+
+Function ExtractFilteredDataToJSONArray(sheetName As String, pivotTableName As String) As String
+    Dim pt As PivotTable
+    Dim ws As Worksheet
+    Dim jsonString As String
+    Dim jsonArray As Object
+    Dim data As Object
+    Dim typesofmargin As String
+    Dim totalName As String
+    Dim totalValue As String
+    Dim rowDict As Object
+    Dim totalDict As Object
+    Dim pRow As Range
+    Dim pCol As Range
+    Dim colHeaders As Range
+    Dim startCol As Integer
+    Dim i As Integer
+
+    ' Set worksheet and PivotTable
+    Set ws = ThisWorkbook.Worksheets(sheetName) ' Adjust the sheet name
+    Set pt = ws.PivotTables(pivotTableName) ' Adjust the PivotTable name
+
+    ' Create JSON array
+    Set jsonArray = CreateObject("Scripting.Dictionary")
+
+    ' Get column headers range
+    Set colHeaders = pt.DataBodyRange.Cells(1, 1).Offset(-1, 1).Resize(1, pt.DataBodyRange.Columns.Count - 1)
+    startCol = pt.DataBodyRange.Column ' First data column
+
+    ' Iterate over the PivotTable columns, starting from the second column
+    For i = 1 To pt.DataBodyRange.Columns.Count
+        ' Initialize a new row dictionary for each typesofmargin
+        Set rowDict = CreateObject("Scripting.Dictionary")
+        Set totalDict = CreateObject("Scripting.Dictionary")
+
+        ' Get the typesofmargin from the column header
+        typesofmargin = Trim(colHeaders.Cells(1, i - 1).Value)
+        rowDict.Add "typesofmargin", typesofmargin
+
+        ' Loop through the rows to get totals for this typesofmargin
+        For Each pRow In pt.DataBodyRange.Rows
+            totalName = LCase(Trim(pRow.Cells(1, 0).Value)) ' The first column under "Row Labels"
+            totalValue = pRow.Cells(1, i).Value ' The current column value for this row            
+            If totalName = "grand total" Then
+                totalName = "total"                
+            End If
+            totalDict.Add totalName, totalValue
+        Next pRow
+
+        ' Add totals dictionary to row dictionary
+        rowDict.Add "totals", totalDict
+        ' Add row dictionary to JSON array
+        jsonArray.Add jsonArray.Count, rowDict
+    Next i
+
+    ' Convert to JSON string
+    jsonString = JsonConvertToObject(jsonArray)
+    ExtractFilteredDataToJSONArray = jsonString
+End Function
+
+Function JsonConvertToObject(dict As Object) As String
+    Dim json As String
+    Dim key As Variant
+    Dim subKey As Variant
+    Dim i As Integer
+    Dim subJson As String
+
+    json = "["
+    i = 0
+    For Each key In dict
+        json = json & "{"
+        json = json & """typesofmargin"":""" & dict(key).Item("typesofmargin") & ""","
+
+        ' Convert totals dictionary to JSON object
+        subJson = "{"
+        For Each subKey In dict(key).Item("totals")
+            subJson = subJson & """" & subKey & """:""" & dict(key).Item("totals")(subKey) & ""","
+        Next subKey
+        ' Remove the trailing comma
+        If Right(subJson, 1) = "," Then subJson = Left(subJson, Len(subJson) - 1)
+        subJson = subJson & "}"
+
+        json = json & """totals"":" & subJson & "}"
+        If i < dict.Count - 1 Then json = json & ","
+        i = i + 1
+    Next key
+    json = json & "]"
+
+    JsonConvertToObject = json
 End Function
