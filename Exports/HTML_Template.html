@@ -10,9 +10,9 @@
         margin: 0;
         padding: 0;
         display: flex;
+        flex-direction: column;
         justify-content: center;
         align-items: center;
-        height: 100vh;
         background-color: #f4f4f4;
       }
       .container {
@@ -48,7 +48,7 @@
       #hpfy24a,
       #pfify24,
       #fy25avspoe,
-      #fy26avspoe{
+      #fy26avspoe {
         height: 400px;
       }
       #acap {
@@ -57,7 +57,7 @@
         min-width: 600px;
       }
 
-      #fyamvspoe{
+      #fyamvspoe {
         height: 600px;
       }
 
@@ -67,6 +67,47 @@
 
       .chart-item {
         flex: 1;
+      }
+    </style>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+      }
+      .footer {
+        background-color: #f1f1f1;
+        padding: 20px;
+        border-top: 1px solid #ddd;
+      }
+      .footer-container {
+        margin: 0 auto;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+      }
+      .footer-item {
+        background-color: #ffffff;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 15px;
+        flex: 1;
+        min-width: 200px;
+      }
+      .footer-item h3 {
+        margin: 0 0 10px;
+        font-size: 16px;
+        color: #333;
+      }
+      .footer-item p {
+        margin: 0;
+        font-size: 14px;
+        color: #666;
+      }
+      @media (max-width: 768px) {
+        .footer-item {
+          flex: 1 1 100%;
+        }
       }
     </style>
   </head>
@@ -93,7 +134,8 @@
             </tbody>
           </table>
         </div>
-        <br><hr>
+        <br />
+        <hr />
         <!-- FY25 Actual vs POE -->
         <div>
           <div class="chart-item">
@@ -111,7 +153,8 @@
             </tbody>
           </table>
         </div>
-        <br><hr>
+        <br />
+        <hr />
         <!-- FY26 Actual vs POE -->
         <div>
           <div class="chart-item">
@@ -129,33 +172,62 @@
             </tbody>
           </table>
         </div>
-        <br><hr>
+        <br />
+        <hr />
         <!-- Actual Cost and Percentage -->
         <div>
           <div class="chart-item">
             <center><h3>Actual Cost and Percentage</h3></center>
-            <div id="acap"></div>
+            <div style="display: flex; flex-wrap: wrap; gap: 1rem;">
+              <div id="acap"></div>
+              <div style="flex: 1;">
+                <table id="table5">
+                  <thead>
+                    <tr id="headerRow"></tr>
+                  </thead>
+                  <tbody>
+                    <tr id="dataRow"></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
           </div>
         </div>
-        <br><hr>
+        <br />
+        <hr />
         <div>
           <div class="chart-item">
             <center><h3>Financial Year Actual Margin vs POE</h3></center>
             <div id="fyamvspoe"></div>
           </div>
         </div>
+        <div>
+          <table id="table4">
+            <thead>
+              <tr id="headerRow"></tr>
+            </thead>
+            <tbody>
+              <tr id="dataRow"></tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
-
+    <div class="footer">
+      <div class="footer-container">
+        <!-- Footer items will be injected here -->
+      </div>
+    </div>
     <script src="https://cdn.amcharts.com/lib/4/core.js"></script>
     <script src="https://cdn.amcharts.com/lib/4/charts.js"></script>
     <script src="https://cdn.amcharts.com/lib/4/maps.js"></script>
     <script src="https://cdn.amcharts.com/lib/4/themes/animated.js"></script>
     <script>
+      var combinedJsonData = {{combinedJson}};
       var summaryJsonData = {{summaryJson}};
-      // var combinedJsonData = {{combinedJson}};
-      console.log(summaryJsonData);
-      // console.log(combinedJsonData);
+      var versionData = {{versionData}};
+
+      console.log(combinedJsonData,versionData);
       const typeList =[
             "RetailMargin",
             "Revenue",
@@ -168,30 +240,73 @@
             "STC",
             "Commission"
         ]
-      const transformDataForPieChart = (data, marginType) => {
+      const transformDataForChart = (data, marginType) => {
           // Find the entry for the specified typesofmargin
           const marginData = data.find(entry => entry.typesofmargin.includes(marginType));
-          console.log(marginType, marginData);
-          
           if (!marginData) {
-            console.error("No data found for the specified typesofmargin.");
-            return [];
+              console.error("No data found for the specified typesofmargin.");
+              return [];
           }
-        
-          // Convert totals to array of objects with 'type' and 'total'
-          return Object.keys(marginData.totals).map(key => ({
-            type: key,
-            total: parseFloat(marginData.totals[key])
-          }));
-      };
-        
-      const achievedMargin2024 = transformDataForPieChart(summaryJsonData, "Sum of Achieved Margin FY2024")
-      const dataFy2024 =  transformDataForPieChart(summaryJsonData, "FY2024")
-      const dataFy2025 =  transformDataForPieChart(summaryJsonData, "FY2025")
-      const dataFy2026 = transformDataForPieChart(summaryJsonData, "FY2026")
 
-      console.log(dataFy2024, dataFy2025, dataFy2026);
-      
+          // Convert totals to array of objects with 'type' (from labels) and 'total', excluding "total"
+          return Object.keys(marginData.totals)
+              .filter(key => key.toLowerCase() !== "total") // Exclude the "total" key
+              .map(key => ({
+                  type: marginData.labels[key] || key, // Use the label if available, otherwise use the key
+                  total: parseFloat(marginData.totals[key])
+              }));
+      };
+
+
+      const transformDataForCluster = (data, marginType) => {
+          // Find the entry for the specified typesofmargin
+          var marginData = []
+          if(marginType == null || marginType == "") {
+            marginData = data;
+          }
+          else {
+            marginData = data.filter(entry => entry.typesofmargin.includes(marginType));
+          }
+
+          const combineData = (data) => {
+            // Initialize an array to hold the combined result
+            const combinedArray = [];
+
+            // Iterate over each entry in the data
+            data.forEach((entry) => {
+              // Extract typesofmargin, totals, and labels from the entry
+              const { typesofmargin, totals, labels } = entry;
+
+              // Iterate over each key in totals
+              Object.keys(totals).forEach((key) => {
+                if (key.toLowerCase() !== "total") { // Exclude "total" key
+                  // Push the combined object to the result array
+                  combinedArray.push({
+                    margin: typesofmargin,
+                    type: labels[key] || key, // Use label if available; otherwise, use the key
+                    total: parseFloat(totals[key]) // Convert total to float
+                  });
+                }
+              });
+            });
+
+            return combinedArray;
+          };
+
+          if (!marginData) {
+              console.error("No data found for the specified typesofmargin.");
+              return [];
+          }
+
+          // Convert totals to array of objects with 'type' (from labels) and 'total', excluding "total"
+          return combineData(marginData)
+      };
+
+      const achievedMargin2024 = transformDataForChart(combinedJsonData, "Sum of Achieved Margin FY2024")
+      const dataFy2024 =  transformDataForChart(combinedJsonData, "FY2024")
+      const dataFy2025 =  transformDataForCluster(combinedJsonData, "FY2025")
+      const dataFy2026 = transformDataForCluster(combinedJsonData, "FY2026")
+
 
       const animatedPieChart = (data, chartId) => {
         am4core.useTheme(am4themes_animated);
@@ -210,6 +325,7 @@
         // Add a legend
         chart.legend = new am4charts.Legend();
         chart.legend.position = "right";
+        chart.exporting.menu = new am4core.ExportMenu();
       };
 
       const xyChart = (data, chartId, seriesName) => {
@@ -254,12 +370,13 @@
         chart.xAxes.getIndex(0).renderer.labels.template.fontSize = 12;
 
         chart.cursor = new am4charts.XYCursor();
+        chart.exporting.menu = new am4core.ExportMenu();
       };
 
       const populateTable1Data = (data) => {
         const headerRow = document.querySelector('#table1 #headerRow');
         const dataRow = document.querySelector('#table1 #dataRow');
-        
+
         data.forEach(item => {
             const th = document.createElement('th');
             th.textContent = item.type.replace(/([A-Z][a-z]+|[A-Z]+(?![a-z]))/g, ' $1').trim();
@@ -292,7 +409,7 @@
           function getExtremes(data) {
               const initialMax = -Infinity;
               const initialMin = Infinity;
-              
+
               const extremes = data.reduce((acc, item) => {
                   const value = parseFloat(item.total);
 
@@ -340,13 +457,13 @@
 
           // Map data to the chart
           const categories = [...new Set(data.map(item => item.type))]; // Unique types
-          const seriesNames = [...new Set(data.map(item => item.typesofmargin))]; // Unique margin types
+          const seriesNames = [...new Set(data.map(item => item.margin))]; // Unique margin types
 
           // Prepare data structure for the chart
           const chartData = categories.map(category => {
               const dataPoint = { type: category };
               seriesNames.forEach(name => {
-                  const entry = data.find(d => d.type === category && d.typesofmargin === name);
+                  const entry = data.find(d => d.type === category && d.margin === name);
                   dataPoint[name] = entry ? parseFloat(entry.total) : 0;
               });
               return dataPoint;
@@ -395,7 +512,8 @@
                   }
               }
           }
-      }
+          chart.exporting.menu = new am4core.ExportMenu();
+        }
       const populateTable2Data = (data, id) => {
           const headerRow = document.querySelector(`#${id} #headerRow`);
           const tbody = document.querySelector(`#${id} tbody`);
@@ -403,15 +521,15 @@
           // Create a set to hold unique types of margins
           const marginTypes = new Set();
           const typesOfMargins = new Set();
-
+          console.log(data);
           // Populate the sets with unique types and margin types from data
           data.forEach(item => {
               marginTypes.add(item.type);
-              typesOfMargins.add(item.typesofmargin);
+              typesOfMargins.add(item.margin);
           });
 
           // Create table headers
-          headerRow.innerHTML = '<th></th>' + Array.from(marginTypes).map(type => 
+          headerRow.innerHTML = '<th></th>' + Array.from(marginTypes).map(type =>
               `<th>${type.replace(/([A-Z][a-z]+|[A-Z]+(?![a-z]))/g, ' $1').trim()}</th>`
           ).join('');
 
@@ -428,8 +546,8 @@
 
           // Populate the map with totals from data
           data.forEach(item => {
-              if (totalsMap[item.typesofmargin]) {
-                  totalsMap[item.typesofmargin][item.type] += parseFloat(item.total);
+              if (totalsMap[item.margin]) {
+                  totalsMap[item.margin][item.type] += parseFloat(item.total);
               }
           });
 
@@ -437,7 +555,7 @@
           Object.keys(totalsMap).forEach(marginType => {
               const row = document.createElement('tr');
               const marginTypeCell = document.createElement('td');
-              marginTypeCell.textContent = `Sum of ${marginType}`;
+              marginTypeCell.textContent = `${marginType}`;
               row.appendChild(marginTypeCell);
 
               marginTypes.forEach(type => {
@@ -446,6 +564,46 @@
                   row.appendChild(td);
               });
 
+              tbody.appendChild(row);
+          });
+      };
+      const populateTable3Data = (data, id) => {
+          const headerRow = document.querySelector(`#${id} #headerRow`);
+          const tbody = document.querySelector(`#${id} tbody`);
+
+          // Clear any existing content
+          headerRow.innerHTML = '';
+          tbody.innerHTML = '';
+
+          // Create table headers for two columns: "Type" and "Total"
+          headerRow.innerHTML = '<th>Margin</th><th>Total</th>';
+
+          // Create a map to hold totals for each type
+          const totalsMap = {};
+
+          // Populate the map with totals from data
+          data.forEach(item => {
+              if (!totalsMap[item.type]) {
+                  totalsMap[item.type] = 0;
+              }
+              totalsMap[item.type] += parseFloat(item.total);
+          });
+
+          // Populate data rows
+          Object.keys(totalsMap).forEach(type => {
+              const row = document.createElement('tr');
+
+              // Create type cell
+              const typeCell = document.createElement('td');
+              typeCell.textContent = type;
+              row.appendChild(typeCell);
+
+              // Create total cell
+              const totalCell = document.createElement('td');
+              totalCell.textContent = totalsMap[type].toFixed(2);
+              row.appendChild(totalCell);
+
+              // Append the row to the table body
               tbody.appendChild(row);
           });
       };
@@ -468,56 +626,31 @@
               total: totals[type].toFixed(2) // Format to two decimal places
           }));
       };
-      const totalCostByMargin = (data) => {
-          const totalsByMargin = {};
-
-          data.forEach(item => {
-              const { typesofmargin, type, total } = item;
-              
-              if (!totalsByMargin[typesofmargin]) {
-                  totalsByMargin[typesofmargin] = {};
-              }
-              
-              if (!totalsByMargin[typesofmargin][type]) {
-                  totalsByMargin[typesofmargin][type] = 0;
-              }
-              totalsByMargin[typesofmargin][type] += parseFloat(total);
-          });
-
-          // Convert the results into an array of objects
-          return Object.keys(totalsByMargin).map(marginType => ({
-              typesofmargin: marginType,
-              totals: Object.keys(totalsByMargin[marginType])
-                  .map(type => ({
-                      type: type,
-                      total: totalsByMargin[marginType][type].toFixed(2) // Format to two decimal places
-                  }))
-                  .sort((a, b) => a.type.localeCompare(b.type)) // Sort totals by type
-          }));
-      };
       const fyActualMarginVsPOE = (dataArr, chartId) => {
           am4core.useTheme(am4themes_animated);
 
-          // Data
-          const data = dataArr;
-
-          // Transform data
-          const transformedData = [];
-          data.forEach(margin => {
-              margin.totals.forEach(total => {
-                  transformedData.push({
-                      typesofmargin: margin.typesofmargin,
-                      type: total.type,
-                      total: parseFloat(total.total)
-                  });
-              });
-          });
-          console.log(transformedData);
-          
           // Create chart instance
           var chart = am4core.create(chartId, am4charts.XYChart);
 
-          // Add data
+          // Prepare transformed data
+          const transformedData = [];
+
+          // Iterate through data array to transform it for the chart
+          dataArr.forEach(margin => {
+              margin.totals.forEach(total => {
+                  // Find if we already have an entry for this type
+                  let existingEntry = transformedData.find(entry => entry.type === total.type);
+                  if (!existingEntry) {
+                      // If it doesn't exist, create a new entry for this type
+                      existingEntry = { type: total.type };
+                      transformedData.push(existingEntry);
+                  }
+                  // Add the margin total to the existing entry under the margin's name
+                  existingEntry[margin.typesofmargin] = total.total;
+              });
+          });
+
+          // Assign the transformed data to the chart
           chart.data = transformedData;
 
           // Create X Axis
@@ -530,26 +663,24 @@
 
           // Create Y Axis
           var valueAxis = chart.yAxes.push(new am4charts.ValueAxis());
-          valueAxis.renderer.inversed = false; // Set to true if you want a reversed value axis
           valueAxis.renderer.minWidth = 35;
           valueAxis.title.text = "Total";
 
           // Create series for each typesofmargin
-          data.forEach(margin => {
+          dataArr.forEach(margin => {
               var series = chart.series.push(new am4charts.LineSeries());
-              series.dataFields.valueY = "total";
+              series.dataFields.valueY = margin.typesofmargin;
               series.dataFields.categoryX = "type";
-              series.dataFields.name = "typesofmargin";
               series.name = margin.typesofmargin;
               series.strokeWidth = 2;
-              series.tooltipText = "{categoryX}: [bold]{valueY}[/]";
+              series.tooltipText = "{name}: [bold]{valueY}[/]";
 
               // Add bullets to the series
               var bullet = series.bullets.push(new am4charts.CircleBullet());
-              bullet.circle.fill = am4core.color("#FF5733"); // Bullet color (you can use a function to set dynamic colors)
-              bullet.circle.stroke = am4core.color("#fff"); // Bullet border color
-              bullet.circle.strokeWidth = 2; // Bullet border width
-              bullet.circle.radius = 6; // Bullet size
+              bullet.circle.fill = am4core.color("#FF5733");
+              bullet.circle.stroke = am4core.color("#fff");
+              bullet.circle.strokeWidth = 2;
+              bullet.circle.radius = 6;
           });
 
           // Add cursor
@@ -561,7 +692,8 @@
 
           // Add scrollbar
           chart.scrollbarX = new am4core.Scrollbar();
-      }
+          chart.exporting.menu = new am4core.ExportMenu();
+      };
 
       xyChart(achievedMargin2024, "hpfy24a", "Historical Performance FY2024 Actuals");
       animatedPieChart(achievedMargin2024, "pfify24");
@@ -570,11 +702,56 @@
       populateTable2Data(dataFy2025, 'table2');
       clusteredChart(dataFy2026, "fy26avspoe");
       populateTable2Data(dataFy2026, 'table3');
-      animatedPieChart(totalCost(summaryJsonData), "acap");
-
+      animatedPieChart(totalCost(transformDataForCluster(summaryJsonData)), "acap");
+      populateTable3Data(totalCost(transformDataForCluster(summaryJsonData)), 'table5');
       // Example usage
-      console.log(totalCostByMargin(summaryJsonData));
-      // fyActualMarginVsPOE(totalCostByMargin(summaryJsonData), "fyamvspoe");
+      const combinedSummary = []
+      const prepareDateForChart = () => {
+        function getLast6IfStartsWithFY(inputString) {
+          if (inputString.length < 6) {
+            return null;
+          }
+
+          // Extract the last 6 characters
+          const last6 = inputString.slice(-6);
+
+          if (last6.startsWith('FY')) {
+            return last6;
+          }
+        }
+
+        summaryJsonData.forEach((data, index) => {
+          const dataOb = {
+            typesofmargin: data.typesofmargin,
+            totals: transformDataForChart(summaryJsonData, data.typesofmargin)
+          }
+          if (data.typesofmargin != "Grand Total")
+            combinedSummary.push(dataOb)
+        })
+        combinedSummary.sort((a, b) => {
+            if (a.typesofmargin < b.typesofmargin) return -1;
+            if (a.typesofmargin > b.typesofmargin) return 1;
+            return 0;
+          });
+          console.log("combinedSummary", combinedSummary);
+      }
+      prepareDateForChart()
+
+      fyActualMarginVsPOE(combinedSummary, "fyamvspoe");
+      populateTable2Data(transformDataForCluster(combinedJsonData), 'table4');
+    </script>
+    <script>
+      const footerContainer = document.querySelector(".footer-container");
+
+      versionData.forEach((item) => {
+        const footerItem = document.createElement("div");
+        footerItem.className = "footer-item";
+        footerItem.innerHTML = `
+              <h3>${item.version}</h3>
+              <p>${item.effectiveDate}</p>
+          `;
+        footerContainer.appendChild(footerItem);
+      });
     </script>
   </body>
 </html>
