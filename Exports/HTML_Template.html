@@ -63,10 +63,24 @@
 
       .chart-container {
         display: flex;
+        flex-wrap: wrap;
       }
 
       .chart-item {
         flex: 1;
+        min-width: 400px;
+      }
+
+      #rmpnmibase {
+        min-height: 700px;
+      }
+      #nmi {
+        width: 200px;
+        padding: 10px;
+        border-radius: 5px;
+      }
+      #loading {
+        text-align: center;
       }
     </style>
     <style>
@@ -110,6 +124,25 @@
         }
       }
     </style>
+    <style>
+      /* Responsive styles */
+      @media (max-width: 768px) {
+        #table1 thead, #table1 tbody {
+          display: inline-grid;
+          width: 50%;
+        }
+        #table1 #headerRow, #table1 #dataRow {
+          display: inline-grid;
+        }
+        .table-container {
+          overflow: scroll;
+        }
+        
+        .container{
+          width: 98%;
+        }
+      }
+    </style>
   </head>
   <body>
     <div class="container">
@@ -124,7 +157,7 @@
             <div id="pfify24"></div>
           </div>
         </div>
-        <div>
+        <div class="table-container">
           <table id="table1">
             <thead>
               <tr id="headerRow"></tr>
@@ -143,7 +176,7 @@
             <div id="fy25avspoe"></div>
           </div>
         </div>
-        <div>
+        <div class="table-container">
           <table id="table2">
             <thead>
               <tr id="headerRow"></tr>
@@ -162,7 +195,7 @@
             <div id="fy26avspoe"></div>
           </div>
         </div>
-        <div>
+        <div class="table-container">
           <table id="table3">
             <thead>
               <tr id="headerRow"></tr>
@@ -178,9 +211,9 @@
         <div>
           <div class="chart-item">
             <center><h3>Actual Cost and Percentage</h3></center>
-            <div style="display: flex; flex-wrap: wrap; gap: 1rem;">
+            <div style="display: flex; flex-wrap: wrap; gap: 1rem">
               <div id="acap"></div>
-              <div style="flex: 1;">
+              <div style="flex: 1" class="table-container">
                 <table id="table5">
                   <thead>
                     <tr id="headerRow"></tr>
@@ -201,7 +234,7 @@
             <div id="fyamvspoe"></div>
           </div>
         </div>
-        <div>
+        <div class="table-container">
           <table id="table4">
             <thead>
               <tr id="headerRow"></tr>
@@ -210,6 +243,18 @@
               <tr id="dataRow"></tr>
             </tbody>
           </table>
+        </div>
+        <hr />
+        <br />
+        <!-- Retail Margin per NMI Base -->
+        <div>
+          <div class="chart-item">
+            <center><h3>Retail Margin per NMI Base</h3></center>
+            <h4 id="loading">Loading please wait...</h4>
+            <div id="rmpnmibase"></div>
+            <label for="nmi">Filter by NMI</label>
+            <select name="nmi" id="nmi"></select>
+          </div>
         </div>
       </div>
     </div>
@@ -222,92 +267,61 @@
     <script src="https://cdn.amcharts.com/lib/4/charts.js"></script>
     <script src="https://cdn.amcharts.com/lib/4/maps.js"></script>
     <script src="https://cdn.amcharts.com/lib/4/themes/animated.js"></script>
+    <!-- functions -->
     <script>
-      var combinedJsonData = {{combinedJson}};
-      var summaryJsonData = {{summaryJson}};
-      var versionData = {{versionData}};
-
-      console.log(combinedJsonData,versionData);
-      const typeList =[
-            "RetailMargin",
-            "Revenue",
-            "Network",
-            "Capacity",
-            "WholesaleEnergy",
-            "MarketFees",
-            "ESS",
-            "LGC",
-            "STC",
-            "Commission"
-        ]
       const transformDataForChart = (data, marginType) => {
-          // Find the entry for the specified typesofmargin
-          const marginData = data.find(entry => entry.typesofmargin.includes(marginType));
-          if (!marginData) {
-              console.error("No data found for the specified typesofmargin.");
-              return [];
-          }
+        const marginData = data.find((entry) =>
+          entry.typesofmargin.includes(marginType)
+        );
+        if (!marginData) {
+          console.error("No data found for the specified typesofmargin.");
+          return [];
+        }
 
-          // Convert totals to array of objects with 'type' (from labels) and 'total', excluding "total"
-          return Object.keys(marginData.totals)
-              .filter(key => key.toLowerCase() !== "total") // Exclude the "total" key
-              .map(key => ({
-                  type: marginData.labels[key] || key, // Use the label if available, otherwise use the key
-                  total: parseFloat(marginData.totals[key])
-              }));
+        return Object.keys(marginData.totals)
+          .filter((key) => key.toLowerCase() !== "total")
+          .map((key) => ({
+            type: marginData.labels[key] || key,
+            total: parseFloat(marginData.totals[key]),
+          }));
       };
-
-
       const transformDataForCluster = (data, marginType) => {
-          // Find the entry for the specified typesofmargin
-          var marginData = []
-          if(marginType == null || marginType == "") {
-            marginData = data;
-          }
-          else {
-            marginData = data.filter(entry => entry.typesofmargin.includes(marginType));
-          }
+        var marginData = [];
+        if (marginType == null || marginType == "") {
+          marginData = data;
+        } else {
+          marginData = data.filter((entry) =>
+            entry.typesofmargin.includes(marginType)
+          );
+        }
 
-          const combineData = (data) => {
-            // Initialize an array to hold the combined result
-            const combinedArray = [];
+        const combineData = (data) => {
+          const combinedArray = [];
 
-            // Iterate over each entry in the data
-            data.forEach((entry) => {
-              // Extract typesofmargin, totals, and labels from the entry
-              const { typesofmargin, totals, labels } = entry;
+          data.forEach((entry) => {
+            const { typesofmargin, totals, labels } = entry;
 
-              // Iterate over each key in totals
-              Object.keys(totals).forEach((key) => {
-                if (key.toLowerCase() !== "total") { // Exclude "total" key
-                  // Push the combined object to the result array
-                  combinedArray.push({
-                    margin: typesofmargin,
-                    type: labels[key] || key, // Use label if available; otherwise, use the key
-                    total: parseFloat(totals[key]) // Convert total to float
-                  });
-                }
-              });
+            Object.keys(totals).forEach((key) => {
+              if (key.toLowerCase() !== "total") {
+                combinedArray.push({
+                  margin: typesofmargin,
+                  type: labels[key] || key,
+                  total: parseFloat(totals[key]),
+                });
+              }
             });
+          });
 
-            return combinedArray;
-          };
+          return combinedArray;
+        };
 
-          if (!marginData) {
-              console.error("No data found for the specified typesofmargin.");
-              return [];
-          }
+        if (!marginData) {
+          console.error("No data found for the specified typesofmargin.");
+          return [];
+        }
 
-          // Convert totals to array of objects with 'type' (from labels) and 'total', excluding "total"
-          return combineData(marginData)
+        return combineData(marginData);
       };
-
-      const achievedMargin2024 = transformDataForChart(combinedJsonData, "Sum of Achieved Margin FY2024")
-      const dataFy2024 =  transformDataForChart(combinedJsonData, "FY2024")
-      const dataFy2025 =  transformDataForCluster(combinedJsonData, "FY2025")
-      const dataFy2026 = transformDataForCluster(combinedJsonData, "FY2026")
-
-
       const animatedPieChart = (data, chartId) => {
         am4core.useTheme(am4themes_animated);
         var chart = am4core.create(chartId, am4charts.PieChart3D);
@@ -322,12 +336,10 @@
         pieSeries.labels.template.disabled = chartId != "acap";
         pieSeries.ticks.template.disabled = chartId != "acap";
 
-        // Add a legend
         chart.legend = new am4charts.Legend();
         chart.legend.position = "right";
         chart.exporting.menu = new am4core.ExportMenu();
       };
-
       const xyChart = (data, chartId, seriesName) => {
         am4core.useTheme(am4themes_animated);
         var chart = am4core.create(chartId, am4charts.XYChart);
@@ -337,20 +349,19 @@
         categoryAxis.dataFields.category = "type";
         categoryAxis.title.text = "Margins";
 
-        // Set minimum grid distance to a smaller value to fit more labels
-        categoryAxis.renderer.minGridDistance = 20; // Adjust this value as needed
+        categoryAxis.renderer.minGridDistance = 20;
 
-        // Disable automatic label hiding
-        categoryAxis.renderer.labels.template.adapter.add("dy", function (dy, target) {
-        return 0; // Keep all labels visible
-        });
+        categoryAxis.renderer.labels.template.adapter.add(
+          "dy",
+          function (dy, target) {
+            return 0;
+          }
+        );
 
-        // Optionally, rotate labels if there are too many
-        categoryAxis.renderer.labels.template.rotation = 45; // Rotate labels 45 degrees
+        categoryAxis.renderer.labels.template.rotation = 45;
         categoryAxis.renderer.labels.template.horizontalCenter = "right";
         categoryAxis.renderer.labels.template.verticalCenter = "middle";
         categoryAxis.renderer.labels.template.fontSize = 12;
-
 
         var valueAxis = chart.yAxes.push(new am4charts.ValueAxis());
         valueAxis.title.text = "Value";
@@ -358,342 +369,533 @@
         var series = chart.series.push(new am4charts.ColumnSeries());
         series.dataFields.valueY = "total";
         series.dataFields.categoryX = "type";
-        series.name = seriesName
+        series.name = seriesName;
         series.stacked = true;
 
         series.columns.template.tooltipText = "{categoryX}: [bold]{valueY}[/]";
-        series.columns.template.fontSize = 14; // Set font size for series labels
+        series.columns.template.fontSize = 14;
 
-        series.tooltip.fontSize = 12; // Customize tooltip font size
+        series.tooltip.fontSize = 12;
 
-        chart.yAxes.getIndex(0).renderer.labels.template.fontSize = 12; // Y-axis labels
+        chart.yAxes.getIndex(0).renderer.labels.template.fontSize = 12;
         chart.xAxes.getIndex(0).renderer.labels.template.fontSize = 12;
 
         chart.cursor = new am4charts.XYCursor();
         chart.exporting.menu = new am4core.ExportMenu();
       };
-
       const populateTable1Data = (data) => {
-        const headerRow = document.querySelector('#table1 #headerRow');
-        const dataRow = document.querySelector('#table1 #dataRow');
+        const headerRow = document.querySelector("#table1 #headerRow");
+        const dataRow = document.querySelector("#table1 #dataRow");
 
-        data.forEach(item => {
-            const th = document.createElement('th');
-            th.textContent = item.type.replace(/([A-Z][a-z]+|[A-Z]+(?![a-z]))/g, ' $1').trim();
-            headerRow.appendChild(th);
+        data.forEach((item) => {
+          const th = document.createElement("th");
+          th.textContent = item.type
+            .replace(/([A-Z][a-z]+|[A-Z]+(?![a-z]))/g, " $1")
+            .trim();
+          headerRow.appendChild(th);
         });
 
-        // Populate data dynamically
-        data.forEach(item => {
-            const td = document.createElement('td');
-            td.textContent = parseFloat(item.total).toFixed(2)
-            dataRow.appendChild(td);
+        data.forEach((item) => {
+          const td = document.createElement("td");
+          td.textContent = parseFloat(item.total).toFixed(2);
+          dataRow.appendChild(td);
         });
-      }
+      };
       const clusteredChart = (data, chartId) => {
-          am4core.useTheme(am4themes_animated);
-          var chart = am4core.create(chartId, am4charts.XYChart);
-          chart.colors.step = 2;
+        am4core.useTheme(am4themes_animated);
+        var chart = am4core.create(chartId, am4charts.XYChart);
+        chart.colors.step = 2;
 
-          chart.legend = new am4charts.Legend();
-          chart.legend.position = 'top';
-          chart.legend.paddingBottom = 20;
-          chart.legend.labels.template.maxWidth = 95;
+        chart.cursor = new am4charts.XYCursor();
+        chart.cursor.behavior = "zoomXY";
 
-          var xAxis = chart.xAxes.push(new am4charts.CategoryAxis());
-          xAxis.dataFields.category = 'type';
-          xAxis.renderer.cellStartLocation = 0.1;
-          xAxis.renderer.cellEndLocation = 0.9;
-          xAxis.renderer.grid.template.location = 0;
+        chart.legend = new am4charts.Legend();
+        chart.legend.position = "top";
+        chart.legend.paddingBottom = 20;
+        chart.legend.labels.template.maxWidth = 95;
 
-          function getExtremes(data) {
-              const initialMax = -Infinity;
-              const initialMin = Infinity;
+        var xAxis = chart.xAxes.push(new am4charts.CategoryAxis());
+        xAxis.dataFields.category = "type";
+        xAxis.renderer.cellStartLocation = 0.1;
+        xAxis.renderer.cellEndLocation = 0.9;
+        xAxis.renderer.grid.template.location = 0;
 
-              const extremes = data.reduce((acc, item) => {
-                  const value = parseFloat(item.total);
+        function getExtremes(data) {
+          const initialMax = -Infinity;
+          const initialMin = Infinity;
 
-                  // Update max and min values
-                  if (value > acc.max) {
-                      acc.max = value;
-                  }
-                  if (value < acc.min) {
-                      acc.min = value;
-                  }
+          const extremes = data.reduce(
+            (acc, item) => {
+              const value = parseFloat(item.total);
 
-                  return acc;
-              }, { max: initialMax, min: initialMin });
-
-              return extremes;
-          }
-
-          // Example usage
-          const { max: highestValue, min: lowestValue } = getExtremes(data);
-
-
-          var yAxis = chart.yAxes.push(new am4charts.ValueAxis()); // By default, this handles negative values too
-          yAxis.min = lowestValue; // Adjust as needed to ensure negative values are visible
-          yAxis.max = highestValue;
-          yAxis.renderer.minGridDistance = 20; // Adjust spacing for clarity if needed
-
-          function createSeries(value, name) {
-              var series = chart.series.push(new am4charts.ColumnSeries());
-              series.dataFields.valueY = value;
-              series.dataFields.categoryX = 'type';
-              series.name = name;
-              series.columns.template.tooltipText = "{categoryX}: [bold]{valueY}[/]";
-              series.columns.template.fontSize = 14; // Set font size for series labels
-
-              series.events.on("hidden", arrangeColumns);
-              series.events.on("shown", arrangeColumns);
-
-              var bullet = series.bullets.push(new am4charts.LabelBullet());
-              bullet.interactionsEnabled = true;
-              bullet.dy = 30;
-              bullet.label.fill = am4core.color('#ffffff');
-
-              return series;
-          }
-
-          // Map data to the chart
-          const categories = [...new Set(data.map(item => item.type))]; // Unique types
-          const seriesNames = [...new Set(data.map(item => item.margin))]; // Unique margin types
-
-          // Prepare data structure for the chart
-          const chartData = categories.map(category => {
-              const dataPoint = { type: category };
-              seriesNames.forEach(name => {
-                  const entry = data.find(d => d.type === category && d.margin === name);
-                  dataPoint[name] = entry ? parseFloat(entry.total) : 0;
-              });
-              return dataPoint;
-          });
-
-          chart.data = chartData;
-
-          // Create series for each typesofmargin
-          seriesNames.forEach(name => {
-              createSeries(name, name);
-          });
-
-          function arrangeColumns() {
-              var series = chart.series.getIndex(0);
-
-              var w = 1 - xAxis.renderer.cellStartLocation - (1 - xAxis.renderer.cellEndLocation);
-              if (series.dataItems.length > 1) {
-                  var x0 = xAxis.getX(series.dataItems.getIndex(0), "categoryX");
-                  var x1 = xAxis.getX(series.dataItems.getIndex(1), "categoryX");
-                  var delta = ((x1 - x0) / chart.series.length) * w;
-                  if (am4core.isNumber(delta)) {
-                      var middle = chart.series.length / 2;
-
-                      var newIndex = 0;
-                      chart.series.each(function(series) {
-                          if (!series.isHidden && !series.isHiding) {
-                              series.dummyData = newIndex;
-                              newIndex++;
-                          }
-                          else {
-                              series.dummyData = chart.series.indexOf(series);
-                          }
-                      })
-                      var visibleCount = newIndex;
-                      var newMiddle = visibleCount / 2;
-
-                      chart.series.each(function(series) {
-                          var trueIndex = chart.series.indexOf(series);
-                          var newIndex = series.dummyData;
-
-                          var dx = (newIndex - trueIndex + middle - newMiddle) * delta;
-
-                          series.animate({ property: "dx", to: dx }, series.interpolationDuration, series.interpolationEasing);
-                          series.bulletsContainer.animate({ property: "dx", to: dx }, series.interpolationDuration, series.interpolationEasing);
-                      })
-                  }
+              if (value > acc.max) {
+                acc.max = value;
               }
-          }
-          chart.exporting.menu = new am4core.ExportMenu();
+              if (value < acc.min) {
+                acc.min = value;
+              }
+
+              return acc;
+            },
+            { max: initialMax, min: initialMin }
+          );
+
+          return extremes;
         }
+
+        const { max: highestValue, min: lowestValue } = getExtremes(data);
+
+        var yAxis = chart.yAxes.push(new am4charts.ValueAxis());
+        yAxis.min = chartId == "rmpnmibase" ? -50000 : lowestValue;
+        yAxis.max = chartId == "rmpnmibase" ? 50000 : highestValue;
+        yAxis.renderer.minGridDistance = 20;
+
+        function createSeries(value, name) {
+          var series = chart.series.push(new am4charts.ColumnSeries());
+          series.dataFields.valueY = value;
+          series.dataFields.categoryX = "type";
+          series.name = name;
+          if (chartId == "rmpnmibase") {
+            series.columns.template.tooltipText = "{name}: [bold]{valueY}[/]";
+          } else {
+            series.columns.template.tooltipText =
+              "{categoryX}: [bold]{valueY}[/]";
+          }
+
+          series.columns.template.fontSize = 14;
+
+          series.events.on("hidden", arrangeColumns);
+          series.events.on("shown", arrangeColumns);
+
+          var bullet = series.bullets.push(new am4charts.LabelBullet());
+          bullet.interactionsEnabled = true;
+          bullet.dy = 30;
+          bullet.label.fill = am4core.color("#ffffff");
+
+          return series;
+        }
+
+        const categories = [...new Set(data.map((item) => item.type))];
+        const seriesNames = [...new Set(data.map((item) => item.margin))];
+
+        const chartData = categories.map((category) => {
+          const dataPoint = { type: category };
+          seriesNames.forEach((name) => {
+            const entry = data.find(
+              (d) => d.type === category && d.margin === name
+            );
+            dataPoint[name] = entry ? parseFloat(entry.total) : 0;
+          });
+          return dataPoint;
+        });
+
+        chart.data = chartData;
+
+        seriesNames.forEach((name) => {
+          createSeries(name, name);
+        });
+
+        function arrangeColumns() {
+          var series = chart.series.getIndex(0);
+
+          var w =
+            1 -
+            xAxis.renderer.cellStartLocation -
+            (1 - xAxis.renderer.cellEndLocation);
+          if (series.dataItems.length > 1) {
+            var x0 = xAxis.getX(series.dataItems.getIndex(0), "categoryX");
+            var x1 = xAxis.getX(series.dataItems.getIndex(1), "categoryX");
+            var delta = ((x1 - x0) / chart.series.length) * w;
+            if (am4core.isNumber(delta)) {
+              var middle = chart.series.length / 2;
+
+              var newIndex = 0;
+              chart.series.each(function (series) {
+                if (!series.isHidden && !series.isHiding) {
+                  series.dummyData = newIndex;
+                  newIndex++;
+                } else {
+                  series.dummyData = chart.series.indexOf(series);
+                }
+              });
+              var visibleCount = newIndex;
+              var newMiddle = visibleCount / 2;
+
+              chart.series.each(function (series) {
+                var trueIndex = chart.series.indexOf(series);
+                var newIndex = series.dummyData;
+
+                var dx = (newIndex - trueIndex + middle - newMiddle) * delta;
+
+                series.animate(
+                  { property: "dx", to: dx },
+                  series.interpolationDuration,
+                  series.interpolationEasing
+                );
+                series.bulletsContainer.animate(
+                  { property: "dx", to: dx },
+                  series.interpolationDuration,
+                  series.interpolationEasing
+                );
+              });
+            }
+          }
+        }
+
+        chart.exporting.menu = new am4core.ExportMenu();
+      };
       const populateTable2Data = (data, id) => {
-          const headerRow = document.querySelector(`#${id} #headerRow`);
-          const tbody = document.querySelector(`#${id} tbody`);
+        const headerRow = document.querySelector("#" + id + " #headerRow");
+        const tbody = document.querySelector("#" + id + " tbody");
 
-          // Create a set to hold unique types of margins
-          const marginTypes = new Set();
-          const typesOfMargins = new Set();
-          console.log(data);
-          // Populate the sets with unique types and margin types from data
-          data.forEach(item => {
-              marginTypes.add(item.type);
-              typesOfMargins.add(item.margin);
+        const marginTypes = new Set();
+        const typesOfMargins = new Set();
+
+        data.forEach((item) => {
+          marginTypes.add(item.type);
+          typesOfMargins.add(item.margin);
+        });
+
+        headerRow.innerHTML =
+          "<th></th>" +
+          Array.from(marginTypes)
+            .map(
+              (type) =>
+                "<th>" +
+                type.replace(/([A-Z][a-z]+|[A-Z]+(?![a-z]))/g, " $1").trim() +
+                "</th>"
+            )
+            .join("");
+
+        const totalsMap = {};
+
+        typesOfMargins.forEach((marginType) => {
+          totalsMap[marginType] = {};
+          marginTypes.forEach((type) => {
+            totalsMap[marginType][type] = 0;
+          });
+        });
+
+        data.forEach((item) => {
+          if (totalsMap[item.margin]) {
+            totalsMap[item.margin][item.type] += parseFloat(item.total);
+          }
+        });
+
+        Object.keys(totalsMap).forEach((marginType) => {
+          const row = document.createElement("tr");
+          const marginTypeCell = document.createElement("td");
+          marginTypeCell.textContent = marginType;
+          row.appendChild(marginTypeCell);
+
+          marginTypes.forEach((type) => {
+            const td = document.createElement("td");
+            td.textContent = totalsMap[marginType][type].toFixed(2);
+            row.appendChild(td);
           });
 
-          // Create table headers
-          headerRow.innerHTML = '<th></th>' + Array.from(marginTypes).map(type =>
-              `<th>${type.replace(/([A-Z][a-z]+|[A-Z]+(?![a-z]))/g, ' $1').trim()}</th>`
-          ).join('');
-
-          // Create a map to hold totals for each margin type and each type
-          const totalsMap = {};
-
-          // Initialize the totals map
-          typesOfMargins.forEach(marginType => {
-              totalsMap[marginType] = {};
-              marginTypes.forEach(type => {
-                  totalsMap[marginType][type] = 0;
-              });
-          });
-
-          // Populate the map with totals from data
-          data.forEach(item => {
-              if (totalsMap[item.margin]) {
-                  totalsMap[item.margin][item.type] += parseFloat(item.total);
-              }
-          });
-
-          // Populate data rows
-          Object.keys(totalsMap).forEach(marginType => {
-              const row = document.createElement('tr');
-              const marginTypeCell = document.createElement('td');
-              marginTypeCell.textContent = `${marginType}`;
-              row.appendChild(marginTypeCell);
-
-              marginTypes.forEach(type => {
-                  const td = document.createElement('td');
-                  td.textContent = totalsMap[marginType][type].toFixed(2);
-                  row.appendChild(td);
-              });
-
-              tbody.appendChild(row);
-          });
+          tbody.appendChild(row);
+        });
       };
       const populateTable3Data = (data, id) => {
-          const headerRow = document.querySelector(`#${id} #headerRow`);
-          const tbody = document.querySelector(`#${id} tbody`);
+        const headerRow = document.querySelector("#" + id + " #headerRow");
+        const tbody = document.querySelector("#" + id + " tbody");
 
-          // Clear any existing content
-          headerRow.innerHTML = '';
-          tbody.innerHTML = '';
+        headerRow.innerHTML = "";
+        tbody.innerHTML = "";
 
-          // Create table headers for two columns: "Type" and "Total"
-          headerRow.innerHTML = '<th>Margin</th><th>Total</th>';
+        headerRow.innerHTML = "<th>Margin</th><th>Total</th>";
 
-          // Create a map to hold totals for each type
-          const totalsMap = {};
+        const totalsMap = {};
 
-          // Populate the map with totals from data
-          data.forEach(item => {
-              if (!totalsMap[item.type]) {
-                  totalsMap[item.type] = 0;
-              }
-              totalsMap[item.type] += parseFloat(item.total);
-          });
+        data.forEach((item) => {
+          if (!totalsMap[item.type]) {
+            totalsMap[item.type] = 0;
+          }
+          totalsMap[item.type] += parseFloat(item.total);
+        });
 
-          // Populate data rows
-          Object.keys(totalsMap).forEach(type => {
-              const row = document.createElement('tr');
+        Object.keys(totalsMap).forEach((type) => {
+          const row = document.createElement("tr");
 
-              // Create type cell
-              const typeCell = document.createElement('td');
-              typeCell.textContent = type;
-              row.appendChild(typeCell);
+          const typeCell = document.createElement("td");
+          typeCell.textContent = type;
+          row.appendChild(typeCell);
 
-              // Create total cell
-              const totalCell = document.createElement('td');
-              totalCell.textContent = totalsMap[type].toFixed(2);
-              row.appendChild(totalCell);
+          const totalCell = document.createElement("td");
+          totalCell.textContent = totalsMap[type].toFixed(2);
+          row.appendChild(totalCell);
 
-              // Append the row to the table body
-              tbody.appendChild(row);
-          });
+          tbody.appendChild(row);
+        });
       };
+      const getUniqueValue = (data) => {
+        const uniqueTypes = [
+          ...new Set(
+            data
+              .map((item) => item.type)
+              .filter((type) => type && type.trim() !== "(blank)")
+          ),
+        ];
+        const selectAllOption = document.createElement("option");
+        selectAllOption.value = "selectAll";
+        selectAllOption.text = "Select All";
+        select.insertBefore(selectAllOption, select.firstChild);
 
+        uniqueTypes.forEach((type) => {
+          const option = document.createElement("option");
+          option.value = type;
+          option.text = type;
+          select.appendChild(option);
+        });
+      };
       const totalCost = (data) => {
-          // Initialize an empty object to hold totals for each type
-          const totals = {};
+        const totals = {};
 
-          // Populate totals with sums for each type
-          data.forEach(item => {
-              if (!totals[item.type]) {
-                  totals[item.type] = 0;
-              }
-              totals[item.type] += parseFloat(item.total);
-          });
+        data.forEach((item) => {
+          if (!totals[item.type]) {
+            totals[item.type] = 0;
+          }
+          totals[item.type] += parseFloat(item.total);
+        });
 
-          // Convert the totals object to an array of objects
-          return Object.keys(totals).map(type => ({
-              type: type,
-              total: totals[type].toFixed(2) // Format to two decimal places
-          }));
+        return Object.keys(totals).map((type) => ({
+          type: type,
+          total: totals[type].toFixed(2),
+        }));
       };
       const fyActualMarginVsPOE = (dataArr, chartId) => {
-          am4core.useTheme(am4themes_animated);
+        am4core.useTheme(am4themes_animated);
 
-          // Create chart instance
-          var chart = am4core.create(chartId, am4charts.XYChart);
+        var chart = am4core.create(chartId, am4charts.XYChart);
 
-          // Prepare transformed data
-          const transformedData = [];
+        const transformedData = [];
 
-          // Iterate through data array to transform it for the chart
-          dataArr.forEach(margin => {
-              margin.totals.forEach(total => {
-                  // Find if we already have an entry for this type
-                  let existingEntry = transformedData.find(entry => entry.type === total.type);
-                  if (!existingEntry) {
-                      // If it doesn't exist, create a new entry for this type
-                      existingEntry = { type: total.type };
-                      transformedData.push(existingEntry);
-                  }
-                  // Add the margin total to the existing entry under the margin's name
-                  existingEntry[margin.typesofmargin] = total.total;
-              });
+        dataArr.forEach((margin) => {
+          margin.totals.forEach((total) => {
+            let existingEntry = transformedData.find(
+              (entry) => entry.type === total.type
+            );
+            if (!existingEntry) {
+              existingEntry = { type: total.type };
+              transformedData.push(existingEntry);
+            }
+
+            existingEntry[margin.typesofmargin] = total.total;
           });
+        });
 
-          // Assign the transformed data to the chart
-          chart.data = transformedData;
+        chart.data = transformedData;
 
-          // Create X Axis
-          var categoryAxis = chart.xAxes.push(new am4charts.CategoryAxis());
-          categoryAxis.dataFields.category = "type";
-          categoryAxis.renderer.labels.template.fontSize = 14;
-          categoryAxis.renderer.grid.template.location = 0;
-          categoryAxis.renderer.minGridDistance = 20;
-          categoryAxis.title.text = "Type";
+        var categoryAxis = chart.xAxes.push(new am4charts.CategoryAxis());
+        categoryAxis.dataFields.category = "type";
+        categoryAxis.renderer.labels.template.fontSize = 14;
+        categoryAxis.renderer.grid.template.location = 0;
+        categoryAxis.renderer.minGridDistance = 20;
+        categoryAxis.title.text = "Type";
 
-          // Create Y Axis
-          var valueAxis = chart.yAxes.push(new am4charts.ValueAxis());
-          valueAxis.renderer.minWidth = 35;
-          valueAxis.title.text = "Total";
+        var valueAxis = chart.yAxes.push(new am4charts.ValueAxis());
+        valueAxis.renderer.minWidth = 35;
+        valueAxis.title.text = "Total";
 
-          // Create series for each typesofmargin
-          dataArr.forEach(margin => {
-              var series = chart.series.push(new am4charts.LineSeries());
-              series.dataFields.valueY = margin.typesofmargin;
-              series.dataFields.categoryX = "type";
-              series.name = margin.typesofmargin;
-              series.strokeWidth = 2;
-              series.tooltipText = "{name}: [bold]{valueY}[/]";
+        dataArr.forEach((margin) => {
+          var series = chart.series.push(new am4charts.LineSeries());
+          series.dataFields.valueY = margin.typesofmargin;
+          series.dataFields.categoryX = "type";
+          series.name = margin.typesofmargin;
+          series.strokeWidth = 2;
+          series.tooltipText = "{name}: [bold]{valueY}[/]";
 
-              // Add bullets to the series
-              var bullet = series.bullets.push(new am4charts.CircleBullet());
-              bullet.circle.fill = am4core.color("#FF5733");
-              bullet.circle.stroke = am4core.color("#fff");
-              bullet.circle.strokeWidth = 2;
-              bullet.circle.radius = 6;
-          });
+          var bullet = series.bullets.push(new am4charts.CircleBullet());
+          bullet.circle.fill = am4core.color("#FF5733");
+          bullet.circle.stroke = am4core.color("#fff");
+          bullet.circle.strokeWidth = 2;
+          bullet.circle.radius = 6;
+        });
 
-          // Add cursor
-          chart.cursor = new am4charts.XYCursor();
-          chart.cursor.behavior = "zoomY";
+        chart.cursor = new am4charts.XYCursor();
+        chart.cursor.behavior = "zoomY";
 
-          // Add legend
-          chart.legend = new am4charts.Legend();
+        chart.legend = new am4charts.Legend();
 
-          // Add scrollbar
-          chart.scrollbarX = new am4core.Scrollbar();
-          chart.exporting.menu = new am4core.ExportMenu();
+        chart.scrollbarX = new am4core.Scrollbar();
+        chart.exporting.menu = new am4core.ExportMenu();
       };
+      const nmiClusteredChart = (data, chartId) => {
+        loadingElement.style.display = "block";
+        if (nmiChartVar) {
+          nmiChartVar.dispose();
+        }
+        am4core.useTheme(am4themes_animated);
+        nmiChartVar = am4core.create(chartId, am4charts.XYChart);
+        nmiChartVar.colors.step = 2;
+
+        nmiChartVar.cursor = new am4charts.XYCursor();
+        nmiChartVar.cursor.behavior = "zoomXY";
+
+        nmiChartVar.legend = new am4charts.Legend();
+        nmiChartVar.legend.position = "top";
+        nmiChartVar.legend.paddingBottom = 20;
+        nmiChartVar.legend.labels.template.maxWidth = 95;
+
+        var xAxis = nmiChartVar.xAxes.push(new am4charts.CategoryAxis());
+        xAxis.dataFields.category = "type";
+        xAxis.renderer.cellStartLocation = 0.1;
+        xAxis.renderer.cellEndLocation = 0.9;
+        xAxis.renderer.grid.template.location = 0;
+
+        function getExtremes(data) {
+          const initialMax = -Infinity;
+          const initialMin = Infinity;
+
+          const extremes = data.reduce(
+            (acc, item) => {
+              const value = parseFloat(item.total);
+
+              if (value > acc.max) {
+                acc.max = value;
+              }
+              if (value < acc.min) {
+                acc.min = value;
+              }
+
+              return acc;
+            },
+            { max: initialMax, min: initialMin }
+          );
+
+          return extremes;
+        }
+
+        const { max: highestValue, min: lowestValue } = getExtremes(data);
+
+        var yAxis = nmiChartVar.yAxes.push(new am4charts.ValueAxis());
+        yAxis.min = chartId == "rmpnmibase" ? -50000 : lowestValue;
+        yAxis.max = chartId == "rmpnmibase" ? 50000 : highestValue;
+        yAxis.renderer.minGridDistance = 20;
+
+        function createSeries(value, name) {
+          var series = nmiChartVar.series.push(new am4charts.ColumnSeries());
+          series.dataFields.valueY = value;
+          series.dataFields.categoryX = "type";
+          series.name = name;
+          series.columns.template.tooltipText = "{name}: [bold]{valueY}[/]";
+          series.columns.template.fontSize = 14;
+
+          series.events.on("hidden", arrangeColumns);
+          series.events.on("shown", arrangeColumns);
+
+          var bullet = series.bullets.push(new am4charts.LabelBullet());
+          bullet.interactionsEnabled = true;
+          bullet.dy = 30;
+          bullet.label.fill = am4core.color("#ffffff");
+
+          return series;
+        }
+
+        const categories = [...new Set(data.map((item) => item.type))];
+        const seriesNames = [...new Set(data.map((item) => item.margin))];
+
+        const chartData = categories.map((category) => {
+          const dataPoint = { type: category };
+          seriesNames.forEach((name) => {
+            const entry = data.find(
+              (d) => d.type === category && d.margin === name
+            );
+            dataPoint[name] = entry ? parseFloat(entry.total) : 0;
+          });
+          return dataPoint;
+        });
+
+        nmiChartVar.data = chartData;
+
+        seriesNames.forEach((name) => {
+          createSeries(name, name);
+        });
+
+        function arrangeColumns() {
+          var series = nmiChartVar.series.getIndex(0);
+
+          var w =
+            1 -
+            xAxis.renderer.cellStartLocation -
+            (1 - xAxis.renderer.cellEndLocation);
+          if (series.dataItems.length > 1) {
+            var x0 = xAxis.getX(series.dataItems.getIndex(0), "categoryX");
+            var x1 = xAxis.getX(series.dataItems.getIndex(1), "categoryX");
+            var delta = ((x1 - x0) / nmiChartVar.series.length) * w;
+            if (am4core.isNumber(delta)) {
+              var middle = nmiChartVar.series.length / 2;
+
+              var newIndex = 0;
+              nmiChartVar.series.each(function (series) {
+                if (!series.isHidden && !series.isHiding) {
+                  series.dummyData = newIndex;
+                  newIndex++;
+                } else {
+                  series.dummyData = nmiChartVar.series.indexOf(series);
+                }
+              });
+              var visibleCount = newIndex;
+              var newMiddle = visibleCount / 2;
+
+              nmiChartVar.series.each(function (series) {
+                var trueIndex = nmiChartVar.series.indexOf(series);
+                var newIndex = series.dummyData;
+
+                var dx = (newIndex - trueIndex + middle - newMiddle) * delta;
+
+                series.animate(
+                  { property: "dx", to: dx },
+                  series.interpolationDuration,
+                  series.interpolationEasing
+                );
+                series.bulletsContainer.animate(
+                  { property: "dx", to: dx },
+                  series.interpolationDuration,
+                  series.interpolationEasing
+                );
+              });
+            }
+          }
+        }
+
+        nmiChartVar.exporting.menu = new am4core.ExportMenu();
+        nmiChartVar.events.on("validated", function () {
+          loadingElement.style.display = "none";
+        });
+        return nmiChartVar;
+      };
+    </script>
+    <!-- variables and execution -->
+    <script>
+      var combinedJsonData = {{combinedJson}};
+      var summaryJsonData = {{summaryJson}};
+      var versionData = {{versionData}};
+      var nmiJsonData = {{nmiJson}}
+
+      var nmiChartVar;
+      const typeList =[
+            "RetailMargin",
+            "Revenue",
+            "Network",
+            "Capacity",
+            "WholesaleEnergy",
+            "MarketFees",
+            "ESS",
+            "LGC",
+            "STC",
+            "Commission"
+        ]
+
+      const achievedMargin2024 = transformDataForChart(combinedJsonData, "Sum of Achieved Margin FY2024")
+      const dataFy2024 =  transformDataForChart(combinedJsonData, "FY2024")
+      const dataFy2025 =  transformDataForCluster(combinedJsonData, "FY2025")
+      const dataFy2026 = transformDataForCluster(combinedJsonData, "FY2026")
+      const dataRmperNMIBase = transformDataForCluster(nmiJsonData.filter(data => data.typesofmargin != "(blank)" && data.typesofmargin != "Grand Total"));
+      var updatedDataRmperNMIBase = []
+      var loadingElement = document.getElementById('loading');
+      const select = document.getElementById('nmi');
 
       xyChart(achievedMargin2024, "hpfy24a", "Historical Performance FY2024 Actuals");
       animatedPieChart(achievedMargin2024, "pfify24");
@@ -733,24 +935,51 @@
             if (a.typesofmargin > b.typesofmargin) return 1;
             return 0;
           });
-          console.log("combinedSummary", combinedSummary);
       }
       prepareDateForChart()
 
       fyActualMarginVsPOE(combinedSummary, "fyamvspoe");
       populateTable2Data(transformDataForCluster(combinedJsonData), 'table4');
+      nmiClusteredChart(dataRmperNMIBase, "rmpnmibase");
+      getUniqueValue(dataRmperNMIBase)
     </script>
+    <!-- footer -->
     <script>
       const footerContainer = document.querySelector(".footer-container");
 
       versionData.forEach((item) => {
         const footerItem = document.createElement("div");
         footerItem.className = "footer-item";
-        footerItem.innerHTML = `
-              <h3>${item.version}</h3>
-              <p>${item.effectiveDate}</p>
-          `;
+        footerItem.innerHTML ="<h3>" + item.version + "</h3>" +
+          "<p>" + item.effectiveDate + "</p>";
         footerContainer.appendChild(footerItem);
+      });
+    </script>
+    <!-- event listener -->
+    <script>
+      function reloadChart(newData) {
+        nmiClusteredChart(newData, "rmpnmibase");
+        isChartLoading = true;
+      }
+      select.addEventListener("change", function () {
+        if (select.value === "selectAll") {
+          updatedDataRmperNMIBase = dataRmperNMIBase;
+          for (let i = 0; i < select.options.length; i++) {
+            if (select.options[i].value !== "selectAll") {
+              select.options[i].selected = true; // Select all other options
+            }
+          }
+        } else {
+          updatedDataRmperNMIBase = transformDataForCluster(
+            nmiJsonData.filter(
+              (data) =>
+                data.typesofmargin != "(blank)" &&
+                data.typesofmargin != "Grand Total"
+            )
+          ).filter((data) => data.type == select.value);
+        }
+        reloadChart(updatedDataRmperNMIBase);
+        console.log("dataRmperNMIBase", updatedDataRmperNMIBase, select.value);
       });
     </script>
   </body>

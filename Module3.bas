@@ -13,17 +13,20 @@ Sub ExportChartToHTML()
     Dim marginData As Range
     Dim combinedJson As String
     Dim summaryJson As String
+    Dim nmiJson As String
     Dim jsonData As String
     Dim templateFilePath As String
     Dim templateFileNumber As Integer
     Dim jsonResult1 As String
     Dim jsonResult2 As String
+    Dim jsonResult3 As String
     Dim versionData As String
     
     jsonResult1 = ExtractFilteredDataToJSONArrayMargins("FINAL output 2", "PivotTable1")
     jsonResult2 = ExtractFilteredDataToJSONArrayMargins("FINAL output 2", "PivotTable2")
-    templateFilePath = GetCurrentExcelDirectory & "\Exports\HTML_Template.html"
-    
+    jsonResult3 = ExtractFilteredDataToJSONArrayMargins("Retail Margin Only", "PivotTable21")
+    ' templateFilePath = GetCurrentExcelDirectory & "\Exports\HTML_Template.html"
+    templateFilePath = GetCurrentExcelDirectory & Application.PathSeparator & "Exports" & Application.PathSeparator & "HTML_Template.html"
     ' Read HTML template from file
     templateFileNumber = FreeFile
     Open templateFilePath For Input As #templateFileNumber
@@ -33,12 +36,14 @@ Sub ExportChartToHTML()
     ' Convert the range to JSON
     combinedJson = jsonResult1
     summaryJson = jsonResult2
+    nmiJson = jsonResult3
     versionData = GetVersionData()
     Debug.Print combinedJson
     ' Replace placeholders in the HTML template with actual data   
     htmlContent = Replace(htmlTemplate, "{{combinedJson}}", combinedJson)
     htmlContent = Replace(htmlContent, "{{summaryJson}}", summaryJson)
     htmlContent = Replace(htmlContent, "{{versionData}}", versionData)
+    htmlContent = Replace(htmlContent, "{{nmiJson}}", nmiJson)
     ' Define the file path to save the HTML file
     filePath = GetCurrentDesktopirectory & "\ExportedReport.html" ' Change to your desired file path
     
