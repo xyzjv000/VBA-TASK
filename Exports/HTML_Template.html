@@ -68,7 +68,7 @@
 
       .chart-item {
         flex: 1;
-        min-width: 400px;
+        min-width: 600px;
       }
 
       #rmpnmibase {
@@ -333,8 +333,15 @@
         pieSeries.dataFields.value = "total";
         pieSeries.dataFields.category = "type";
 
-        pieSeries.labels.template.disabled = chartId != "acap";
-        pieSeries.ticks.template.disabled = chartId != "acap";
+        if(chartId != "acap") {     
+          pieSeries.alignLabels = false;     
+          pieSeries.labels.template.adapter.add("text", function(text, target) {
+            if (target.dataItem && Math.abs(target.dataItem.values.value.percent) < 1) {
+              return ""; // Return empty string to hide the label
+            }
+            return text;
+          });
+        }
 
         chart.legend = new am4charts.Legend();
         chart.legend.position = "right";
@@ -873,7 +880,9 @@
       var summaryJsonData = {{summaryJson}};
       var versionData = {{versionData}};
       var nmiJsonData = {{nmiJson}}
-
+      var combinedDataJsonFull = {{combinedFullJson}}
+      console.log(combinedDataJsonFull);
+      
       var nmiChartVar;
       const typeList =[
             "RetailMargin",

@@ -1,8 +1,10 @@
 [
-  { "version": "PRN Version", "effectiveDate": "7/1/2024" },
-  { "version": "Interval Price Issue Date", "effectiveDate": "7/2/2024" },
-  { "version": "Eureka Issue Date", "effectiveDate": "7/3/2024" },
-  { "version": "Historical Consump. Data Range", "effectiveDate": "7/4/2024" },
-  { "version": "New Forecast Range", "effectiveDate": "7/5/2024" },
-  { "version": "EM Publish Date", "effectiveDate": "7/6/2024" }
+  {
+    "nmi": "",
+    "types": {
+      "capacity": {
+        
+      }
+    }
+  }
 ]

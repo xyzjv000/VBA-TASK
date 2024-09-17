@@ -14,17 +14,20 @@ Sub ExportChartToHTML()
     Dim combinedJson As String
     Dim summaryJson As String
     Dim nmiJson As String
+    Dim combinedFullJson As String
     Dim jsonData As String
     Dim templateFilePath As String
     Dim templateFileNumber As Integer
     Dim jsonResult1 As String
     Dim jsonResult2 As String
     Dim jsonResult3 As String
+    Dim jsonResult4 As String
     Dim versionData As String
-    
+
     jsonResult1 = ExtractFilteredDataToJSONArrayMargins("FINAL output 2", "PivotTable1")
     jsonResult2 = ExtractFilteredDataToJSONArrayMargins("FINAL output 2", "PivotTable2")
     jsonResult3 = ExtractFilteredDataToJSONArrayMargins("Retail Margin Only", "PivotTable21")
+    jsonResult4 = ExportPivotTableToJSON("FINAL output 2", "PivotTable4")
     ' templateFilePath = GetCurrentExcelDirectory & "\Exports\HTML_Template.html"
     templateFilePath = GetCurrentExcelDirectory & Application.PathSeparator & "Exports" & Application.PathSeparator & "HTML_Template.html"
     ' Read HTML template from file
@@ -32,38 +35,40 @@ Sub ExportChartToHTML()
     Open templateFilePath For Input As #templateFileNumber
     htmlTemplate = Input$(LOF(templateFileNumber), templateFileNumber)
     Close #templateFileNumber
-        
-    ' Convert the range to JSON
+
+    ' Convert the range To JSON
     combinedJson = jsonResult1
     summaryJson = jsonResult2
     nmiJson = jsonResult3
+    combinedFullJson = jsonResult4
     versionData = GetVersionData()
     Debug.Print combinedJson
-    ' Replace placeholders in the HTML template with actual data   
+    ' Replace placeholders in the HTML template With actual data
     htmlContent = Replace(htmlTemplate, "{{combinedJson}}", combinedJson)
     htmlContent = Replace(htmlContent, "{{summaryJson}}", summaryJson)
     htmlContent = Replace(htmlContent, "{{versionData}}", versionData)
     htmlContent = Replace(htmlContent, "{{nmiJson}}", nmiJson)
-    ' Define the file path to save the HTML file
-    filePath = GetCurrentDesktopirectory & "\ExportedReport.html" ' Change to your desired file path
-    
-    ' Write HTML content to file
+    htmlContent = Replace(htmlContent, "{{combinedFullJson}}", combinedFullJson)
+    ' Define the file path To save the HTML file
+    filePath = GetCurrentDesktopirectory & "\ExportedReport.html" ' Change To your desired file path
+
+    ' Write HTML content To file
     Open filePath For Output As #1
     Print #1, htmlContent
     Close #1
-    
+
     ' Notify the user
-    MsgBox "Data and chart have been exported to HTML successfully!", vbInformation
+    MsgBox "Data And chart have been exported To HTML successfully!", vbInformation
 End Sub
 
 Function GetCurrentExcelDirectory() As String
     ' Get the directory of the currently open workbook
     Dim currentDirectory As String
     currentDirectory = ThisWorkbook.Path
-    
-    ' Check if the workbook is saved
+
+    ' Check If the workbook is saved
     If currentDirectory = "" Then
-        GetCurrentExcelDirectory = "The workbook has not been saved yet."
+        GetCurrentExcelDirectory = "The workbook has Not been saved yet."
     Else
         GetCurrentExcelDirectory = currentDirectory
     End If
@@ -73,10 +78,10 @@ Function GetCurrentDesktopirectory() As String
     ' Get the directory of the currently open workbook
     Dim desktopPath As String
     desktopPath = CreateObject("WScript.Shell").SpecialFolders("Desktop")
-    
-    ' Check if the workbook is saved
+
+    ' Check If the workbook is saved
     If desktopPath = "" Then
-        GetCurrentDesktopirectory = "The workbook has not been saved yet."
+        GetCurrentDesktopirectory = "The workbook has Not been saved yet."
     Else
         GetCurrentDesktopirectory = desktopPath
     End If
@@ -91,37 +96,37 @@ Function RangeToJSON(rng As Range) As String
     Dim value As Variant
     Dim headerName As String
 
-    On Error GoTo ErrorHandler
+    On Error Goto ErrorHandler
 
-    headers = rng.Rows(1).Value
-    values = rng.Offset(1, 0).Resize(rng.Rows.Count - 1, rng.Columns.Count).Value
+        headers = rng.Rows(1).value
+        values = rng.Offset(1, 0).Resize(rng.Rows.Count - 1, rng.Columns.Count).value
 
-    data = "["
+        data = "["
 
-    For i = 1 To UBound(values, 1)
-        data = data & "{"
-        For j = 1 To UBound(values, 2)
-            value = Trim(CStr(values(i, j))) ' Ensure value is a string and remove spaces
-            headerName = ToCamelCase(CStr(headers(1, j)))
-            data = data & """" & headerName & """: """ & value & """"
-            If j < UBound(values, 2) Then
+        For i = 1 To UBound(values, 1)
+            data = data & "{"
+            For j = 1 To UBound(values, 2)
+                value = Trim(CStr(values(i, j))) ' Ensure value is a string And remove spaces
+                headerName = ToCamelCase(CStr(headers(1, j)))
+                data = data & """" & headerName & """: """ & value & """"
+                If j < UBound(values, 2) Then
+                    data = data & ", "
+                End If
+            Next j
+            data = data & "}"
+            If i < UBound(values, 1) Then
                 data = data & ", "
             End If
-        Next j
-        data = data & "}"
-        If i < UBound(values, 1) Then
-            data = data & ", "
-        End If
-    Next i
+        Next i
 
-    data = data & "]"
-    
-    RangeToJSON = data
-    Exit Function
+        data = data & "]"
 
-ErrorHandler:
-    MsgBox "An error occurred: " & Err.Description, vbCritical
-    RangeToJSON = "[]"
+        RangeToJSON = data
+     Exit Function
+
+ ErrorHandler:
+        MsgBox "An error occurred: " & Err.Description, vbCritical
+        RangeToJSON = "[]"
 End Function
 
 Function ToCamelCase(text As String) As String
@@ -142,10 +147,10 @@ Function ToCamelCase(text As String) As String
                 result = result & IIf(upperNext, LCase(char), char)
                 upperNext = False
             End If
-        ElseIf char Like "[a-z]" Then
+        Elseif char Like "[a-z]" Then
             result = result & char
             upperNext = False
-        ElseIf char Like " " Then
+        Elseif char Like " " Then
             upperNext = True
         End If
     Next i
@@ -170,7 +175,7 @@ Function ExtractFilteredDataToJSONArrayMargins(sheetName As String, pivotTableNa
     Dim totalValue As String
     Dim i As Integer
 
-    ' Set worksheet and PivotTable
+    ' Set worksheet And PivotTable
     Set ws = ThisWorkbook.Worksheets(sheetName)
     Set pt = ws.PivotTables(pivotTableName)
 
@@ -183,41 +188,41 @@ Function ExtractFilteredDataToJSONArrayMargins(sheetName As String, pivotTableNa
 
     ' Iterate over the PivotTable columns, starting from the second column
     For i = 1 To pt.DataBodyRange.Columns.Count
-        ' Initialize a new row dictionary for each typesofmargin
+        ' Initialize a New row dictionary For each typesofmargin
         Set rowDict = CreateObject("Scripting.Dictionary")
         Set totalDict = CreateObject("Scripting.Dictionary")
         Set labelDict = CreateObject("Scripting.Dictionary")
 
         ' Get the typesofmargin from the column header
-        typesofmargin = Trim(colHeaders.Cells(1, i - 1).Value)
+        typesofmargin = Trim(colHeaders.Cells(1, i - 1).value)
         rowDict.Add "typesofmargin", typesofmargin
 
-        ' Loop through the rows to get totals for this typesofmargin
+        ' Loop through the rows To Get totals For this typesofmargin
         For Each pRow In pt.DataBodyRange.Rows
-            totalName = LCase(Trim(pRow.Cells(1, 0).Value)) ' The first column under "Row Labels"
-            totalLabel = pRow.Cells(1, 0).Value ' Use the correct reference for labels
-            totalValue = pRow.Cells(1, i).Value ' The current column value for this row            
+            totalName = LCase(Trim(pRow.Cells(1, 0).value)) ' The first column under "Row Labels"
+            totalLabel = pRow.Cells(1, 0).value ' Use the correct reference For labels
+            totalValue = pRow.Cells(1, i).value ' The current column value For this row
 
-            ' Normalize "grand total" to "total"
+            ' Normalize "grand total" To "total"
             If totalName = "grand total" Then
                 totalLabel = "Total"
                 totalName = "total"
             End If
 
-            ' Add total and label to respective dictionaries
+            ' Add total And Label To respective dictionaries
             totalDict.Add totalName, totalValue
             labelDict.Add totalName, totalLabel
         Next pRow
 
-        ' Add totals and labels dictionaries to row dictionary
+        ' Add totals And labels dictionaries To row dictionary
         rowDict.Add "totals", totalDict
         rowDict.Add "labels", labelDict
 
-        ' Add row dictionary to JSON array
+        ' Add row dictionary To JSON array
         jsonArray.Add jsonArray.Count, rowDict
     Next i
 
-    ' Convert to JSON string
+    ' Convert To JSON string
     jsonString = JsonConvertToObjectMargins(jsonArray)
     ExtractFilteredDataToJSONArrayMargins = jsonString
 End Function
@@ -236,32 +241,32 @@ Function JsonConvertToObjectMargins(dict As Object) As String
         json = json & "{"
         json = json & """typesofmargin"":""" & dict(key).Item("typesofmargin") & ""","
 
-        ' Convert totals dictionary to JSON object
+        ' Convert totals dictionary To JSON object
         subJson = "{"
         For Each subKey In dict(key).Item("totals")
             subJson = subJson & """" & subKey & """:""" & dict(key).Item("totals")(subKey) & ""","
         Next subKey
         ' Remove the trailing comma from totals
         If Right(subJson, 1) = "," Then subJson = Left(subJson, Len(subJson) - 1)
-        subJson = subJson & "}"
+            subJson = subJson & "}"
 
-        ' Convert labels dictionary to JSON object
-        labelJson = "{"
-        For Each subKey In dict(key).Item("labels")
-            labelJson = labelJson & """" & subKey & """:""" & dict(key).Item("labels")(subKey) & ""","
-        Next subKey
-        ' Remove the trailing comma from labels
-        If Right(labelJson, 1) = "," Then labelJson = Left(labelJson, Len(labelJson) - 1)
-        labelJson = labelJson & "}"
+            ' Convert labels dictionary To JSON object
+            labelJson = "{"
+            For Each subKey In dict(key).Item("labels")
+                labelJson = labelJson & """" & subKey & """:""" & dict(key).Item("labels")(subKey) & ""","
+            Next subKey
+            ' Remove the trailing comma from labels
+            If Right(labelJson, 1) = "," Then labelJson = Left(labelJson, Len(labelJson) - 1)
+                labelJson = labelJson & "}"
 
-        ' Combine totals and labels into the main JSON object
-        json = json & """totals"":" & subJson & "," & """labels"":" & labelJson & "}"
-        If i < dict.Count - 1 Then json = json & ","
-        i = i + 1
-    Next key
-    json = json & "]"
+                ' Combine totals And labels into the main JSON object
+                json = json & """totals"":" & subJson & "," & """labels"":" & labelJson & "}"
+                If i < dict.Count - 1 Then json = json & ","
+                    i = i + 1
+                Next key
+                json = json & "]"
 
-    JsonConvertToObjectMargins = json
+                JsonConvertToObjectMargins = json
 End Function
 
 
@@ -270,40 +275,118 @@ Function GetVersionData() As String
     Dim rng As Range
     Dim jsonString As String
     Dim i As Integer
-    
-    On Error GoTo ErrorHandler
-    
-    ' Set the worksheet and range
-    Set ws = ThisWorkbook.Sheets("Run Sheet")
-    Set rng = ws.Range("B20:C25")
-    
-    ' Start building the JSON string
-    jsonString = "["
-    
-    ' Loop through each row in the range and build JSON
-    For i = 1 To rng.Rows.Count
-        If Not IsEmpty(rng.Cells(i, 1)) And Not IsEmpty(rng.Cells(i, 2)) Then
-            jsonString = jsonString & "{"
-            jsonString = jsonString & """version"": """ & rng.Cells(i, 1).Value & """, "
-            jsonString = jsonString & """effectiveDate"": """ & rng.Cells(i, 2).Value & """"
-            jsonString = jsonString & "}"
-            
-            ' Add a comma if this is not the last item
-            If i < rng.Rows.Count Then
-                jsonString = jsonString & ", "
-            End If
-        End If
-    Next i
-    
-    ' Close the JSON array
-    jsonString = jsonString & "]"
-    
-    ' Return the JSON string
-    GetVersionData = jsonString
-    Exit Function
 
-ErrorHandler:
-    GetVersionData = "Error: " & Err.Description
+    On Error Goto ErrorHandler
+
+        ' Set the worksheet And range
+        Set ws = ThisWorkbook.Sheets("Run Sheet")
+        Set rng = ws.Range("B20:C25")
+
+        ' Start building the JSON string
+        jsonString = "["
+
+        ' Loop through each row in the range And build JSON
+        For i = 1 To rng.Rows.Count
+            If Not IsEmpty(rng.Cells(i, 1)) And Not IsEmpty(rng.Cells(i, 2)) Then
+                jsonString = jsonString & "{"
+                jsonString = jsonString & """version"": """ & rng.Cells(i, 1).value & """, "
+                jsonString = jsonString & """effectiveDate"": """ & rng.Cells(i, 2).value & """"
+                jsonString = jsonString & "}"
+
+                ' Add a comma If this is Not the last item
+                If i < rng.Rows.Count Then
+                    jsonString = jsonString & ", "
+                End If
+            End If
+        Next i
+
+        ' Close the JSON array
+        jsonString = jsonString & "]"
+
+        ' Return the JSON string
+        GetVersionData = jsonString
+     Exit Function
+
+ ErrorHandler:
+        GetVersionData = "Error: " & Err.Description
 End Function
 
-
+    Function ExportPivotTableToJSON(sheetName As String, pivotTableName As String) As String
+        Dim ws As Worksheet
+        Dim pvt As PivotTable
+        Dim jsonData As String
+        Dim rowItem As PivotItem
+        Dim colItem As PivotItem
+        Dim cellValue As Variant
+        Dim i As Long, j As Long
+    
+        Dim rowFieldName As String
+        Dim rowFieldType As String
+        Dim rowFieldPortfolio As String
+        Dim rowFieldStatus As String
+        Dim rowFieldAssociation As String
+        Dim rowFieldAgreement As String
+        Dim colFieldName As String
+        Dim dataFieldName As String
+    
+        ' Set worksheet and pivot table
+        Set ws = ThisWorkbook.Sheets(sheetName)
+        Set pvt = ws.PivotTables(pivotTableName)
+    
+        ' Initialize JSON string
+        jsonData = "["
+    
+        ' Ensure there are row fields and column fields
+        If pvt.RowFields.Count >= 6 And pvt.ColumnFields.Count >= 1 Then
+            ' Define row field names
+            rowFieldName = pvt.RowFields(1).Name
+            rowFieldType = pvt.RowFields(2).Name
+            rowFieldPortfolio = pvt.RowFields(3).Name
+            rowFieldStatus = pvt.RowFields(4).Name
+            rowFieldAssociation = pvt.RowFields(5).Name
+            rowFieldAgreement = pvt.RowFields(6).Name
+            colFieldName = pvt.ColumnFields(1).Name
+            dataFieldName = pvt.DataFields(1).Name
+    
+            ' Loop through row fields and column fields
+            For i = 1 To pvt.RowFields(1).PivotItems.Count
+                Set rowItem = pvt.RowFields(1).PivotItems(i)
+                For j = 1 To pvt.ColumnFields(1).PivotItems.Count
+                    Set colItem = pvt.ColumnFields(1).PivotItems(j)
+    
+                    ' On Error Resume Next ' Ignore error if GetPivotData fails
+                    cellValue = pvt.GetPivotData(dataFieldName, rowFieldName, rowItem.Name, colFieldName, colItem.Name)
+                    cellType = pvt.GetPivotData(dataFieldName, rowFieldType, rowItem.Name, colFieldName, colItem.Name)
+                    cellPortfolio = pvt.GetPivotData(dataFieldName, rowFieldPortfolio, rowItem.Name, colFieldName, colItem.Name)
+                    cellStatus = pvt.GetPivotData(dataFieldName, rowFieldStatus, rowItem.Name, colFieldName, colItem.Name)
+                    cellAssociation = pvt.GetPivotData(dataFieldName, rowFieldAssociation, rowItem.Name, colFieldName, colItem.Name)
+                    cellAgreement = pvt.GetPivotData(dataFieldName, rowFieldAgreement, rowItem.Name, colFieldName, colItem.Name)
+                    ' On Error GoTo 0 ' Reset error handling
+    
+                    ' Check if cellValue is not an error and add to JSON if valid
+                    If Not IsError(cellValue) Then
+                        jsonData = jsonData & "{" & _
+                            """nmi"":""" & rowItem.Name & """," & _
+                            """margin"":""" & colItem.Name & """," & _
+                            """value"":" & cellValue & "," & _
+                            """type"":""" & IIf(Not IsError(cellType), cellType, "") & """," & _
+                            """portfolio"":""" & IIf(Not IsError(cellPortfolio), cellPortfolio, "") & """," & _
+                            """status"":""" & IIf(Not IsError(cellStatus), cellStatus, "") & """," & _
+                            """association"":""" & IIf(Not IsError(cellAssociation), cellAssociation, "") & """," & _
+                            """agreement"":""" & IIf(Not IsError(cellAgreement), cellAgreement, "") & """" & _
+                            "}," 
+                    End If
+                Next j
+            Next i
+        End If
+    
+        ' Remove the trailing comma and close the JSON array
+        If Len(jsonData) > 1 Then
+            jsonData = Left(jsonData, Len(jsonData) - 1) ' Remove last comma
+        End If
+        jsonData = jsonData & "]"
+    
+        ' Return the JSON string
+        ExportPivotTableToJSON = jsonData
+    End Function
+    
