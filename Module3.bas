@@ -96,7 +96,7 @@ Function RangeToJSON(rng As Range) As String
     Dim value As Variant
     Dim headerName As String
 
-    On Error Goto ErrorHandler
+    On Error GoTo ErrorHandler
 
         headers = rng.Rows(1).value
         values = rng.Offset(1, 0).Resize(rng.Rows.Count - 1, rng.Columns.Count).value
@@ -124,7 +124,7 @@ Function RangeToJSON(rng As Range) As String
         RangeToJSON = data
      Exit Function
 
- ErrorHandler:
+ErrorHandler:
         MsgBox "An error occurred: " & Err.Description, vbCritical
         RangeToJSON = "[]"
 End Function
@@ -147,10 +147,10 @@ Function ToCamelCase(text As String) As String
                 result = result & IIf(upperNext, LCase(char), char)
                 upperNext = False
             End If
-        Elseif char Like "[a-z]" Then
+        ElseIf char Like "[a-z]" Then
             result = result & char
             upperNext = False
-        Elseif char Like " " Then
+        ElseIf char Like " " Then
             upperNext = True
         End If
     Next i
@@ -276,7 +276,7 @@ Function GetVersionData() As String
     Dim jsonString As String
     Dim i As Integer
 
-    On Error Goto ErrorHandler
+    On Error GoTo ErrorHandler
 
         ' Set the worksheet And range
         Set ws = ThisWorkbook.Sheets("Run Sheet")
@@ -307,86 +307,111 @@ Function GetVersionData() As String
         GetVersionData = jsonString
      Exit Function
 
- ErrorHandler:
+ErrorHandler:
         GetVersionData = "Error: " & Err.Description
 End Function
 
-    Function ExportPivotTableToJSON(sheetName As String, pivotTableName As String) As String
-        Dim ws As Worksheet
-        Dim pvt As PivotTable
-        Dim jsonData As String
-        Dim rowItem As PivotItem
-        Dim colItem As PivotItem
-        Dim cellValue As Variant
-        Dim i As Long, j As Long
-    
-        Dim rowFieldName As String
-        Dim rowFieldType As String
-        Dim rowFieldPortfolio As String
-        Dim rowFieldStatus As String
-        Dim rowFieldAssociation As String
-        Dim rowFieldAgreement As String
-        Dim colFieldName As String
-        Dim dataFieldName As String
-    
-        ' Set worksheet and pivot table
-        Set ws = ThisWorkbook.Sheets(sheetName)
-        Set pvt = ws.PivotTables(pivotTableName)
-    
-        ' Initialize JSON string
-        jsonData = "["
-    
-        ' Ensure there are row fields and column fields
-        If pvt.RowFields.Count >= 6 And pvt.ColumnFields.Count >= 1 Then
-            ' Define row field names
-            rowFieldName = pvt.RowFields(1).Name
-            rowFieldType = pvt.RowFields(2).Name
-            rowFieldPortfolio = pvt.RowFields(3).Name
-            rowFieldStatus = pvt.RowFields(4).Name
-            rowFieldAssociation = pvt.RowFields(5).Name
-            rowFieldAgreement = pvt.RowFields(6).Name
-            colFieldName = pvt.ColumnFields(1).Name
-            dataFieldName = pvt.DataFields(1).Name
-    
-            ' Loop through row fields and column fields
-            For i = 1 To pvt.RowFields(1).PivotItems.Count
-                Set rowItem = pvt.RowFields(1).PivotItems(i)
-                For j = 1 To pvt.ColumnFields(1).PivotItems.Count
-                    Set colItem = pvt.ColumnFields(1).PivotItems(j)
-    
-                    ' On Error Resume Next ' Ignore error if GetPivotData fails
-                    cellValue = pvt.GetPivotData(dataFieldName, rowFieldName, rowItem.Name, colFieldName, colItem.Name)
-                    cellType = pvt.GetPivotData(dataFieldName, rowFieldType, rowItem.Name, colFieldName, colItem.Name)
-                    cellPortfolio = pvt.GetPivotData(dataFieldName, rowFieldPortfolio, rowItem.Name, colFieldName, colItem.Name)
-                    cellStatus = pvt.GetPivotData(dataFieldName, rowFieldStatus, rowItem.Name, colFieldName, colItem.Name)
-                    cellAssociation = pvt.GetPivotData(dataFieldName, rowFieldAssociation, rowItem.Name, colFieldName, colItem.Name)
-                    cellAgreement = pvt.GetPivotData(dataFieldName, rowFieldAgreement, rowItem.Name, colFieldName, colItem.Name)
-                    ' On Error GoTo 0 ' Reset error handling
-    
-                    ' Check if cellValue is not an error and add to JSON if valid
-                    If Not IsError(cellValue) Then
-                        jsonData = jsonData & "{" & _
-                            """nmi"":""" & rowItem.Name & """," & _
-                            """margin"":""" & colItem.Name & """," & _
-                            """value"":" & cellValue & "," & _
-                            """type"":""" & IIf(Not IsError(cellType), cellType, "") & """," & _
-                            """portfolio"":""" & IIf(Not IsError(cellPortfolio), cellPortfolio, "") & """," & _
-                            """status"":""" & IIf(Not IsError(cellStatus), cellStatus, "") & """," & _
-                            """association"":""" & IIf(Not IsError(cellAssociation), cellAssociation, "") & """," & _
-                            """agreement"":""" & IIf(Not IsError(cellAgreement), cellAgreement, "") & """" & _
-                            "}," 
-                    End If
-                Next j
-            Next i
-        End If
-    
-        ' Remove the trailing comma and close the JSON array
-        If Len(jsonData) > 1 Then
-            jsonData = Left(jsonData, Len(jsonData) - 1) ' Remove last comma
-        End If
-        jsonData = jsonData & "]"
-    
-        ' Return the JSON string
-        ExportPivotTableToJSON = jsonData
-    End Function
-    
+Function ExportPivotTableToJSON(sheetName As String, pivotTableName As String) As String
+    Dim ws As Worksheet
+    Dim pvt As PivotTable
+    Dim jsonData As String
+    Dim rowItem As PivotItem
+    Dim rowItemNmi As Variant
+    Dim rowItemType As Variant
+    Dim rowItemPortfolio As Variant
+    Dim rowItemStatus As Variant
+    Dim rowItemAssociation As Variant
+    Dim rowItemAgreement As Variant
+    Dim colItem As PivotItem
+    Dim cellValue As Variant
+    Dim i As Long, j As Long, k As Long
+    Dim lastRow As Long
+
+    Dim rowFieldName As String
+    Dim rowFieldType As String
+    Dim rowFieldPortfolio As String
+    Dim rowFieldStatus As String
+    Dim rowFieldAssociation As String
+    Dim rowFieldAgreement As String
+    Dim colFieldName As String
+    Dim dataFieldName As String
+
+    ' Set worksheet And pivot table
+    Set ws = ThisWorkbook.Sheets(sheetName)
+    Set pvt = ws.PivotTables(pivotTableName)
+
+    ' Initialize JSON string
+    jsonData = "["
+
+    ' Ensure there are row fields And column fields
+    If pvt.rowFields.Count >= 6 And pvt.ColumnFields.Count >= 1 Then
+        ' Define row field names
+        rowFieldNmi = pvt.rowFields(1).Name
+        rowFieldType = pvt.rowFields(2).Name
+        rowFieldPortfolio = pvt.rowFields(3).Name
+        rowFieldStatus = pvt.rowFields(4).Name
+        rowFieldAssociation = pvt.rowFields(5).Name
+        rowFieldAgreement = pvt.rowFields(6).Name
+        colFieldName = pvt.ColumnFields(1).Name
+        lastRow = pvt.DataBodyRange.Rows.Count + pvt.DataBodyRange.Row - 1
+        k = 0
+        ' Loop through row fields And column fields
+        For i = 1 To lastRow Step 5
+            
+            If (i - 1) Mod 50 = 0 Then
+                If (i = 1) Then 
+                    Set rowItemNmi = pvt.DataBodyRange.Cells(i, 0)
+                Else
+                    k = k + 1
+                    Set rowItemNmi = pvt.DataBodyRange.Cells(i + k , 0)
+                End If                
+            End If
+            
+            Set rowItemType = pvt.DataBodyRange.Cells(i + k + 1, 0)
+            Set rowItemPortfolio = pvt.DataBodyRange.Cells(i + k + 2, 0)
+            Set rowItemStatus = pvt.DataBodyRange.Cells(i + k + 3, 0)
+            Set rowItemAssociation = pvt.DataBodyRange.Cells(i + k + 4, 0)
+            Set rowItemAgreement = pvt.DataBodyRange.Cells(i + k + 5, 0)
+            
+
+            For j = 1 To pvt.ColumnFields(1).PivotItems.Count
+                dataFieldName = pvt.DataFields(j).Name
+
+                ' On Error Resume Next ' Ignore error if GetPivotData fails
+                cellValue = pvt.GetPivotData(dataFieldName, rowFieldNmi, rowItemNmi, colFieldName, dataFieldName)
+                cellType = rowItemType
+                cellPortfolio = rowItemPortfolio
+                cellStatus = rowItemStatus
+                cellAssociation = rowItemAssociation
+                cellAgreement = rowItemAgreement
+                ' On Error GoTo 0 ' Reset error handling
+
+                ' Check if cellValue is not an error and add to JSON if valid
+                If Not IsError(cellValue) Then
+                    jsonData = jsonData & "{" & _
+                        """nmi"":""" & rowItemNmi & """," & _
+                        """margin"":""" & dataFieldName & """," & _
+                        """value"":" & cellValue & "," & _
+                        """type"":""" & cellType & """," & _
+                        """portfolio"":""" & cellPortfolio & """," & _
+                        """status"":""" & cellStatus & """," & _
+                        """association"":""" & cellAssociation & """," & _
+                        """agreement"":""" & cellAgreement & """" & _
+                        "},"
+                End If
+            Next j
+        Next i
+
+    End If
+
+    ' Remove the trailing comma And close the JSON array
+    If Len(jsonData) > 1 Then
+        jsonData = Left(jsonData, Len(jsonData) - 1) ' Remove last comma
+    End If
+    jsonData = jsonData & "]"
+
+    ' Return the JSON string
+    ExportPivotTableToJSON = jsonData
+End Function
+
+
