@@ -96,7 +96,7 @@ Function RangeToJSON(rng As Range) As String
     Dim value As Variant
     Dim headerName As String
 
-    On Error GoTo ErrorHandler
+    On Error Goto ErrorHandler
 
         headers = rng.Rows(1).value
         values = rng.Offset(1, 0).Resize(rng.Rows.Count - 1, rng.Columns.Count).value
@@ -124,7 +124,7 @@ Function RangeToJSON(rng As Range) As String
         RangeToJSON = data
      Exit Function
 
-ErrorHandler:
+ ErrorHandler:
         MsgBox "An error occurred: " & Err.Description, vbCritical
         RangeToJSON = "[]"
 End Function
@@ -147,10 +147,10 @@ Function ToCamelCase(text As String) As String
                 result = result & IIf(upperNext, LCase(char), char)
                 upperNext = False
             End If
-        ElseIf char Like "[a-z]" Then
+        Elseif char Like "[a-z]" Then
             result = result & char
             upperNext = False
-        ElseIf char Like " " Then
+        Elseif char Like " " Then
             upperNext = True
         End If
     Next i
@@ -276,7 +276,7 @@ Function GetVersionData() As String
     Dim jsonString As String
     Dim i As Integer
 
-    On Error GoTo ErrorHandler
+    On Error Goto ErrorHandler
 
         ' Set the worksheet And range
         Set ws = ThisWorkbook.Sheets("Run Sheet")
@@ -307,7 +307,7 @@ Function GetVersionData() As String
         GetVersionData = jsonString
      Exit Function
 
-ErrorHandler:
+ ErrorHandler:
         GetVersionData = "Error: " & Err.Description
 End Function
 
@@ -317,22 +317,34 @@ Function ExportPivotTableToJSON(sheetName As String, pivotTableName As String) A
     Dim jsonData As String
     Dim rowItem As PivotItem
     Dim rowItemNmi As Variant
-    Dim rowItemType As Variant
+    Dim rowItemCapacity As Variant
+    Dim rowItemCommission As Variant
+    Dim rowItemEss As Variant
+    Dim rowItemLgc As Variant
+    Dim rowItemMarketFees As Variant
+    Dim rowItemNetwork As Variant
+    Dim rowItemRetailMargin As Variant
+    Dim rowItemRevenue As Variant
+    Dim rowItemStc As Variant
+    Dim rowItemWholesaleEnergy As Variant
     Dim rowItemPortfolio As Variant
     Dim rowItemStatus As Variant
     Dim rowItemAssociation As Variant
     Dim rowItemAgreement As Variant
     Dim colItem As PivotItem
-    Dim cellValue As Variant
+    Dim valueNmi As Variant
+    Dim valueCapacity As Variant
+    Dim valueCommission As Variant
+    Dim valueEss As Variant
+    Dim valueLgc As Variant
+    Dim valueMarketFees As Variant
+    Dim valueNetwork As Variant
+    Dim valueRetailMargin As Variant
+    Dim valueRevenue As Variant
+    Dim valueStc As Variant
+    Dim valueWholesaleEnergy As Variant
     Dim i As Long, j As Long, k As Long
     Dim lastRow As Long
-
-    Dim rowFieldName As String
-    Dim rowFieldType As String
-    Dim rowFieldPortfolio As String
-    Dim rowFieldStatus As String
-    Dim rowFieldAssociation As String
-    Dim rowFieldAgreement As String
     Dim colFieldName As String
     Dim dataFieldName As String
 
@@ -340,66 +352,135 @@ Function ExportPivotTableToJSON(sheetName As String, pivotTableName As String) A
     Set ws = ThisWorkbook.Sheets(sheetName)
     Set pvt = ws.PivotTables(pivotTableName)
 
+
+    'Add 50 in Loop
+    Dim nmiIndex As Long
+    Dim portfolioIndex As Long
+    Dim statusIndex As Long
+    Dim associationIndex As Long
+    Dim agreementIndex As Long
+    Dim capacityIndex As Long
+    Dim commissionIndex As Long
+    Dim essIndex As Long
+    Dim lgcIndex As Long
+    Dim marketFeesIndex As Long
+    Dim networkIndex As Long
+    Dim retailMarginIndex As Long
+    Dim revenueIndex As Long
+    Dim stcIndex As Long
+    Dim wholesaleEnergyIndex As Long
+
+    nmiIndex = 1
+    capacityIndex = 2
+    portfolioIndex = 3
+    statusIndex = 4
+    associationIndex = 5
+    agreementIndex = 6
+    commissionIndex = 7
+    essIndex = 12
+    lgcIndex = 17
+    marketFeesIndex = 22
+    networkIndex = 27
+    retailMarginIndex = 32
+    revenueIndex = 37
+    stcIndex = 42
+    wholesaleEnergyIndex = 47
     ' Initialize JSON string
     jsonData = "["
-
+    k = 51
     ' Ensure there are row fields And column fields
     If pvt.rowFields.Count >= 6 And pvt.ColumnFields.Count >= 1 Then
-        ' Define row field names
         rowFieldNmi = pvt.rowFields(1).Name
-        rowFieldType = pvt.rowFields(2).Name
-        rowFieldPortfolio = pvt.rowFields(3).Name
-        rowFieldStatus = pvt.rowFields(4).Name
-        rowFieldAssociation = pvt.rowFields(5).Name
-        rowFieldAgreement = pvt.rowFields(6).Name
         colFieldName = pvt.ColumnFields(1).Name
         lastRow = pvt.DataBodyRange.Rows.Count + pvt.DataBodyRange.Row - 1
-        k = 0
         ' Loop through row fields And column fields
-        For i = 1 To lastRow Step 5
-            
-            If (i - 1) Mod 50 = 0 Then
-                If (i = 1) Then 
-                    Set rowItemNmi = pvt.DataBodyRange.Cells(i, 0)
-                Else
-                    k = k + 1
-                    Set rowItemNmi = pvt.DataBodyRange.Cells(i + k , 0)
-                End If                
+        For i = 1 To lastRow Step k
+
+            Set rowItemNmi = pvt.DataBodyRange.Cells( nmiIndex, 0)
+            If rowItemNmi = "Grand Total" Then
+                Exit For 'End
             End If
-            
-            Set rowItemType = pvt.DataBodyRange.Cells(i + k + 1, 0)
-            Set rowItemPortfolio = pvt.DataBodyRange.Cells(i + k + 2, 0)
-            Set rowItemStatus = pvt.DataBodyRange.Cells(i + k + 3, 0)
-            Set rowItemAssociation = pvt.DataBodyRange.Cells(i + k + 4, 0)
-            Set rowItemAgreement = pvt.DataBodyRange.Cells(i + k + 5, 0)
-            
+            Set rowItemCapacity = pvt.DataBodyRange.Cells( capacityIndex, 0)
+            Set rowItemCommission = pvt.DataBodyRange.Cells ( commissionIndex, 0)
+            Set rowItemEss = pvt.DataBodyRange.Cells ( essIndex, 0)
+            Set rowItemLgc = pvt.DataBodyRange.Cells ( lgcIndex, 0)
+            Set rowItemMarketFees = pvt.DataBodyRange.Cells ( marketFeesIndex, 0)
+            Set rowItemNetwork = pvt.DataBodyRange.Cells ( networkIndex, 0)
+            Set rowItemRetailMargin = pvt.DataBodyRange.Cells ( retailMarginIndex, 0)
+            Set rowItemRevenue = pvt.DataBodyRange.Cells ( revenueIndex, 0)
+            Set rowItemStc = pvt.DataBodyRange.Cells ( stcIndex, 0)
+            Set rowItemWholesaleEnergy = pvt.DataBodyRange.Cells ( wholesaleEnergyIndex, 0)
+
+            Set rowItemPortfolio = pvt.DataBodyRange.Cells(portfolioIndex, 0)
+            Set rowItemStatus = pvt.DataBodyRange.Cells( statusIndex, 0)
+            Set rowItemAssociation = pvt.DataBodyRange.Cells( associationIndex, 0)
+            Set rowItemAgreement = pvt.DataBodyRange.Cells( agreementIndex, 0)
+
 
             For j = 1 To pvt.ColumnFields(1).PivotItems.Count
                 dataFieldName = pvt.DataFields(j).Name
 
-                ' On Error Resume Next ' Ignore error if GetPivotData fails
-                cellValue = pvt.GetPivotData(dataFieldName, rowFieldNmi, rowItemNmi, colFieldName, dataFieldName)
-                cellType = rowItemType
+                ' On Error Resume Next ' Ignore error If GetPivotData fails
+                valueNmi = pvt.GetPivotData(dataFieldName, rowFieldNmi, rowItemNmi , colFieldName, dataFieldName)
+                valueCapacity = pvt.GetPivotData(dataFieldName, rowFieldNmi, rowItemNmi , "Type" , rowItemCapacity , colFieldName, dataFieldName)
+                valueCommission = pvt.GetPivotData(dataFieldName, rowFieldNmi, rowItemNmi , "Type" , rowItemCommission , colFieldName, dataFieldName)
+                valueEss = pvt.GetPivotData(dataFieldName, rowFieldNmi, rowItemNmi , "Type" ,rowItemEss , colFieldName, dataFieldName)
+                valueLgc = pvt.GetPivotData(dataFieldName, rowFieldNmi, rowItemNmi , "Type" , rowItemLgc, colFieldName, dataFieldName)
+                valueMarketFees = pvt.GetPivotData(dataFieldName, rowFieldNmi, rowItemNmi , "Type" ,rowItemMarketFees , colFieldName, dataFieldName)
+                valueNetwork = pvt.GetPivotData(dataFieldName, rowFieldNmi, rowItemNmi , "Type" ,rowItemNetwork , colFieldName, dataFieldName)
+                valueRetailMargin = pvt.GetPivotData(dataFieldName, rowFieldNmi, rowItemNmi , "Type" ,rowItemRetailMargin , colFieldName, dataFieldName)
+                valueRevenue = pvt.GetPivotData(dataFieldName, rowFieldNmi, rowItemNmi , "Type" , rowItemRevenue, colFieldName, dataFieldName)
+                valueStc = pvt.GetPivotData(dataFieldName, rowFieldNmi, rowItemNmi , "Type" ,rowItemStc , colFieldName, dataFieldName)
+                valueWholesaleEnergy = pvt.GetPivotData(dataFieldName, rowFieldNmi, rowItemNmi , "Type" , rowItemWholesaleEnergy, colFieldName, dataFieldName)
+
                 cellPortfolio = rowItemPortfolio
                 cellStatus = rowItemStatus
                 cellAssociation = rowItemAssociation
                 cellAgreement = rowItemAgreement
-                ' On Error GoTo 0 ' Reset error handling
+                ' On Error Goto 0 ' Reset error handling
 
-                ' Check if cellValue is not an error and add to JSON if valid
+                ' Check If cellValue is Not an error And add To JSON If valid
                 If Not IsError(cellValue) Then
                     jsonData = jsonData & "{" & _
-                        """nmi"":""" & rowItemNmi & """," & _
-                        """margin"":""" & dataFieldName & """," & _
-                        """value"":" & cellValue & "," & _
-                        """type"":""" & cellType & """," & _
-                        """portfolio"":""" & cellPortfolio & """," & _
-                        """status"":""" & cellStatus & """," & _
-                        """association"":""" & cellAssociation & """," & _
-                        """agreement"":""" & cellAgreement & """" & _
-                        "},"
-                End If
+                    """nmi"":""" & rowItemNmi & """," & _
+                    """margin"":""" & dataFieldName & """," & _
+                    """value"":" & valueNmi & "," & _
+                    """type"":[" & _
+                    "{""name"":""capacity"",""value"":" & valueCapacity & "}," & _
+                    "{""name"":""commission"",""value"":" & valueCommission & "}," & _
+                    "{""name"":""ess"",""value"":" & valueEss & "}," & _
+                    "{""name"":""lgc"",""value"":" & valueLgc & "}," & _
+                    "{""name"":""marketFees"",""value"":" & valueMarketFees & "}," & _
+                    "{""name"":""network"",""value"":" & valueNetwork & "}," & _
+                    "{""name"":""retailMargin"",""value"":" & valueRetailMargin & "}," & _
+                    "{""name"":""revenue"",""value"":" & valueRevenue & "}," & _
+                    "{""name"":""stc"",""value"":" & valueStc & "}," & _
+                    "{""name"":""wholesaleEnergy"",""value"":" & valueWholesaleEnergy & "}" & _
+                    "]," & _
+                    """portfolio"":""" & cellPortfolio & """," & _
+                    """status"":""" & cellStatus & """," & _
+                    """association"":""" & cellAssociation & """," & _
+                    """agreement"":""" & cellAgreement & """" & _
+                    "},"
+                End If                
             Next j
+
+            nmiIndex = nmiIndex + k 
+            portfolioIndex = portfolioIndex + k
+            statusIndex = statusIndex + k
+            associationIndex = associationIndex + k
+            agreementIndex = agreementIndex + k
+
+            capacityIndex = capacityIndex + k            
+            commissionIndex = commissionIndex + k
+            essIndex = essIndex + k
+            lgcIndex = lgcIndex + k
+            marketFeesIndex = marketFeesIndex + k
+            networkIndex = networkIndex + k
+            retailMarginIndex = retailMarginIndex + k
+            revenueIndex = revenueIndex + k
+            stcIndex = stcIndex + k
+            wholesaleEnergyIndex = wholesaleEnergyIndex + k
         Next i
 
     End If
