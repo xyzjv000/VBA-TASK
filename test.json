@@ -1,22 +1,7 @@
 {
-  "nmi": "8001000427",
-  "margin": "Sum of Total Predicted TM FY2026",
-  "value": 66180,
-  "type": [
-    {"name": "capacity", "value" : 0},
-    {"name": "commission", "value" : 0},
-    {"name": "ess", "value" : 0},
-    {"name": "lgc", "value" : 0},
-    {"name": "marketFees", "value" : 0},
-    {"name": "network", "value" : 0},
-    {"name": "retailMargin", "value" : 0},
-    {"name": "revenue", "value" : 0},
-    {"name": "stc", "value" : 0},
-    {"name": "wholesaleEnergy", "value" :0}
-  ],
-  "portfolio": "AE",
-  "status": "LUC",
-  "association": "0",
-  "agreement": "Unbundled"
+  "data":[
+    {"margin":"",
+      "type":[
+        {"name":"capacity","value":},
+        {"name":"commission","value":},{"name":"ess","value":},{"name":"lgc","value":},{"name":"marketFees","value":},{"name":"network","value":},{"name":"retailMargin","value":},{"name":"revenue","value":},{"name":"stc","value":},{"name":"wholesaleEnergy","value":}]}]
 }
-

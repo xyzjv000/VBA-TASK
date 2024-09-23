@@ -315,6 +315,7 @@ Function ExportPivotTableToJSON(sheetName As String, pivotTableName As String) A
     Dim ws As Worksheet
     Dim pvt As PivotTable
     Dim jsonData As String
+    Dim jsonDataItem As String
     Dim rowItem As PivotItem
     Dim rowItemNmi As Variant
     Dim rowItemCapacity As Variant
@@ -348,12 +349,11 @@ Function ExportPivotTableToJSON(sheetName As String, pivotTableName As String) A
     Dim colFieldName As String
     Dim dataFieldName As String
 
-    ' Set worksheet And pivot table
+    ' Set worksheet and pivot table
     Set ws = ThisWorkbook.Sheets(sheetName)
     Set pvt = ws.PivotTables(pivotTableName)
 
-
-    'Add 50 in Loop
+    ' Index setup
     Dim nmiIndex As Long
     Dim portfolioIndex As Long
     Dim statusIndex As Long
@@ -385,38 +385,40 @@ Function ExportPivotTableToJSON(sheetName As String, pivotTableName As String) A
     revenueIndex = 37
     stcIndex = 42
     wholesaleEnergyIndex = 47
+
     ' Initialize JSON string
     jsonData = "["
+
     k = 51
-    ' Ensure there are row fields And column fields
+    ' Ensure row and column fields exist
     If pvt.rowFields.Count >= 6 And pvt.ColumnFields.Count >= 1 Then
         rowFieldNmi = pvt.rowFields(1).Name
         colFieldName = pvt.ColumnFields(1).Name
         lastRow = pvt.DataBodyRange.Rows.Count + pvt.DataBodyRange.Row - 1
-        ' Loop through row fields And column fields
+        
+        ' Loop through row fields and column fields
         For i = 1 To lastRow Step k
-
-            Set rowItemNmi = pvt.DataBodyRange.Cells( nmiIndex, 0)
+            Set rowItemNmi = pvt.DataBodyRange.Cells(nmiIndex, 0)
             If rowItemNmi = "Grand Total" Then
-                Exit For 'End
+                Exit For
             End If
-            Set rowItemCapacity = pvt.DataBodyRange.Cells( capacityIndex, 0)
-            Set rowItemCommission = pvt.DataBodyRange.Cells ( commissionIndex, 0)
-            Set rowItemEss = pvt.DataBodyRange.Cells ( essIndex, 0)
-            Set rowItemLgc = pvt.DataBodyRange.Cells ( lgcIndex, 0)
-            Set rowItemMarketFees = pvt.DataBodyRange.Cells ( marketFeesIndex, 0)
-            Set rowItemNetwork = pvt.DataBodyRange.Cells ( networkIndex, 0)
-            Set rowItemRetailMargin = pvt.DataBodyRange.Cells ( retailMarginIndex, 0)
-            Set rowItemRevenue = pvt.DataBodyRange.Cells ( revenueIndex, 0)
-            Set rowItemStc = pvt.DataBodyRange.Cells ( stcIndex, 0)
-            Set rowItemWholesaleEnergy = pvt.DataBodyRange.Cells ( wholesaleEnergyIndex, 0)
+            Set rowItemCapacity = pvt.DataBodyRange.Cells(capacityIndex, 0)
+            Set rowItemCommission = pvt.DataBodyRange.Cells(commissionIndex, 0)
+            Set rowItemEss = pvt.DataBodyRange.Cells(essIndex, 0)
+            Set rowItemLgc = pvt.DataBodyRange.Cells(lgcIndex, 0)
+            Set rowItemMarketFees = pvt.DataBodyRange.Cells(marketFeesIndex, 0)
+            Set rowItemNetwork = pvt.DataBodyRange.Cells(networkIndex, 0)
+            Set rowItemRetailMargin = pvt.DataBodyRange.Cells(retailMarginIndex, 0)
+            Set rowItemRevenue = pvt.DataBodyRange.Cells(revenueIndex, 0)
+            Set rowItemStc = pvt.DataBodyRange.Cells(stcIndex, 0)
+            Set rowItemWholesaleEnergy = pvt.DataBodyRange.Cells(wholesaleEnergyIndex, 0)
 
             Set rowItemPortfolio = pvt.DataBodyRange.Cells(portfolioIndex, 0)
-            Set rowItemStatus = pvt.DataBodyRange.Cells( statusIndex, 0)
-            Set rowItemAssociation = pvt.DataBodyRange.Cells( associationIndex, 0)
-            Set rowItemAgreement = pvt.DataBodyRange.Cells( agreementIndex, 0)
+            Set rowItemStatus = pvt.DataBodyRange.Cells(statusIndex, 0)
+            Set rowItemAssociation = pvt.DataBodyRange.Cells(associationIndex, 0)
+            Set rowItemAgreement = pvt.DataBodyRange.Cells(agreementIndex, 0)
 
-
+            ' Loop through column items
             For j = 1 To pvt.ColumnFields(1).PivotItems.Count
                 dataFieldName = pvt.DataFields(j).Name
 
@@ -441,37 +443,42 @@ Function ExportPivotTableToJSON(sheetName As String, pivotTableName As String) A
 
                 ' Check If cellValue is Not an error And add To JSON If valid
                 If Not IsError(cellValue) Then
-                    jsonData = jsonData & "{" & _
-                    """nmi"":""" & rowItemNmi & """," & _
-                    """margin"":""" & dataFieldName & """," & _
-                    """value"":" & valueNmi & "," & _
-                    """type"":[" & _
-                    "{""name"":""capacity"",""value"":" & valueCapacity & "}," & _
-                    "{""name"":""commission"",""value"":" & valueCommission & "}," & _
-                    "{""name"":""ess"",""value"":" & valueEss & "}," & _
-                    "{""name"":""lgc"",""value"":" & valueLgc & "}," & _
-                    "{""name"":""marketFees"",""value"":" & valueMarketFees & "}," & _
-                    "{""name"":""network"",""value"":" & valueNetwork & "}," & _
-                    "{""name"":""retailMargin"",""value"":" & valueRetailMargin & "}," & _
-                    "{""name"":""revenue"",""value"":" & valueRevenue & "}," & _
-                    "{""name"":""stc"",""value"":" & valueStc & "}," & _
-                    "{""name"":""wholesaleEnergy"",""value"":" & valueWholesaleEnergy & "}" & _
-                    "]," & _
-                    """portfolio"":""" & cellPortfolio & """," & _
-                    """status"":""" & cellStatus & """," & _
-                    """association"":""" & cellAssociation & """," & _
-                    """agreement"":""" & cellAgreement & """" & _
-                    "},"
+                    jsonDataItem = jsonDataItem & _
+                    "{""margin"":""" & dataFieldName & """," & _
+                        """value"":" & valueNmi & "," & _
+                        """type"":[" & _
+                        "{""name"":""capacity"",""value"":" & valueCapacity & "}," & _
+                        "{""name"":""commission"",""value"":" & valueCommission & "}," & _
+                        "{""name"":""ess"",""value"":" & valueEss & "}," & _
+                        "{""name"":""lgc"",""value"":" & valueLgc & "}," & _
+                        "{""name"":""marketFees"",""value"":" & valueMarketFees & "}," & _
+                        "{""name"":""network"",""value"":" & valueNetwork & "}," & _
+                        "{""name"":""retailMargin"",""value"":" & valueRetailMargin & "}," & _
+                        "{""name"":""revenue"",""value"":" & valueRevenue & "}," & _
+                        "{""name"":""stc"",""value"":" & valueStc & "}," & _
+                        "{""name"":""wholesaleEnergy"",""value"":" & valueWholesaleEnergy & "}" & _
+                    "]},"
                 End If                
             Next j
 
-            nmiIndex = nmiIndex + k 
+            jsonData = jsonData & "{" & _
+                """nmi"":""" & rowItemNmi & """," & _                
+                """data"":[" & _
+                jsonDataItem & _
+                "]," & _
+                """portfolio"":""" & rowItemPortfolio & """," & _
+                """status"":""" & rowItemStatus & """," & _
+                """association"":""" & rowItemAssociation & """," & _
+                """agreement"":""" & rowItemAgreement & """" & _
+                "},"
+            jsonDataItem = ""
+            ' Increment indices
+            nmiIndex = nmiIndex + k
             portfolioIndex = portfolioIndex + k
             statusIndex = statusIndex + k
             associationIndex = associationIndex + k
             agreementIndex = agreementIndex + k
-
-            capacityIndex = capacityIndex + k            
+            capacityIndex = capacityIndex + k
             commissionIndex = commissionIndex + k
             essIndex = essIndex + k
             lgcIndex = lgcIndex + k
@@ -482,10 +489,9 @@ Function ExportPivotTableToJSON(sheetName As String, pivotTableName As String) A
             stcIndex = stcIndex + k
             wholesaleEnergyIndex = wholesaleEnergyIndex + k
         Next i
-
     End If
 
-    ' Remove the trailing comma And close the JSON array
+    ' Remove trailing comma and close JSON array
     If Len(jsonData) > 1 Then
         jsonData = Left(jsonData, Len(jsonData) - 1) ' Remove last comma
     End If
@@ -494,5 +500,6 @@ Function ExportPivotTableToJSON(sheetName As String, pivotTableName As String) A
     ' Return the JSON string
     ExportPivotTableToJSON = jsonData
 End Function
+
 
 
