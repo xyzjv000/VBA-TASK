@@ -104,7 +104,8 @@
         flex: none;
       }
 
-      #filter2 .filter-container select, #nmi {
+      #filter2 .filter-container select,
+      #nmi {
         padding: 10px;
         min-width: 250px;
         border-radius: 5px;
@@ -177,17 +178,6 @@
   <body>
     <div class="container">
       <div class="chart">
-        <div class="chart-container">
-          <div class="chart-item">
-            <center><h3>Historical Performance FY2024 Actuals</h3></center>
-            <div id="hpfy24a"></div>
-          </div>
-          <div class="chart-item">
-            <center><h3>Percentage Fees in FY2024</h3></center>
-            <div id="pfify24"></div>
-          </div>
-        </div>
-        <br />
         <div id="filter1">
           <div class="filter-container">
             <label for="portfolio-filter">Portfolio</label>
@@ -210,6 +200,17 @@
             <select name="nmi-filter" id="nmi-filter"></select>
           </div>
         </div>
+        <div class="chart-container">
+          <div class="chart-item">
+            <center><h3>Historical Performance FY2024 Actuals</h3></center>
+            <div id="hpfy24a"></div>
+          </div>
+          <div class="chart-item">
+            <center><h3>Percentage Fees in FY2024</h3></center>
+            <div id="pfify24"></div>
+          </div>
+        </div>
+        <br />
         <div class="table-container">
           <table id="table1">
             <thead>
@@ -261,6 +262,18 @@
         <br />
         <hr />
         <!-- Actual Cost and Percentage -->
+
+        <div id="filter2">
+          <div class="filter-container">
+            <label for="year-filter">Year</label>
+            <select name="year-filter" id="year-filter"></select>
+          </div>
+          <div class="filter-container">
+            <label for="margin-filter">Types of Margin</label>
+            <select name="margin-filter" id="margin-filter"></select>
+          </div>
+        </div>
+        <br />
         <div>
           <div class="chart-item">
             <center><h3>Actual Cost and Percentage</h3></center>
@@ -277,17 +290,6 @@
                 </table>
               </div>
             </div>
-          </div>
-        </div>
-        <br>
-        <div id="filter2">
-          <div class="filter-container">
-            <label for="year-filter">Year</label>
-            <select name="year-filter" id="year-filter"></select>
-          </div>
-          <div class="filter-container">
-            <label for="margin-filter">Types of Margin</label>
-            <select name="margin-filter" id="margin-filter"></select>
           </div>
         </div>
         <br />
@@ -386,6 +388,7 @@
 
         return combineData(marginData);
       };
+      
       const animatedPieChart = (data, chartId) => {
         am4core.useTheme(am4themes_animated);
         var chart = am4core.create(chartId, am4charts.PieChart3D);
@@ -417,6 +420,7 @@
         chart.legend.position = "right";
         chart.exporting.menu = new am4core.ExportMenu();
       };
+      
       const xyChart = (data, chartId, seriesName) => {
         am4core.useTheme(am4themes_animated);
         var chart = am4core.create(chartId, am4charts.XYChart);
@@ -460,6 +464,7 @@
         chart.cursor = new am4charts.XYCursor();
         chart.exporting.menu = new am4core.ExportMenu();
       };
+      
       const populateTable1Data = (data) => {
         const headerRow = document.querySelector("#table1 #headerRow");
         const dataRow = document.querySelector("#table1 #dataRow");
@@ -478,6 +483,7 @@
           dataRow.appendChild(td);
         });
       };
+      
       const clusteredChart = (data, chartId) => {
         am4core.useTheme(am4themes_animated);
         var chart = am4core.create(chartId, am4charts.XYChart);
@@ -621,6 +627,7 @@
 
         chart.exporting.menu = new am4core.ExportMenu();
       };
+      
       const populateTable2Data = (data, id) => {
         const headerRow = document.querySelector("#" + id + " #headerRow");
         const tbody = document.querySelector("#" + id + " tbody");
@@ -674,6 +681,7 @@
           tbody.appendChild(row);
         });
       };
+      
       const populateTable3Data = (data, id) => {
         const headerRow = document.querySelector("#" + id + " #headerRow");
         const tbody = document.querySelector("#" + id + " tbody");
@@ -706,6 +714,7 @@
           tbody.appendChild(row);
         });
       };
+      
       const getUniqueValue = (data, element) => {
         const uniqueTypes = [
           ...new Set(
@@ -791,6 +800,7 @@
           total: totals[type].toFixed(2),
         }));
       };
+
       const fyActualMarginVsPOE = (dataArr, chartId) => {
         am4core.useTheme(am4themes_animated);
 
@@ -799,16 +809,16 @@
         const transformedData = [];
 
         dataArr.forEach((margin) => {
-          margin.totals.forEach((total) => {
+          margin.type.forEach((total) => {
             let existingEntry = transformedData.find(
-              (entry) => entry.type === total.type
+              (entry) => entry.type === total.name
             );
             if (!existingEntry) {
-              existingEntry = { type: total.type };
+              existingEntry = { type: total.name };
               transformedData.push(existingEntry);
             }
 
-            existingEntry[margin.typesofmargin] = total.total;
+            existingEntry[margin.margin] = total.value;
           });
         });
 
@@ -823,13 +833,13 @@
 
         var valueAxis = chart.yAxes.push(new am4charts.ValueAxis());
         valueAxis.renderer.minWidth = 35;
-        valueAxis.title.text = "Total";
+        valueAxis.title.text = "Value";
 
         dataArr.forEach((margin) => {
           var series = chart.series.push(new am4charts.LineSeries());
-          series.dataFields.valueY = margin.typesofmargin;
+          series.dataFields.valueY = margin.margin;
           series.dataFields.categoryX = "type";
-          series.name = margin.typesofmargin;
+          series.name = margin.margin;
           series.strokeWidth = 2;
           series.tooltipText = "{name}: [bold]{valueY}[/]";
 
@@ -848,6 +858,7 @@
         chart.scrollbarX = new am4core.Scrollbar();
         chart.exporting.menu = new am4core.ExportMenu();
       };
+
       const nmiClusteredChart = (data, chartId) => {
         loadingElement.style.display = "block";
         if (nmiChartVar) {
@@ -993,16 +1004,148 @@
         });
         return nmiChartVar;
       };
+
+      function transformDataForChartNew(data, key) {
+        return data
+          .map((item) => item.data)
+          .flat()
+          .filter((item) => (key ? item.margin.includes(key) : true))
+          .map((item) => item.type)
+          .flat();
+      }
+      function transformDataForPOEChart(data, key) {
+        return data
+          .map((item) => item.data)
+          .flat()
+          .filter((item) => (key ? item.margin.includes(key) : true));
+      }
+      function totalValuesByName(data) {
+        const totals = {};
+
+        data.forEach((item) => {
+          if (totals[item.name]) {
+            totals[item.name] += item.value;
+          } else {
+            totals[item.name] = item.value;
+          }
+        });
+
+        return [
+          { type: "Capacity", total: totals["capacity"] || 0 },
+          { type: "Commission", total: totals["commission"] || 0 },
+          { type: "ESS", total: totals["ess"] || 0 },
+          { type: "LGC", total: totals["lgc"] || 0 },
+          { type: "Market Fees", total: totals["marketFees"] || 0 },
+          { type: "Network", total: totals["network"] || 0 },
+          { type: "Retail Margin", total: totals["retailMargin"] || 0 },
+          { type: "Revenue", total: totals["revenue"] || 0 },
+          { type: "STC", total: totals["stc"] || 0 },
+          { type: "Wholesale Energy", total: totals["wholesaleEnergy"] || 0 },
+        ];
+      }
+      
+      function totalValuesByType(data) {
+        const totals = [];
+        const names = [
+          { type: "Capacity", name: "capacity" },
+          { type: "Commission", name: "commission" },
+          { type: "ESS", name: "ess" },
+          { type: "LGC", name: "lgc" },
+          { type: "Market Fees", name: "marketFees" },
+          { type: "Network", name: "network" },
+          { type: "Retail Margin", name: "retailMargin" },
+          { type: "Revenue", name: "revenue" },
+          { type: "STC", name: "stc" },
+          { type: "Wholesale Energy", name: "wholesaleEnergy" },
+        ];
+        data.forEach((item) => {
+          item.type.forEach((typeObj) => {
+            // Find if the same combination of margin and type already exists
+            const existing = totals.find(
+              (entry) =>
+                entry.margin === item.margin && entry.type === typeObj.name
+            );
+
+            if (existing) {
+              // If it exists, add the value to the total
+              existing.total += typeObj.value;
+            } else {
+              // If it doesn't exist, add a new entry to the array
+              totals.push({
+                margin: item.margin,
+                type: typeObj.name,
+                total: typeObj.value,
+              });
+            }
+          });
+        });
+        function updateTypeValues(data) {
+          return data.map((item) => {
+            const foundName = names.find((n) => n.name === item.type);
+            return {
+              ...item,
+              type: foundName ? foundName.type : item.type, // Update type if found, else keep the original
+            };
+          });
+        }
+        return updateTypeValues(totals);
+      }
+
+      function totalValuesByTypeNew(data) {
+        const margins = {};
+        const names = [
+          { type: "Capacity", name: "capacity" },
+          { type: "Commission", name: "commission" },
+          { type: "ESS", name: "ess" },
+          { type: "LGC", name: "lgc" },
+          { type: "Market Fees", name: "marketFees" },
+          { type: "Network", name: "network" },
+          { type: "Retail Margin", name: "retailMargin" },
+          { type: "Revenue", name: "revenue" },
+          { type: "STC", name: "stc" },
+          { type: "Wholesale Energy", name: "wholesaleEnergy" },
+        ];
+
+        // Create a mapping of type names for easy lookup
+        const typeMapping = Object.fromEntries(names.map(item => [item.name, item.type]));
+
+        data.forEach((item) => {
+          if (!margins[item.margin]) {
+            // Initialize a new margin if not already present
+            margins[item.margin] = {};
+          }
+
+          item.type.forEach((typeObj) => {
+            // Use typeMapping to update the type value
+            const updatedType = typeMapping[typeObj.name] || typeObj.name; // fallback to original name if not found
+
+            if (margins[item.margin][updatedType]) {
+              margins[item.margin][updatedType] += typeObj.value;
+            } else {
+              margins[item.margin][updatedType] = typeObj.value;
+            }
+          });
+        });
+
+        // Convert the result back to the required format
+        return Object.keys(margins).map((margin) => {
+          return {
+            margin,
+            type: Object.keys(margins[margin]).map((name) => ({
+              name,
+              value: margins[margin][name],
+            })),
+          };
+        });
+      }
+
     </script>
     <!-- variables and execution -->
     <script>
-      var combinedJsonData = {{combinedJson}};
-      var summaryJsonData = {{summaryJson}};
       var versionData = {{versionData}};
       var nmiJsonData = {{nmiJson}}
       var combinedDataJsonFull = {{combinedFullJson}}
-      console.log(combinedDataJsonFull);
-
+      console.log("combinedDataJsonFull",combinedDataJsonFull);
       var nmiChartVar;
       const typeList =[
             "RetailMargin",
@@ -1017,10 +1160,11 @@
             "Commission"
         ]
 
-      const achievedMargin2024 = transformDataForChart(combinedJsonData, "Sum of Achieved Margin FY2024")
-      const dataFy2024 =  transformDataForChart(combinedJsonData, "FY2024")
-      const dataFy2025 =  transformDataForCluster(combinedJsonData, "FY2025")
-      const dataFy2026 = transformDataForCluster(combinedJsonData, "FY2026")
+      let achievedMargin2024 = totalValuesByName(transformDataForChartNew(combinedDataJsonFull, "FY2024"));
+      const dataFy2025 =  totalValuesByType(transformDataForPOEChart(combinedDataJsonFull, "FY2025"))
+      const dataFy2026 =  totalValuesByType(transformDataForPOEChart(combinedDataJsonFull, "FY2026"))
+      let actualsMarginData= totalValuesByName(transformDataForChartNew(combinedDataJsonFull));
+
       const dataRmperNMIBase = transformDataForCluster(nmiJsonData.filter(data => data.typesofmargin != "(blank)" && data.typesofmargin != "Grand Total"));
       const nmiList = combinedDataJsonFull.filter(data => data.nmi);
       var updatedDataRmperNMIBase = []
@@ -1034,7 +1178,6 @@
       const yearFilterselect = document.getElementById('year-filter');
       const marginFilterselect = document.getElementById('margin-filter');
 
-
       xyChart(achievedMargin2024, "hpfy24a", "Historical Performance FY2024 Actuals");
       animatedPieChart(achievedMargin2024, "pfify24");
       populateTable1Data(achievedMargin2024);
@@ -1042,42 +1185,13 @@
       populateTable2Data(dataFy2025, 'table2');
       clusteredChart(dataFy2026, "fy26avspoe");
       populateTable2Data(dataFy2026, 'table3');
-      animatedPieChart(totalCost(transformDataForCluster(summaryJsonData)), "acap");
-      populateTable3Data(totalCost(transformDataForCluster(summaryJsonData)), 'table5');
-      // Example usage
-      const combinedSummary = []
-      const prepareDateForChart = () => {
-        function getLast6IfStartsWithFY(inputString) {
-          if (inputString.length < 6) {
-            return null;
-          }
 
-          // Extract the last 6 characters
-          const last6 = inputString.slice(-6);
+      animatedPieChart(actualsMarginData, "acap");
+      populateTable3Data(actualsMarginData, 'table5');
 
-          if (last6.startsWith('FY')) {
-            return last6;
-          }
-        }
-
-        summaryJsonData.forEach((data, index) => {
-          const dataOb = {
-            typesofmargin: data.typesofmargin,
-            totals: transformDataForChart(summaryJsonData, data.typesofmargin)
-          }
-          if (data.typesofmargin != "Grand Total")
-            combinedSummary.push(dataOb)
-        })
-        combinedSummary.sort((a, b) => {
-            if (a.typesofmargin < b.typesofmargin) return -1;
-            if (a.typesofmargin > b.typesofmargin) return 1;
-            return 0;
-          });
-      }
-      prepareDateForChart()
-
-      fyActualMarginVsPOE(combinedSummary, "fyamvspoe");
-      populateTable2Data(transformDataForCluster(combinedJsonData), 'table4');
+      fyActualMarginVsPOE(totalValuesByTypeNew(transformDataForPOEChart(combinedDataJsonFull)), "fyamvspoe");      
+      populateTable2Data(totalValuesByType(transformDataForPOEChart(combinedDataJsonFull)), 'table4');
+      
       nmiClusteredChart(dataRmperNMIBase, "rmpnmibase");
       getUniqueValue(dataRmperNMIBase, select);
       setFilterData(nmiList, nmiFilterselect, "nmi");
@@ -1123,8 +1237,6 @@
             )
           ).filter((data) => data.type == select.value);
         }
-
-        nmi - filter;
         reloadChart(updatedDataRmperNMIBase);
         console.log("dataRmperNMIBase", updatedDataRmperNMIBase, select.value);
       });

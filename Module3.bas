@@ -24,8 +24,8 @@ Sub ExportChartToHTML()
     Dim jsonResult4 As String
     Dim versionData As String
 
-    jsonResult1 = ExtractFilteredDataToJSONArrayMargins("FINAL output 2", "PivotTable1")
-    jsonResult2 = ExtractFilteredDataToJSONArrayMargins("FINAL output 2", "PivotTable2")
+    ' jsonResult1 = ExtractFilteredDataToJSONArrayMargins("FINAL output 2", "PivotTable1")
+    ' jsonResult2 = ExtractFilteredDataToJSONArrayMargins("FINAL output 2", "PivotTable2")
     jsonResult3 = ExtractFilteredDataToJSONArrayMargins("Retail Margin Only", "PivotTable21")
     jsonResult4 = ExportPivotTableToJSON("FINAL output 2", "PivotTable4")
     ' templateFilePath = GetCurrentExcelDirectory & "\Exports\HTML_Template.html"
@@ -37,16 +37,16 @@ Sub ExportChartToHTML()
     Close #templateFileNumber
 
     ' Convert the range To JSON
-    combinedJson = jsonResult1
-    summaryJson = jsonResult2
+    ' combinedJson = jsonResult1
+    ' summaryJson = jsonResult2
     nmiJson = jsonResult3
     combinedFullJson = jsonResult4
     versionData = GetVersionData()
     Debug.Print combinedJson
     ' Replace placeholders in the HTML template With actual data
-    htmlContent = Replace(htmlTemplate, "{{combinedJson}}", combinedJson)
-    htmlContent = Replace(htmlContent, "{{summaryJson}}", summaryJson)
-    htmlContent = Replace(htmlContent, "{{versionData}}", versionData)
+    ' htmlContent = Replace(htmlTemplate, "{{combinedJson}}", combinedJson)
+    ' htmlContent = Replace(htmlContent, "{{summaryJson}}", summaryJson)
+    htmlContent = Replace(htmlTemplate, "{{versionData}}", versionData)
     htmlContent = Replace(htmlContent, "{{nmiJson}}", nmiJson)
     htmlContent = Replace(htmlContent, "{{combinedFullJson}}", combinedFullJson)
     ' Define the file path To save the HTML file
