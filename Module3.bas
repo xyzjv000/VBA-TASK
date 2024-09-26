@@ -8,47 +8,48 @@ Sub ExportChartToHTML()
     Dim htmlWSummary As String
     Dim htmlWVersion As String
     Dim filePath As String
-    Dim summaryData As Range
-    Dim combinedData As Range
-    Dim marginData As Range
     Dim combinedJson As String
     Dim summaryJson As String
     Dim nmiJson As String
     Dim combinedFullJson As String
-    Dim jsonData As String
     Dim templateFilePath As String
+    Dim cssFilePath As String
+    Dim jsFilePath As String
     Dim templateFileNumber As Integer
-    Dim jsonResult1 As String
-    Dim jsonResult2 As String
     Dim jsonResult3 As String
     Dim jsonResult4 As String
     Dim versionData As String
 
-    ' jsonResult1 = ExtractFilteredDataToJSONArrayMargins("FINAL output 2", "PivotTable1")
-    ' jsonResult2 = ExtractFilteredDataToJSONArrayMargins("FINAL output 2", "PivotTable2")
+    ' JSON extraction from your Pivot Tables
     jsonResult3 = ExtractFilteredDataToJSONArrayMargins("Retail Margin Only", "PivotTable21")
     jsonResult4 = ExportPivotTableToJSON("FINAL output 2", "PivotTable4")
-    ' templateFilePath = GetCurrentExcelDirectory & "\Exports\HTML_Template.html"
+
+    ' File paths
     templateFilePath = GetCurrentExcelDirectory & Application.PathSeparator & "Exports" & Application.PathSeparator & "HTML_Template.html"
+    cssFilePath = GetCurrentExcelDirectory & Application.PathSeparator & "Exports" & Application.PathSeparator & "styles.css"
+    jsFilePath = GetCurrentExcelDirectory & Application.PathSeparator & "Exports" & Application.PathSeparator & "script.js"
+
     ' Read HTML template from file
     templateFileNumber = FreeFile
     Open templateFilePath For Input As #templateFileNumber
     htmlTemplate = Input$(LOF(templateFileNumber), templateFileNumber)
     Close #templateFileNumber
 
-    ' Convert the range To JSON
-    ' combinedJson = jsonResult1
-    ' summaryJson = jsonResult2
+    ' Replace placeholders in the HTML template With actual data
     nmiJson = jsonResult3
     combinedFullJson = jsonResult4
     versionData = GetVersionData()
-    Debug.Print combinedJson
-    ' Replace placeholders in the HTML template With actual data
+
     ' htmlContent = Replace(htmlTemplate, "{{combinedJson}}", combinedJson)
     ' htmlContent = Replace(htmlContent, "{{summaryJson}}", summaryJson)
     htmlContent = Replace(htmlTemplate, "{{versionData}}", versionData)
     htmlContent = Replace(htmlContent, "{{nmiJson}}", nmiJson)
     htmlContent = Replace(htmlContent, "{{combinedFullJson}}", combinedFullJson)
+
+    ' Replace CSS And JS placeholders With file paths
+    htmlContent = Replace(htmlContent, "{{cssFilePath}}", cssFilePath)
+    htmlContent = Replace(htmlContent, "{{jsFilePath}}", jsFilePath)
+
     ' Define the file path To save the HTML file
     filePath = GetCurrentDesktopirectory & "\ExportedReport.html" ' Change To your desired file path
 
@@ -159,114 +160,109 @@ Function ToCamelCase(text As String) As String
 End Function
 
 Function ExtractFilteredDataToJSONArrayMargins(sheetName As String, pivotTableName As String) As String
-    Dim pt As PivotTable
     Dim ws As Worksheet
-    Dim jsonString As String
-    Dim jsonArray As Object
-    Dim rowDict As Object
-    Dim totalDict As Object
-    Dim labelDict As Object
-    Dim pRow As Range
-    Dim colHeaders As Range
-    Dim startCol As Integer
-    Dim typesofmargin As String
-    Dim totalName As String
-    Dim totalLabel As String
-    Dim totalValue As String
-    Dim i As Integer
+    Dim pvt As PivotTable
+    Dim jsonData As String
+    Dim jsonDataItem As String
+    Dim rowItem As PivotItem
+    Dim rowItemNmi As Variant
+    Dim rowItemPortfolio As Variant
+    Dim rowItemStatus As Variant
+    Dim rowItemAssociation As Variant
+    Dim rowItemAgreement As Variant
+    Dim colItem As PivotItem
+    Dim valueNmi As Variant
+    Dim i As Long, j As Long, k As Long
+    Dim lastRow As Long
+    Dim colFieldName As String
+    Dim dataFieldName As String
 
-    ' Set worksheet And PivotTable
-    Set ws = ThisWorkbook.Worksheets(sheetName)
-    Set pt = ws.PivotTables(pivotTableName)
+    ' Set worksheet And pivot table
+    Set ws = ThisWorkbook.Sheets(sheetName)
+    Set pvt = ws.PivotTables(pivotTableName)
 
-    ' Create JSON array
-    Set jsonArray = CreateObject("Scripting.Dictionary")
+    ' Index setup
+    Dim nmiIndex As Long
+    Dim portfolioIndex As Long
+    Dim statusIndex As Long
+    Dim associationIndex As Long
+    Dim agreementIndex As Long
 
-    ' Get column headers range
-    Set colHeaders = pt.DataBodyRange.Cells(1, 1).Offset(-1, 1).Resize(1, pt.DataBodyRange.Columns.Count - 1)
-    startCol = pt.DataBodyRange.Column
+    nmiIndex = 1
+    statusIndex = 2
+    portfolioIndex = 3
+    associationIndex = 4
+    agreementIndex = 5
+    ' Initialize JSON string
+    jsonData = "["
 
-    ' Iterate over the PivotTable columns, starting from the second column
-    For i = 1 To pt.DataBodyRange.Columns.Count
-        ' Initialize a New row dictionary For each typesofmargin
-        Set rowDict = CreateObject("Scripting.Dictionary")
-        Set totalDict = CreateObject("Scripting.Dictionary")
-        Set labelDict = CreateObject("Scripting.Dictionary")
+    k = 5
+    ' Ensure row And column fields exist
+    If pvt.rowFields.Count >= 5 And pvt.ColumnFields.Count >= 1 Then
+        rowFieldNmi = pvt.rowFields(1).name
+        colFieldName = pvt.ColumnFields(1).name
+        lastRow = pvt.DataBodyRange.Rows.Count + pvt.DataBodyRange.row - 1
 
-        ' Get the typesofmargin from the column header
-        typesofmargin = Trim(colHeaders.Cells(1, i - 1).value)
-        rowDict.Add "typesofmargin", typesofmargin
-
-        ' Loop through the rows To Get totals For this typesofmargin
-        For Each pRow In pt.DataBodyRange.Rows
-            totalName = LCase(Trim(pRow.Cells(1, 0).value)) ' The first column under "Row Labels"
-            totalLabel = pRow.Cells(1, 0).value ' Use the correct reference For labels
-            totalValue = pRow.Cells(1, i).value ' The current column value For this row
-
-            ' Normalize "grand total" To "total"
-            If totalName = "grand total" Then
-                totalLabel = "Total"
-                totalName = "total"
+        ' Loop through row fields And column fields
+        For i = 1 To lastRow Step k
+            Set rowItemNmi = pvt.DataBodyRange.Cells(nmiIndex, 0)
+            If rowItemNmi = "Grand Total" Then
+             Exit For
             End If
+            If rowItemNmi = "(blank)" Then
+             Exit For
+            End If
+            Set rowItemPortfolio = pvt.DataBodyRange.Cells(portfolioIndex, 0)
+            Set rowItemStatus = pvt.DataBodyRange.Cells(statusIndex, 0)
+            Set rowItemAssociation = pvt.DataBodyRange.Cells(associationIndex, 0)
+            Set rowItemAgreement = pvt.DataBodyRange.Cells(agreementIndex, 0)
 
-            ' Add total And Label To respective dictionaries
-            totalDict.Add totalName, totalValue
-            labelDict.Add totalName, totalLabel
-        Next pRow
+            ' Loop through column items
+            For j = 1 To pvt.ColumnFields(1).PivotItems.Count - 3
+                dataFieldName = pvt.DataBodyRange.Cells(0, j)
+                If dataFieldName = "Grand Total" Then
+                 Exit For
+                End If
+                If dataFieldName <> "(blank)" Then
+                    valueNmi = pvt.DataBodyRange.Cells(nmiIndex, j)
+                    If Not IsError(cellValue) Then
+                        jsonDataItem = jsonDataItem & _
+                        "{""margin"":""" & dataFieldName & """," & _
+                        """value"":" & valueNmi & "},"
+                    End If
+                End If                
+            Next j
+            If Len(jsonDataItem) > 1 Then
+                jsonDataItem = Left(jsonDataItem, Len(jsonDataItem) - 1) ' Remove last comma
+            End If
+            jsonData = jsonData & "{" & _
+            """nmi"":""" & rowItemNmi & """," & _
+            """data"":[" & _
+            jsonDataItem & _
+            "]," & _
+            """portfolio"":""" & rowItemPortfolio & """," & _
+            """status"":""" & rowItemStatus & """," & _
+            """association"":""" & rowItemAssociation & """," & _
+            """agreement"":""" & rowItemAgreement & """" & _
+            "},"
+            jsonDataItem = ""
+            ' Increment indices
+            nmiIndex = nmiIndex + k
+            portfolioIndex = portfolioIndex + k
+            statusIndex = statusIndex + k
+            associationIndex = associationIndex + k
+            agreementIndex = agreementIndex + k
+        Next i
+    End If
 
-        ' Add totals And labels dictionaries To row dictionary
-        rowDict.Add "totals", totalDict
-        rowDict.Add "labels", labelDict
+    ' Remove trailing comma And close JSON array
+    If Len(jsonData) > 1 Then
+        jsonData = Left(jsonData, Len(jsonData) - 1) ' Remove last comma
+    End If
+    jsonData = jsonData & "]"
 
-        ' Add row dictionary To JSON array
-        jsonArray.Add jsonArray.Count, rowDict
-    Next i
-
-    ' Convert To JSON string
-    jsonString = JsonConvertToObjectMargins(jsonArray)
-    ExtractFilteredDataToJSONArrayMargins = jsonString
-End Function
-
-Function JsonConvertToObjectMargins(dict As Object) As String
-    Dim json As String
-    Dim key As Variant
-    Dim subKey As Variant
-    Dim i As Integer
-    Dim subJson As String
-    Dim labelJson As String
-
-    json = "["
-    i = 0
-    For Each key In dict
-        json = json & "{"
-        json = json & """typesofmargin"":""" & dict(key).Item("typesofmargin") & ""","
-
-        ' Convert totals dictionary To JSON object
-        subJson = "{"
-        For Each subKey In dict(key).Item("totals")
-            subJson = subJson & """" & subKey & """:""" & dict(key).Item("totals")(subKey) & ""","
-        Next subKey
-        ' Remove the trailing comma from totals
-        If Right(subJson, 1) = "," Then subJson = Left(subJson, Len(subJson) - 1)
-            subJson = subJson & "}"
-
-            ' Convert labels dictionary To JSON object
-            labelJson = "{"
-            For Each subKey In dict(key).Item("labels")
-                labelJson = labelJson & """" & subKey & """:""" & dict(key).Item("labels")(subKey) & ""","
-            Next subKey
-            ' Remove the trailing comma from labels
-            If Right(labelJson, 1) = "," Then labelJson = Left(labelJson, Len(labelJson) - 1)
-                labelJson = labelJson & "}"
-
-                ' Combine totals And labels into the main JSON object
-                json = json & """totals"":" & subJson & "," & """labels"":" & labelJson & "}"
-                If i < dict.Count - 1 Then json = json & ","
-                    i = i + 1
-                Next key
-                json = json & "]"
-
-                JsonConvertToObjectMargins = json
+    ' Return the JSON string
+    ExtractFilteredDataToJSONArrayMargins = jsonData
 End Function
 
 
@@ -349,7 +345,7 @@ Function ExportPivotTableToJSON(sheetName As String, pivotTableName As String) A
     Dim colFieldName As String
     Dim dataFieldName As String
 
-    ' Set worksheet and pivot table
+    ' Set worksheet And pivot table
     Set ws = ThisWorkbook.Sheets(sheetName)
     Set pvt = ws.PivotTables(pivotTableName)
 
@@ -390,17 +386,17 @@ Function ExportPivotTableToJSON(sheetName As String, pivotTableName As String) A
     jsonData = "["
 
     k = 51
-    ' Ensure row and column fields exist
+    ' Ensure row And column fields exist
     If pvt.rowFields.Count >= 6 And pvt.ColumnFields.Count >= 1 Then
-        rowFieldNmi = pvt.rowFields(1).Name
-        colFieldName = pvt.ColumnFields(1).Name
-        lastRow = pvt.DataBodyRange.Rows.Count + pvt.DataBodyRange.Row - 1
-        
-        ' Loop through row fields and column fields
+        rowFieldNmi = pvt.rowFields(1).name
+        colFieldName = pvt.ColumnFields(1).name
+        lastRow = pvt.DataBodyRange.Rows.Count + pvt.DataBodyRange.row - 1
+
+        ' Loop through row fields And column fields
         For i = 1 To lastRow Step k
             Set rowItemNmi = pvt.DataBodyRange.Cells(nmiIndex, 0)
             If rowItemNmi = "Grand Total" Then
-                Exit For
+             Exit For
             End If
             Set rowItemCapacity = pvt.DataBodyRange.Cells(capacityIndex, 0)
             Set rowItemCommission = pvt.DataBodyRange.Cells(commissionIndex, 0)
@@ -420,20 +416,20 @@ Function ExportPivotTableToJSON(sheetName As String, pivotTableName As String) A
 
             ' Loop through column items
             For j = 1 To pvt.ColumnFields(1).PivotItems.Count
-                dataFieldName = pvt.DataFields(j).Name
+                dataFieldName = pvt.DataFields(j).name
 
                 ' On Error Resume Next ' Ignore error If GetPivotData fails
-                valueNmi = pvt.GetPivotData(dataFieldName, rowFieldNmi, rowItemNmi , colFieldName, dataFieldName)
-                valueCapacity = pvt.GetPivotData(dataFieldName, rowFieldNmi, rowItemNmi , "Type" , rowItemCapacity , colFieldName, dataFieldName)
-                valueCommission = pvt.GetPivotData(dataFieldName, rowFieldNmi, rowItemNmi , "Type" , rowItemCommission , colFieldName, dataFieldName)
-                valueEss = pvt.GetPivotData(dataFieldName, rowFieldNmi, rowItemNmi , "Type" ,rowItemEss , colFieldName, dataFieldName)
-                valueLgc = pvt.GetPivotData(dataFieldName, rowFieldNmi, rowItemNmi , "Type" , rowItemLgc, colFieldName, dataFieldName)
-                valueMarketFees = pvt.GetPivotData(dataFieldName, rowFieldNmi, rowItemNmi , "Type" ,rowItemMarketFees , colFieldName, dataFieldName)
-                valueNetwork = pvt.GetPivotData(dataFieldName, rowFieldNmi, rowItemNmi , "Type" ,rowItemNetwork , colFieldName, dataFieldName)
-                valueRetailMargin = pvt.GetPivotData(dataFieldName, rowFieldNmi, rowItemNmi , "Type" ,rowItemRetailMargin , colFieldName, dataFieldName)
-                valueRevenue = pvt.GetPivotData(dataFieldName, rowFieldNmi, rowItemNmi , "Type" , rowItemRevenue, colFieldName, dataFieldName)
-                valueStc = pvt.GetPivotData(dataFieldName, rowFieldNmi, rowItemNmi , "Type" ,rowItemStc , colFieldName, dataFieldName)
-                valueWholesaleEnergy = pvt.GetPivotData(dataFieldName, rowFieldNmi, rowItemNmi , "Type" , rowItemWholesaleEnergy, colFieldName, dataFieldName)
+                valueNmi = pvt.GetPivotData(dataFieldName, rowFieldNmi, rowItemNmi, colFieldName, dataFieldName)
+                valueCapacity = pvt.GetPivotData(dataFieldName, rowFieldNmi, rowItemNmi, "Type", rowItemCapacity, colFieldName, dataFieldName)
+                valueCommission = pvt.GetPivotData(dataFieldName, rowFieldNmi, rowItemNmi, "Type", rowItemCommission, colFieldName, dataFieldName)
+                valueEss = pvt.GetPivotData(dataFieldName, rowFieldNmi, rowItemNmi, "Type", rowItemEss, colFieldName, dataFieldName)
+                valueLgc = pvt.GetPivotData(dataFieldName, rowFieldNmi, rowItemNmi, "Type", rowItemLgc, colFieldName, dataFieldName)
+                valueMarketFees = pvt.GetPivotData(dataFieldName, rowFieldNmi, rowItemNmi, "Type", rowItemMarketFees, colFieldName, dataFieldName)
+                valueNetwork = pvt.GetPivotData(dataFieldName, rowFieldNmi, rowItemNmi, "Type", rowItemNetwork, colFieldName, dataFieldName)
+                valueRetailMargin = pvt.GetPivotData(dataFieldName, rowFieldNmi, rowItemNmi, "Type", rowItemRetailMargin, colFieldName, dataFieldName)
+                valueRevenue = pvt.GetPivotData(dataFieldName, rowFieldNmi, rowItemNmi, "Type", rowItemRevenue, colFieldName, dataFieldName)
+                valueStc = pvt.GetPivotData(dataFieldName, rowFieldNmi, rowItemNmi, "Type", rowItemStc, colFieldName, dataFieldName)
+                valueWholesaleEnergy = pvt.GetPivotData(dataFieldName, rowFieldNmi, rowItemNmi, "Type", rowItemWholesaleEnergy, colFieldName, dataFieldName)
 
                 cellPortfolio = rowItemPortfolio
                 cellStatus = rowItemStatus
@@ -445,32 +441,32 @@ Function ExportPivotTableToJSON(sheetName As String, pivotTableName As String) A
                 If Not IsError(cellValue) Then
                     jsonDataItem = jsonDataItem & _
                     "{""margin"":""" & dataFieldName & """," & _
-                        """value"":" & valueNmi & "," & _
-                        """type"":[" & _
-                        "{""name"":""capacity"",""value"":" & valueCapacity & "}," & _
-                        "{""name"":""commission"",""value"":" & valueCommission & "}," & _
-                        "{""name"":""ess"",""value"":" & valueEss & "}," & _
-                        "{""name"":""lgc"",""value"":" & valueLgc & "}," & _
-                        "{""name"":""marketFees"",""value"":" & valueMarketFees & "}," & _
-                        "{""name"":""network"",""value"":" & valueNetwork & "}," & _
-                        "{""name"":""retailMargin"",""value"":" & valueRetailMargin & "}," & _
-                        "{""name"":""revenue"",""value"":" & valueRevenue & "}," & _
-                        "{""name"":""stc"",""value"":" & valueStc & "}," & _
-                        "{""name"":""wholesaleEnergy"",""value"":" & valueWholesaleEnergy & "}" & _
+                    """value"":" & valueNmi & "," & _
+                    """type"":[" & _
+                    "{""name"":""capacity"",""value"":" & valueCapacity & "}," & _
+                    "{""name"":""commission"",""value"":" & valueCommission & "}," & _
+                    "{""name"":""ess"",""value"":" & valueEss & "}," & _
+                    "{""name"":""lgc"",""value"":" & valueLgc & "}," & _
+                    "{""name"":""marketFees"",""value"":" & valueMarketFees & "}," & _
+                    "{""name"":""network"",""value"":" & valueNetwork & "}," & _
+                    "{""name"":""retailMargin"",""value"":" & valueRetailMargin & "}," & _
+                    "{""name"":""revenue"",""value"":" & valueRevenue & "}," & _
+                    "{""name"":""stc"",""value"":" & valueStc & "}," & _
+                    "{""name"":""wholesaleEnergy"",""value"":" & valueWholesaleEnergy & "}" & _
                     "]},"
-                End If                
+                End If
             Next j
 
             jsonData = jsonData & "{" & _
-                """nmi"":""" & rowItemNmi & """," & _                
-                """data"":[" & _
-                jsonDataItem & _
-                "]," & _
-                """portfolio"":""" & rowItemPortfolio & """," & _
-                """status"":""" & rowItemStatus & """," & _
-                """association"":""" & rowItemAssociation & """," & _
-                """agreement"":""" & rowItemAgreement & """" & _
-                "},"
+            """nmi"":""" & rowItemNmi & """," & _
+            """data"":[" & _
+            jsonDataItem & _
+            "]," & _
+            """portfolio"":""" & rowItemPortfolio & """," & _
+            """status"":""" & rowItemStatus & """," & _
+            """association"":""" & rowItemAssociation & """," & _
+            """agreement"":""" & rowItemAgreement & """" & _
+            "},"
             jsonDataItem = ""
             ' Increment indices
             nmiIndex = nmiIndex + k
@@ -491,7 +487,7 @@ Function ExportPivotTableToJSON(sheetName As String, pivotTableName As String) A
         Next i
     End If
 
-    ' Remove trailing comma and close JSON array
+    ' Remove trailing comma And close JSON array
     If Len(jsonData) > 1 Then
         jsonData = Left(jsonData, Len(jsonData) - 1) ' Remove last comma
     End If
@@ -500,6 +496,4 @@ Function ExportPivotTableToJSON(sheetName As String, pivotTableName As String) A
     ' Return the JSON string
     ExportPivotTableToJSON = jsonData
 End Function
-
-
 
