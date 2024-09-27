@@ -79,6 +79,8 @@ const animatedPieChart = (data, chartId) => {
   chart.legend = new am4charts.Legend();
   chart.legend.position = "right";
   chart.exporting.menu = new am4core.ExportMenu();
+
+  return chart;
 };
 
 const xyChart = (data, chartId, seriesName) => {
@@ -123,11 +125,17 @@ const xyChart = (data, chartId, seriesName) => {
 
   chart.cursor = new am4charts.XYCursor();
   chart.exporting.menu = new am4core.ExportMenu();
+
+  return chart;
 };
 
 const populateTable1Data = (data) => {
   const headerRow = document.querySelector("#table1 #headerRow");
   const dataRow = document.querySelector("#table1 #dataRow");
+
+  // Clear the existing header and data rows
+  headerRow.innerHTML = "";
+  dataRow.innerHTML = "";
 
   data.forEach((item) => {
     const th = document.createElement("th");
@@ -283,11 +291,16 @@ const clusteredChart = (data, chartId) => {
   }
 
   chart.exporting.menu = new am4core.ExportMenu();
+  return chart;
 };
 
 const populateTable2Data = (data, id) => {
   const headerRow = document.querySelector("#" + id + " #headerRow");
   const tbody = document.querySelector("#" + id + " tbody");
+
+  // Clear the existing header and body content
+  headerRow.innerHTML = "";
+  tbody.innerHTML = "";
 
   const marginTypes = new Set();
   const typesOfMargins = new Set();
@@ -420,9 +433,6 @@ const getYearFilter = (data, element, key) => {
   if (key === "margin") {
     // Accessing the margin property correctly
     uniqueTypes = data[0].data.map((item) => item.margin);
-  } else if (key == "nmi") {
-    uniqueTypes = data.map((item) => item.margin);
-    console.log(uniqueTypes);
   } else {
     // Ensuring margin and slice are accessed correctly
     uniqueTypes = [
@@ -526,6 +536,8 @@ const fyActualMarginVsPOE = (dataArr, chartId) => {
 
   chart.scrollbarX = new am4core.Scrollbar();
   chart.exporting.menu = new am4core.ExportMenu();
+
+  return chart;
 };
 
 const nmiClusteredChart = (data, chartId) => {
@@ -822,21 +834,227 @@ function transformData(data) {
 
   return result;
 }
+
+function reloadChart(newData) {
+  nmiClusteredChart(newData, "rmpnmibase");
+  isChartLoading = true;
+}
+
+function refreshFilter1Data(filteredData) {
+  achievedMargin2024 = totalValuesByName(
+    transformDataForChartNew(filteredData, "FY2024")
+  );
+  dataFy2025 = totalValuesByType(
+    transformDataForPOEChart(filteredData, "FY2025")
+  );
+  dataFy2026 = totalValuesByType(
+    transformDataForPOEChart(filteredData, "FY2026")
+  );
+  if (xyChartHpfy24a) {
+    xyChartHpfy24a.dispose();
+  }
+  if (clusterChartFy25avspoe) {
+    clusterChartFy25avspoe.dispose();
+  }
+
+  if (clusterChartFy26avspoe) {
+    clusterChartFy26avspoe.dispose();
+  }
+
+  xyChartHpfy24a = xyChart(
+    achievedMargin2024,
+    "hpfy24a",
+    "Historical Performance FY2024 Actuals"
+  );
+  // animatedPieChart(achievedMargin2024, "pfify24");
+  populateTable1Data(achievedMargin2024);
+  clusterChartFy25avspoe = clusteredChart(dataFy2025, "fy25avspoe");
+  populateTable2Data(dataFy2025, "table2");
+  clusterChartFy26avspoe = clusteredChart(dataFy2026, "fy26avspoe");
+  populateTable2Data(dataFy2026, "table3");
+}
+
+// Function to apply all active filters
+// Function to apply all active filters
+function applyAllFilters() {
+  // Start with the full dataset before filtering
+  let filteredData = combinedDataJsonFull;
+
+  // Apply portfolio filter if it's not 'selectAll'
+  if (filter1Portfolio.value !== "selectAll") {
+    filteredData = filteredData.filter(
+      (data) => data.portfolio === filter1Portfolio.value
+    );
+  }
+
+  // Apply status filter if it's not 'selectAll'
+  if (filter1Status.value !== "selectAll") {
+    filteredData = filteredData.filter(
+      (data) => data.status === filter1Status.value
+    );
+  }
+
+  // Apply association filter if it's not 'selectAll'
+  if (filter1Association.value !== "selectAll") {
+    filteredData = filteredData.filter(
+      (data) => data.association === filter1Association.value
+    );
+  }
+
+  // Apply agreement filter if it's not 'selectAll'
+  if (filter1Agreement.value !== "selectAll") {
+    filteredData = filteredData.filter(
+      (data) => data.agreement === filter1Agreement.value
+    );
+  }
+
+  // Apply NMI filter if it's not 'selectAll'
+  if (filter1Nmi.value !== "selectAll") {
+    filteredData = filteredData.filter((data) => data.nmi === filter1Nmi.value);
+  }
+
+  // Ensure filtered data is updated globally and reflect the final filtered result
+  filter1Data = filteredData;
+
+  // setFilterData(filteredData, filter1Nmi, "nmi");
+  // setFilterData(filteredData, filter1Portfolio, "portfolio");
+  // setFilterData(filteredData, filter1Agreement, "agreement");
+  // setFilterData(filteredData, filter1Status, "status");
+  // setFilterData(filteredData, filter1Association, "association");
+
+  // Refresh table or chart with the final filtered data
+  refreshFilter1Data(filteredData);
+}
+
+function refreshFilter2Data(filteredData) {
+  actualsMarginData = totalValuesByName(transformDataForChartNew(filteredData));
+
+  if (animatedPieChartAcap) {
+    animatedPieChartAcap.dispose();
+  }
+
+  if (fyAMVP) {
+    fyAMVP.dispose();
+  }
+
+  animatedPieChartAcap = animatedPieChart(actualsMarginData, "acap");
+  populateTable3Data(actualsMarginData, "table5");
+
+  fyAMVP = fyActualMarginVsPOE(
+    totalValuesByTypeNew(transformDataForPOEChart(filteredData)),
+    "fyamvspoe"
+  );
+  populateTable2Data(
+    totalValuesByType(transformDataForPOEChart(filteredData)),
+    "table4"
+  );
+}
+
+function applyAllFilters2() {
+  // Start with the full dataset before filtering
+  let filteredData = combinedDataJsonFull;
+
+  // Apply portfolio filter if it's not 'selectAll'
+  if (filter2Year.value !== "selectAll") {
+    filteredData = filteredData.map((data) => {
+      return {
+        ...data,
+        data: data.data.filter((item) =>
+          item.margin.includes(filter2Year.value)
+        ),
+      };
+    });
+  }
+
+  if (filter2Margin.value !== "selectAll") {
+    filteredData = filteredData.map((data) => {
+      return {
+        ...data,
+        data: data.data.filter((item) => item.margin == filter2Margin.value),
+      };
+    });
+  }
+
+  // Ensure filtered data is updated globally and reflect the final filtered result
+  filter2Data = filteredData;
+  console.log("Filtered data:", filter2Data);
+  // getYearFilter(filteredData, filter2Year, "year");
+  // getYearFilter(filteredData, filter2Margin, "margin");
+  refreshFilter2Data(filteredData);
+}
+
+function refreshFilter3Data(filteredData) {
+  reloadChart(transformData(filteredData));
+}
+
+function applyAllFilters3() {
+  // Start with the full dataset before filtering
+  let filteredData = nmiJsonData;
+  // Apply NMI filter if it's not 'selectAll'
+  if (filter3Nmi.value !== "selectAll") {
+    filteredData = filteredData.filter((data) => data.nmi === filter3Nmi.value);
+  }
+
+  if (filter3FinancialYear.value !== "selectAll") {
+    filteredData = filteredData.map((data) => {
+      return {
+        ...data,
+        data: data.data.filter((item) =>
+          item.margin.includes(filter3FinancialYear.value)
+        ),
+      };
+    });
+  }
+
+  if (filter3Type.value !== "selectAll") {
+    filteredData = filteredData.map((data) => {
+      return {
+        ...data,
+        data: data.data.filter((item) => item.margin == filter3Type.value),
+      };
+    });
+  }
+
+  if (filter3Portfolio.value !== "selectAll") {
+    filteredData = filteredData.filter(
+      (data) => data.portfolio === filter3Portfolio.value
+    );
+  }
+  if (filter3Status.value !== "selectAll") {
+    filteredData = filteredData.filter(
+      (data) => data.status === filter3Status.value
+    );
+  }
+  if (filter3Agreement.value !== "selectAll") {
+    filteredData = filteredData.filter(
+      (data) => data.agreement === filter3Agreement.value
+    );
+  }
+  if (filter3Association.value !== "selectAll") {
+    filteredData = filteredData.filter(
+      (data) => data.association === filter3Association.value
+    );
+  }
+
+  // Ensure filtered data is updated globally and reflect the final filtered result
+  filter3Data = filteredData;
+  refreshFilter3Data(filteredData);
+}
+
+function toggleSidebar() {
+  var sidebar = document.getElementById("mySidebar");
+  var width = sidebar.style.width;
+
+  if (width === "250px") {
+    sidebar.style.width = "0";
+  } else {
+    sidebar.style.width = "250px";
+  }
+}
+
 console.log("combinedDataJsonFull", combinedDataJsonFull);
 var nmiChartVar;
 var xyChartVar;
-const typeList = [
-  "RetailMargin",
-  "Revenue",
-  "Network",
-  "Capacity",
-  "WholesaleEnergy",
-  "MarketFees",
-  "ESS",
-  "LGC",
-  "STC",
-  "Commission",
-];
 
 let filter1Data = combinedDataJsonFull;
 let achievedMargin2024 = totalValuesByName(
@@ -848,17 +1066,16 @@ let dataFy2025 = totalValuesByType(
 let dataFy2026 = totalValuesByType(
   transformDataForPOEChart(filter1Data, "FY2026")
 );
-let actualsMarginData = totalValuesByName(
-  transformDataForChartNew(combinedDataJsonFull)
-);
-
-const dataRmperNMIBase = transformData(nmiJsonData);
+let filter3Data = nmiJsonData;
+const dataRmperNMIBase = transformData(filter3Data);
 const nmiList = combinedDataJsonFull.filter((data) => data.nmi);
 var updatedDataRmperNMIBase = [];
 var loadingElement = document.getElementById("loading");
 
 // Filter 1
 let updatedFilter1Data = [];
+let updatedFilter2Data = [];
+
 const filter1Nmi = document.getElementById("filter1-nmi");
 const filter1Portfolio = document.getElementById("filter1-portfolio");
 const filter1Status = document.getElementById("filter1-status");
@@ -885,27 +1102,36 @@ const filter3Status = document.getElementById("filter3-status");
 const filter3Agreement = document.getElementById("filter3-agreement");
 const filter3Association = document.getElementById("filter3-association");
 setFilterData(nmiJsonData, filter3Portfolio, "portfolio");
-setFilterData(nmiJsonData, filter3Status, "agreement");
-setFilterData(nmiJsonData, filter3Agreement, "status");
+setFilterData(nmiJsonData, filter3Status, "status");
+setFilterData(nmiJsonData, filter3Agreement, "agreement");
 setFilterData(nmiJsonData, filter3Association, "association");
 getYearFilter(nmiJsonData, filter3FinancialYear, "year");
-getYearFilter(nmiJsonData, filter3Type, "nmi");
+getYearFilter(nmiJsonData, filter3Type, "margin");
 
-xyChart(achievedMargin2024, "hpfy24a", "Historical Performance FY2024 Actuals");
+let xyChartHpfy24a = xyChart(
+  achievedMargin2024,
+  "hpfy24a",
+  "Historical Performance FY2024 Actuals"
+);
 animatedPieChart(achievedMargin2024, "pfify24");
 populateTable1Data(achievedMargin2024);
-clusteredChart(dataFy2025, "fy25avspoe");
+let clusterChartFy25avspoe = clusteredChart(dataFy2025, "fy25avspoe");
 populateTable2Data(dataFy2025, "table2");
-clusteredChart(dataFy2026, "fy26avspoe");
+let clusterChartFy26avspoe = clusteredChart(dataFy2026, "fy26avspoe");
 populateTable2Data(dataFy2026, "table3");
 
-animatedPieChart(actualsMarginData, "acap");
+let filter2Data = combinedDataJsonFull;
+let actualsMarginData = totalValuesByName(
+  transformDataForChartNew(filter2Data)
+);
+let animatedPieChartAcap = animatedPieChart(actualsMarginData, "acap");
 populateTable3Data(actualsMarginData, "table5");
 
-fyActualMarginVsPOE(
-  totalValuesByTypeNew(transformDataForPOEChart(combinedDataJsonFull)),
+let fyAMVP = fyActualMarginVsPOE(
+  totalValuesByTypeNew(transformDataForPOEChart(filter2Data)),
   "fyamvspoe"
 );
+
 populateTable2Data(
   totalValuesByType(transformDataForPOEChart(combinedDataJsonFull)),
   "table4"
@@ -923,77 +1149,105 @@ versionData.forEach((item) => {
     "<h3>" + item.version + "</h3>" + "<p>" + item.effectiveDate + "</p>";
   footerContainer.appendChild(footerItem);
 });
-function reloadChart(newData) {
-  nmiClusteredChart(newData, "rmpnmibase");
-  isChartLoading = true;
-}
 
+// event listeners
+// Handle the change events for Filter 1
 filter1Portfolio.addEventListener("change", function () {
   if (filter1Portfolio.value === "selectAll") {
-    updatedFilter1Data = combinedDataJsonFull;
-    for (let i = 0; i < filter1Portfolio.options.length; i++) {
-      if (filter1Portfolio.options[i].value !== "selectAll") {
-        filter1Portfolio.options[i].selected = true; // Select all other options
-      }
-    }
-  } else {
-    updatedFilter1Data = combinedDataJsonFull.filter(
-      (data) => data.portfoio == filter1Portfolio.value
-    );
+    // If "selectAll" is chosen, reset to full dataset, but apply other filters
+    filter1Portfolio.value = "selectAll"; // Reset this filter to 'selectAll'
   }
-  filter1Data = updatedFilter1Data;
-  refreshFilter1Data()
+  applyAllFilters();
 });
 
-function refreshFilter1Data() {
-  achievedMargin2024 = totalValuesByName(
-    transformDataForChartNew(filter1Data, "FY2024")
-  );
-  dataFy2025 = totalValuesByType(
-    transformDataForPOEChart(filter1Data, "FY2025")
-  );
-  dataFy2026 = totalValuesByType(
-    transformDataForPOEChart(filter1Data, "FY2026")
-  );
-  xyChart(
-    achievedMargin2024,
-    "hpfy24a",
-    "Historical Performance FY2024 Actuals"
-  );
-  animatedPieChart(achievedMargin2024, "pfify24");
-  clusteredChart(dataFy2025, "fy25avspoe");
-  populateTable2Data(dataFy2025, "table2");
-  clusteredChart(dataFy2026, "fy26avspoe");
-  populateTable2Data(dataFy2026, "table3");
-}
+filter1Status.addEventListener("change", function () {
+  if (filter1Status.value === "selectAll") {
+    filter1Status.value = "selectAll"; // Reset this filter to 'selectAll'
+  }
+  applyAllFilters();
+});
+
+filter1Association.addEventListener("change", function () {
+  if (filter1Association.value === "selectAll") {
+    filter1Association.value = "selectAll"; // Reset this filter to 'selectAll'
+  }
+  applyAllFilters();
+});
+
+filter1Agreement.addEventListener("change", function () {
+  if (filter1Agreement.value === "selectAll") {
+    filter1Agreement.value = "selectAll"; // Reset this filter to 'selectAll'
+  }
+  applyAllFilters();
+});
+
+filter1Nmi.addEventListener("change", function () {
+  if (filter1Nmi.value === "selectAll") {
+    filter1Nmi.value = "selectAll"; // Reset this filter to 'selectAll'
+  }
+  applyAllFilters();
+});
+
+// Handle the change events for Filter 2
+filter2Year.addEventListener("change", function () {
+  if (filter2Year.value === "selectAll") {
+    filter2Year.value = "selectAll"; // Reset this filter to 'selectAll'
+  }
+  applyAllFilters2();
+});
+
+filter2Margin.addEventListener("change", function () {
+  if (filter2Margin.value === "selectAll") {
+    filter2Margin.value = "selectAll"; // Reset this filter to 'selectAll'
+  }
+  applyAllFilters2();
+});
 
 filter3Nmi.addEventListener("change", function () {
   if (filter3Nmi.value === "selectAll") {
-    updatedDataRmperNMIBase = dataRmperNMIBase;
-    for (let i = 0; i < filter3Nmi.options.length; i++) {
-      if (filter3Nmi.options[i].value !== "selectAll") {
-        filter3Nmi.options[i].selected = true; // Select all other options
-      }
-    }
-  } else {
-    updatedDataRmperNMIBase = transformData(
-      nmiJsonData.filter(
-        (data) =>
-          data.typesofmargin != "(blank)" && data.typesofmargin != "Grand Total"
-      )
-    ).filter((data) => data.type == filter3Nmi.value);
+    filter3Nmi.value = "selectAll"; // Reset this filter to 'selectAll'
   }
-  reloadChart(updatedDataRmperNMIBase);
-  console.log("dataRmperNMIBase", updatedDataRmperNMIBase, filter3Nmi.value);
+  applyAllFilters3();
 });
 
-function toggleSidebar() {
-  var sidebar = document.getElementById("mySidebar");
-  var width = sidebar.style.width;
-
-  if (width === "250px") {
-    sidebar.style.width = "0";
-  } else {
-    sidebar.style.width = "250px";
+filter3FinancialYear.addEventListener("change", function () {
+  if (filter3FinancialYear.value === "selectAll") {
+    filter3FinancialYear.value = "selectAll"; // Reset this filter to 'selectAll'
   }
-}
+  applyAllFilters3();
+});
+
+filter3Type.addEventListener("change", function () {
+  if (filter3Type.value === "selectAll") {
+    filter3Type.value = "selectAll"; // Reset this filter to 'selectAll'
+  }
+  applyAllFilters3();
+});
+
+filter3Portfolio.addEventListener("change", function () {
+  if (filter3Portfolio.value === "selectAll") {
+    filter3Portfolio.value = "selectAll"; // Reset this filter to 'selectAll'
+  }
+  applyAllFilters3();
+});
+
+filter3Status.addEventListener("change", function () {
+  if (filter3Status.value === "selectAll") {
+    filter3Status.value = "selectAll"; // Reset this filter to 'selectAll'
+  }
+  applyAllFilters3();
+});
+
+filter3Agreement.addEventListener("change", function () {
+  if (filter3Agreement.value === "selectAll") {
+    filter3Agreement.value = "selectAll"; // Reset this filter to 'selectAll'
+  }
+  applyAllFilters3();
+});
+
+filter3Association.addEventListener("change", function () {
+  if (filter3Association.value === "selectAll") {
+    filter3Association.value = "selectAll"; // Reset this filter to 'selectAll'
+  }
+  applyAllFilters3();
+});
