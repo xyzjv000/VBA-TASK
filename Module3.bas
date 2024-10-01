@@ -21,8 +21,8 @@ Sub ExportChartToHTML()
     Dim versionData As String
 
     ' JSON extraction from your Pivot Tables
-    jsonResult3 = ExtractFilteredDataToJSONArrayMargins("Retail Margin Only", "PivotTable21")
-    jsonResult4 = ExportPivotTableToJSON("FINAL output 2", "PivotTable4")
+    jsonResult3 = ExtractFilteredDataToJSONArrayMargins("Exported Data", "RetailMarginPivot")
+    jsonResult4 = ExportPivotTableToJSON("Exported Data", "CombinedDataPivot")
 
     ' File paths
     templateFilePath = GetCurrentExcelDirectory & Application.PathSeparator & "Exports" & Application.PathSeparator & "HTML_Template.html"
@@ -88,77 +88,7 @@ Function GetCurrentDesktopirectory() As String
     End If
 End Function
 
-
-Function RangeToJSON(rng As Range) As String
-    Dim data As String
-    Dim i As Integer, j As Integer
-    Dim headers As Variant
-    Dim values As Variant
-    Dim value As Variant
-    Dim headerName As String
-
-    On Error Goto ErrorHandler
-
-        headers = rng.Rows(1).value
-        values = rng.Offset(1, 0).Resize(rng.Rows.Count - 1, rng.Columns.Count).value
-
-        data = "["
-
-        For i = 1 To UBound(values, 1)
-            data = data & "{"
-            For j = 1 To UBound(values, 2)
-                value = Trim(CStr(values(i, j))) ' Ensure value is a string And remove spaces
-                headerName = ToCamelCase(CStr(headers(1, j)))
-                data = data & """" & headerName & """: """ & value & """"
-                If j < UBound(values, 2) Then
-                    data = data & ", "
-                End If
-            Next j
-            data = data & "}"
-            If i < UBound(values, 1) Then
-                data = data & ", "
-            End If
-        Next i
-
-        data = data & "]"
-
-        RangeToJSON = data
-     Exit Function
-
- ErrorHandler:
-        MsgBox "An error occurred: " & Err.Description, vbCritical
-        RangeToJSON = "[]"
-End Function
-
-Function ToCamelCase(text As String) As String
-    Dim result As String
-    Dim i As Integer
-    Dim char As String
-    Dim upperNext As Boolean
-
-    result = ""
-    upperNext = False
-
-    For i = 1 To Len(text)
-        char = Mid(text, i, 1)
-        If char Like "[A-Z]" Then
-            If i = 1 Then
-                result = result & LCase(char)
-            Else
-                result = result & IIf(upperNext, LCase(char), char)
-                upperNext = False
-            End If
-        Elseif char Like "[a-z]" Then
-            result = result & char
-            upperNext = False
-        Elseif char Like " " Then
-            upperNext = True
-        End If
-    Next i
-
-    ToCamelCase = result
-End Function
-
+' USED
 Function ExtractFilteredDataToJSONArrayMargins(sheetName As String, pivotTableName As String) As String
     Dim ws As Worksheet
     Dim pvt As PivotTable
@@ -265,7 +195,7 @@ Function ExtractFilteredDataToJSONArrayMargins(sheetName As String, pivotTableNa
     ExtractFilteredDataToJSONArrayMargins = jsonData
 End Function
 
-
+' USED
 Function GetVersionData() As String
     Dim ws As Worksheet
     Dim rng As Range
@@ -307,6 +237,7 @@ Function GetVersionData() As String
         GetVersionData = "Error: " & Err.Description
 End Function
 
+' USED
 Function ExportPivotTableToJSON(sheetName As String, pivotTableName As String) As String
     Dim ws As Worksheet
     Dim pvt As PivotTable
@@ -496,4 +427,3 @@ Function ExportPivotTableToJSON(sheetName As String, pivotTableName As String) A
     ' Return the JSON string
     ExportPivotTableToJSON = jsonData
 End Function
-
