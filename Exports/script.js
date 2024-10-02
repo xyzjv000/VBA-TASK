@@ -1052,6 +1052,36 @@ function toggleSidebar() {
   }
 }
 
+
+function updateSidebarFilters() {
+  // Get sections
+  var section1 = document.getElementById("page1");
+  var section2 = document.getElementById("page2");
+
+  // Get filters
+  var filter0Height = document.getElementById("filter0").offsetHeight;
+  var filter1 = document.getElementById("filter1");
+  var filter2 = document.getElementById("filter2");
+  var filter3 = document.getElementById("filter3");
+  var scrollPosition = (window.scrollY || window.pageYOffset) + filter0Height;
+
+  if (scrollPosition <= section1.offsetHeight) {    
+    filter1.style.display = "flex";
+    filter2.style.display = "none";
+    filter3.style.display = "none";
+  } else if ( scrollPosition > section1.offsetHeight && scrollPosition <= (section1.offsetHeight + section2.offsetHeight) ) {
+    filter1.style.display = "none";
+    filter2.style.display = "flex";
+    filter3.style.display = "none";
+  } else {
+    filter1.style.display = "none";
+    filter2.style.display = "none";
+    filter3.style.display = "flex";
+  }  
+}
+
+updateSidebarFilters();
+
 console.log("combinedDataJsonFull", combinedDataJsonFull);
 var nmiChartVar;
 var xyChartVar;
@@ -1149,7 +1179,6 @@ versionData.forEach((item) => {
     "<h3>" + item.version + "</h3>" + "<p>" + item.effectiveDate + "</p>";
   footerContainer.appendChild(footerItem);
 });
-
 // event listeners
 // Handle the change events for Filter 1
 filter1Portfolio.addEventListener("change", function () {
@@ -1251,3 +1280,18 @@ filter3Association.addEventListener("change", function () {
   }
   applyAllFilters3();
 });
+
+window.addEventListener("scroll", updateSidebarFilters);
+
+// // Add event listeners if needed for actions when buttons are selected
+// document.getElementById("mtd").addEventListener("change", function () {
+//   if (this.checked) {
+//     console.log("MTD selected");
+//   }
+// });
+
+// document.getElementById("ytd").addEventListener("change", function () {
+//   if (this.checked) {
+//     console.log("YTD selected");
+//   }
+// });

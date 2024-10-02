@@ -1,20 +1,47 @@
 body {
-  font-family: Arial, sans-serif;
+  font-family: "Inter", sans-serif;
   margin: 0;
   padding: 0;
   display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  background-color: #f4f4f4;
+  flex-direction: row;
+  background-color: #d9d9d9;
+}
+.sidebar {
+  width: 250px;
+  min-width: 250px;
+}
+
+.content {
+  width: 100%;
 }
 .container {
-  width: 90%;
   margin: auto;
-  padding: 20px;
-  background: #fff;
-  border-radius: 8px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.chart-container {
+  display: flex;
+  flex-wrap: wrap;
+  margin-bottom: -10px;
+}
+
+.chart {
+  margin: 5px;
+}
+
+.chart-item {
+  flex: 1;
+  min-width: 600px;
+  background: #ffffff;
+  margin: 10px 5px;
+  padding: 16px;
+  border-radius: 5px;
+}
+
+.table-container {
+  background: #ffffff;
+  margin: 10px 5px;
+  padding: 16px;
+  border-radius: 5px;
 }
 img {
   max-width: 100%;
@@ -54,16 +81,6 @@ th {
   height: 600px;
 }
 
-.chart-container {
-  display: flex;
-  flex-wrap: wrap;
-}
-
-.chart-item {
-  flex: 1;
-  min-width: 600px;
-}
-
 #rmpnmibase {
   min-height: 700px;
 }
@@ -71,15 +88,33 @@ th {
   text-align: center;
 }
 
+#filter0 {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 20px 0;
+  border-bottom: 1px solid #c3c3c3;
+  position: sticky;
+  top: 0;
+}
+
 #filter1,
 #filter2,
 #filter3 {
-  display: flex;
   flex-direction: column;
   gap: 1rem;
   margin: auto;
   padding: 30px 25px;
   border-bottom: 1px solid #b9b9b9;
+  position: sticky;
+  top: 183px;
+}
+#filter1 {
+  display: flex;
+}
+#filter2,
+#filter3 {
+  display: none;
 }
 
 #filter1 label,
@@ -116,63 +151,8 @@ th {
   margin-top: 5px;
 }
 
-/* Hamburger */
-
-.hamburger {
-  position: fixed;
-  top: 10px;
-  left: 10px;
-  cursor: pointer;
-  z-index: 1000;
-}
-
-.hamburger div {
-  width: 30px;
-  height: 4px;
-  background-color: #333;
-  margin: 6px 0;
-  transition: 0.4s;
-}
-
-.sidebar {
-  height: 100%;
-  width: 0;
-  position: fixed;
-  top: 0;
-  left: 0;
-  background-color: #ddd;
-  overflow-x: hidden;
-  transition: 0.5s;
-  padding-top: 100px 0;
-  z-index: 9999;
-}
-
-.sidebar a {
-  padding: 10px 15px;
-  text-decoration: none;
-  font-size: 18px;
-  color: #818181;
-  display: block;
-  transition: 0.3s;
-}
-
-.sidebar a:hover {
-  color: #f1f1f1;
-}
-
-.sidebar .closebtn {
-  position: relative;
-  top: 0;
-  right: 0;
-  font-size: 36px;
-  text-align: right;
-}
-
-/* Hamburger */
 .footer {
-  background-color: #f1f1f1;
-  padding: 20px;
-  border-top: 1px solid #ddd;
+  padding: 10px;
 }
 .footer-container {
   margin: 0 auto;
@@ -199,6 +179,36 @@ th {
   color: #666;
 }
 
+.toggle-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 200px;
+  margin: auto;
+}
+
+/* Hide default radio buttons */
+.toggle-container input[type="radio"] {
+  display: none;
+}
+
+/* Style the buttons */
+.toggle-container label {
+  padding: 10px 20px;
+  background-color: #f1f1f1;
+  border: 1px solid #ccc;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  flex: 1;
+  text-align: center;
+}
+
+/* Change button style when selected */
+.toggle-container input[type="radio"]:checked + label {
+  background-color: #353535;
+  color: white;
+  border-color: #353535;
+}
 /* Responsive styles */
 @media (max-width: 768px) {
   #table1 thead,

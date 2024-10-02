@@ -5,18 +5,41 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Chart Report</title>
     <link rel="stylesheet" type="text/css" href="{{cssFilePath}}" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap"
+      rel="stylesheet"
+    />
   </head>
   <body>
-    <div class="hamburger" onclick="toggleSidebar()">
-      <div></div>
-      <div></div>
-      <div></div>
-    </div>
-
     <div id="mySidebar" class="sidebar">
-      <a href="javascript:void(0)" class="closebtn" onclick="toggleSidebar()"
-        >&times;</a
-      >
+      <div id="filter0">
+        <div>
+          <p style="text-align: center; font-weight: bold; margin: 0 0 5px">
+            Period
+          </p>
+          <div class="toggle-container">
+            <input type="radio" id="mtd" name="period" checked />
+            <label for="mtd">MTD</label>
+
+            <input type="radio" id="ytd" name="period" />
+            <label for="ytd">YTD</label>
+          </div>
+        </div>
+        <div>
+          <p style="text-align: center; font-weight: bold; margin: 0 0 5px">
+            Benchmark
+          </p>
+          <div class="toggle-container">
+            <input type="radio" id="mtd1" name="benchmark" checked />
+            <label for="mtd1">MTD</label>
+
+            <input type="radio" id="ytd1" name="benchmark" />
+            <label for="ytd1">YTD</label>
+          </div>
+        </div>
+      </div>
       <div id="filter1">
         <div class="filter-container">
           <label for="filter1-portfolio">Portfolio</label>
@@ -50,7 +73,6 @@
         </div>
       </div>
       <div id="filter3">
-        <h3 style="margin: 0;">Retail Margin</h3>
         <div class="filter-container">
           <label for="filter3-nmi">NMI</label>
           <select name="filter3-nmi" id="filter3-nmi"></select>
@@ -81,123 +103,125 @@
         </div>
       </div>
     </div>
-    <div class="container">
-      <div class="chart">
-        <div class="chart-container">
-          <div class="chart-item">
-            <center><h3>Historical Performance FY2024 Actuals</h3></center>
-            <div id="hpfy24a"></div>
-          </div>
-          <div class="chart-item">
-            <center><h3>Percentage Fees in FY2024</h3></center>
-            <div id="pfify24"></div>
-          </div>
-        </div>
-        <br />
-        <div class="table-container">
-          <table id="table1">
-            <thead>
-              <tr id="headerRow"></tr>
-            </thead>
-            <tbody>
-              <tr id="dataRow"></tr>
-            </tbody>
-          </table>
-        </div>
-        <br />
-        <hr />
-        <!-- FY25 Actual vs POE -->
-        <div>
-          <div class="chart-item">
-            <center><h3>FY25 Actual vs POE</h3></center>
-            <div id="fy25avspoe"></div>
-          </div>
-        </div>
-        <div class="table-container">
-          <table id="table2">
-            <thead>
-              <tr id="headerRow"></tr>
-            </thead>
-            <tbody>
-              <tr id="dataRow"></tr>
-            </tbody>
-          </table>
-        </div>
-        <br />
-        <hr />
-        <!-- FY26 Actual vs POE -->
-        <div>
-          <div class="chart-item">
-            <center><h3>FY26 Actual vs POE</h3></center>
-            <div id="fy26avspoe"></div>
-          </div>
-        </div>
-        <div class="table-container">
-          <table id="table3">
-            <thead>
-              <tr id="headerRow"></tr>
-            </thead>
-            <tbody>
-              <tr id="dataRow"></tr>
-            </tbody>
-          </table>
-        </div>
-        <br />
-        <hr />
-        <!-- Actual Cost and Percentage -->
-
-        <br />
-        <div>
-          <div class="chart-item">
-            <center><h3>Actual Cost and Percentage</h3></center>
-            <div style="display: flex; flex-wrap: wrap; gap: 1rem">
-              <div id="acap"></div>
-              <div style="flex: 1" class="table-container">
-                <table id="table5">
-                  <thead>
-                    <tr id="headerRow"></tr>
-                  </thead>
-                  <tbody>
-                    <tr id="dataRow"></tr>
-                  </tbody>
-                </table>
+    <div class="content">
+      <div class="container">
+        <div class="chart">
+          <section id="page1">
+            <div class="chart-container">
+              <div class="chart-item">
+                <center><h3>Historical Performance FY2024 Actuals</h3></center>
+                <div id="hpfy24a"></div>
+              </div>
+              <div class="chart-item">
+                <center><h3>Percentage Fees in FY2024</h3></center>
+                <div id="pfify24"></div>
               </div>
             </div>
-          </div>
-        </div>
-        <br />
-        <hr />
-        <div>
-          <div class="chart-item">
-            <center><h3>Financial Year Actual Margin vs POE</h3></center>
-            <div id="fyamvspoe"></div>
-          </div>
-        </div>
-        <div class="table-container">
-          <table id="table4">
-            <thead>
-              <tr id="headerRow"></tr>
-            </thead>
-            <tbody>
-              <tr id="dataRow"></tr>
-            </tbody>
-          </table>
-        </div>
-        <hr />
-        <br />
-        <!-- Retail Margin per NMI Base -->
-        <div>
-          <div class="chart-item">
-            <center><h3>Retail Margin per NMI Base</h3></center>
-            <h4 id="loading">Loading please wait...</h4>
-            <div id="rmpnmibase"></div>
-          </div>
+
+            <div class="table-container">
+              <table id="table1">
+                <thead>
+                  <tr id="headerRow"></tr>
+                </thead>
+                <tbody>
+                  <tr id="dataRow"></tr>
+                </tbody>
+              </table>
+            </div>
+
+            <!-- FY25 Actual vs POE -->
+            <div>
+              <div class="chart-item">
+                <center><h3>FY25 Actual vs POE</h3></center>
+                <div id="fy25avspoe"></div>
+              </div>
+            </div>
+            <div class="table-container">
+              <table id="table2">
+                <thead>
+                  <tr id="headerRow"></tr>
+                </thead>
+                <tbody>
+                  <tr id="dataRow"></tr>
+                </tbody>
+              </table>
+            </div>
+
+            <!-- FY26 Actual vs POE -->
+            <div>
+              <div class="chart-item">
+                <center><h3>FY26 Actual vs POE</h3></center>
+                <div id="fy26avspoe"></div>
+              </div>
+            </div>
+            <div class="table-container">
+              <table id="table3">
+                <thead>
+                  <tr id="headerRow"></tr>
+                </thead>
+                <tbody>
+                  <tr id="dataRow"></tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          <!-- Actual Cost and Percentage -->
+
+          <section id="page2">
+            <div>
+              <div class="chart-item">
+                <center><h3>Actual Cost and Percentage</h3></center>
+                <div style="display: flex; flex-wrap: wrap; gap: 1rem">
+                  <div id="acap"></div>
+                  <div style="flex: 1" class="table-container">
+                    <table id="table5">
+                      <thead>
+                        <tr id="headerRow"></tr>
+                      </thead>
+                      <tbody>
+                        <tr id="dataRow"></tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <div class="chart-item">
+                <center><h3>Financial Year Actual Margin vs POE</h3></center>
+                <div id="fyamvspoe"></div>
+              </div>
+            </div>
+            <div class="table-container">
+              <table id="table4">
+                <thead>
+                  <tr id="headerRow"></tr>
+                </thead>
+                <tbody>
+                  <tr id="dataRow"></tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          <!-- Retail Margin per NMI Base -->
+          <section id="page3">
+            <div>
+              <div class="chart-item">
+                <center><h3>Retail Margin per NMI Base</h3></center>
+                <h4 id="loading">Loading please wait...</h4>
+                <div id="rmpnmibase"></div>
+              </div>
+            </div>
+          </section>
         </div>
       </div>
-    </div>
-    <div class="footer">
-      <div class="footer-container">
-        <!-- Footer items will be injected here -->
+      <div class="footer">
+        <div class="footer-container">
+          <!-- Footer items will be injected here -->
+        </div>
       </div>
     </div>
     <script src="https://cdn.amcharts.com/lib/4/core.js"></script>
