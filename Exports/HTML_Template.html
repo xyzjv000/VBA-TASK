@@ -102,6 +102,15 @@
           <select name="filter3-association" id="filter3-association"></select>
         </div>
       </div>
+      <div id="clearFilters">
+        <button>Clear Filters</button>
+      </div>
+      <div id="exportButton">
+        <button>Export PDF</button>
+      </div>
+      <div id="exportDataButton">
+        <button>Export XLSX</button>
+      </div>
     </div>
     <div class="content">
       <div class="container">
@@ -210,6 +219,38 @@
           <section id="page3">
             <div>
               <div class="chart-item">
+                <div class="header-table">
+                  <div class="header-items">
+                    <div class="header-item-label">Achieved Margin FY2024</div>
+                    <div class="header-item-value">$2,412,553.66</div>
+                  </div>
+
+                  <div class="header-items">
+                    <div class="header-item-label">Actual Margin FY2025</div>
+                    <div class="header-item-value">$2,412,553.66</div>
+                  </div>
+
+                  <div class="header-items">
+                    <div class="header-item-label">Actual Margin FY2026</div>
+                    <div class="header-item-value">$2,412,553.66</div>
+                  </div>
+
+                  <div class="header-items">
+                    <div class="header-item-label">
+                      Predicted Margin FY 2025
+                    </div>
+                    <div class="header-item-value">$2,412,553.66</div>
+                  </div>
+
+                  <div class="header-items">
+                    <div class="header-item-label">
+                      Predicted Margin FY 2026
+                    </div>
+                    <div class="header-item-value">$2,412,553.66</div>
+                  </div>
+                </div>
+              </div>
+              <div class="chart-item">
                 <center><h3>Retail Margin per NMI Base</h3></center>
                 <h4 id="loading">Loading please wait...</h4>
                 <div id="rmpnmibase"></div>
@@ -228,6 +269,9 @@
     <script src="https://cdn.amcharts.com/lib/4/charts.js"></script>
     <script src="https://cdn.amcharts.com/lib/4/maps.js"></script>
     <script src="https://cdn.amcharts.com/lib/4/themes/animated.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dom-to-image/2.6.0/dom-to-image.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.5/xlsx.full.min.js"></script>
     <script>
       var versionData = {{versionData}};
       var nmiJsonData = {{nmiJson}}
@@ -236,6 +280,7 @@
       console.log("nmiJsonData",nmiJsonData);
       console.log("combinedDataJsonFull",combinedDataJsonFull);
     </script>
+    <!-- external -->
     <script src="{{jsFilePath}}"></script>
   </body>
 </html>

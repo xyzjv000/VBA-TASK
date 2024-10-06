@@ -681,6 +681,10 @@ const nmiClusteredChart = (data, chartId) => {
   nmiChartVar.events.on("validated", function () {
     loadingElement.style.display = "none";
   });
+  if (chartId == "rmpnmibase") {
+    updateHeaderData(data);
+    console.log(nmiBaseChartData);
+  }
   return nmiChartVar;
 };
 
@@ -1051,8 +1055,7 @@ function toggleSidebar() {
     sidebar.style.width = "250px";
   }
 }
-
-
+let currentPage = "page1";
 function updateSidebarFilters() {
   // Get sections
   var section1 = document.getElementById("page1");
@@ -1065,23 +1068,78 @@ function updateSidebarFilters() {
   var filter3 = document.getElementById("filter3");
   var scrollPosition = (window.scrollY || window.pageYOffset) + filter0Height;
 
-  if (scrollPosition <= section1.offsetHeight) {    
+  if (scrollPosition <= section1.offsetHeight) {
     filter1.style.display = "flex";
     filter2.style.display = "none";
     filter3.style.display = "none";
-  } else if ( scrollPosition > section1.offsetHeight && scrollPosition <= (section1.offsetHeight + section2.offsetHeight) ) {
+    currentPage = "page1";
+  } else if (
+    scrollPosition > section1.offsetHeight &&
+    scrollPosition <= section1.offsetHeight + section2.offsetHeight
+  ) {
     filter1.style.display = "none";
     filter2.style.display = "flex";
     filter3.style.display = "none";
+    currentPage = "page2";
   } else {
     filter1.style.display = "none";
     filter2.style.display = "none";
     filter3.style.display = "flex";
-  }  
+    currentPage = "page3";
+  }
 }
+function updateHeaderData(data) {
+  nmiBaseChartData = {
+    achievedMarginFy2024: 0,
+    actualMarginFy2025: 0,
+    actualMarginFy2026: 0,
+    predictedMarginFy2025: 0,
+    predictedMarginFy2026: 0,
+  };
 
+  nmiBaseChartData.achievedMarginFy2024 = data
+    .filter((item) => item.margin == "Achieved Margin FY2024")
+    .reduce((sum, item) => sum + item.total, 0);
+  nmiBaseChartData.actualMarginFy2025 = data
+    .filter((item) => item.margin == "Total Actuals Margin FY2025")
+    .reduce((sum, item) => sum + item.total, 0);
+  nmiBaseChartData.actualMarginFy2026 = data
+    .filter((item) => item.margin == "Total Actuals Margin FY2026")
+    .reduce((sum, item) => sum + item.total, 0);
+  nmiBaseChartData.predictedMarginFy2025 = data
+    .filter((item) => item.margin == "Total Predicted TM FY2025")
+    .reduce((sum, item) => sum + item.total, 0);
+  nmiBaseChartData.predictedMarginFy2026 = data
+    .filter((item) => item.margin == "Total Predicted TM FY2026")
+    .reduce((sum, item) => sum + item.total, 0);
+
+  let items = document.querySelectorAll(".header-items");
+  items.forEach((item) => {
+    const label = item.querySelector(".header-item-label").textContent.trim();
+    const valueElement = item.querySelector(".header-item-value");
+
+    if (label === "Achieved Margin FY2024") {
+      valueElement.textContent = `$${nmiBaseChartData.achievedMarginFy2024.toLocaleString()}`;
+    } else if (label === "Actual Margin FY2025") {
+      valueElement.textContent = `$${nmiBaseChartData.actualMarginFy2025.toLocaleString()}`;
+    } else if (label === "Actual Margin FY2026") {
+      valueElement.textContent = `$${nmiBaseChartData.actualMarginFy2026.toLocaleString()}`;
+    } else if (label === "Predicted Margin FY 2025") {
+      valueElement.textContent = `$${nmiBaseChartData.predictedMarginFy2025.toLocaleString()}`;
+    } else if (label === "Predicted Margin FY 2026") {
+      valueElement.textContent = `$${nmiBaseChartData.predictedMarginFy2026.toLocaleString()}`;
+    }
+  });
+}
 updateSidebarFilters();
 
+let nmiBaseChartData = {
+  achievedMarginFy2024: 0,
+  actualMarginFy2025: 0,
+  actualMarginFy2026: 0,
+  predictedMarginFy2025: 0,
+  predictedMarginFy2026: 0,
+};
 console.log("combinedDataJsonFull", combinedDataJsonFull);
 var nmiChartVar;
 var xyChartVar;
@@ -1137,6 +1195,10 @@ setFilterData(nmiJsonData, filter3Agreement, "agreement");
 setFilterData(nmiJsonData, filter3Association, "association");
 getYearFilter(nmiJsonData, filter3FinancialYear, "year");
 getYearFilter(nmiJsonData, filter3Type, "margin");
+
+const clearFilterButton = document.querySelector("#clearFilters button");
+const exportButton = document.querySelector("#exportButton button");
+const exportDataButton = document.querySelector("#exportDataButton button");
 
 let xyChartHpfy24a = xyChart(
   achievedMargin2024,
@@ -1282,6 +1344,93 @@ filter3Association.addEventListener("change", function () {
 });
 
 window.addEventListener("scroll", updateSidebarFilters);
+
+clearFilterButton.addEventListener("click", () => {
+  // Check if any filter is NOT 'selectAll'
+  const filter1Changed =
+    filter1Nmi.value !== "selectAll" ||
+    filter1Portfolio.value !== "selectAll" ||
+    filter1Status.value !== "selectAll" ||
+    filter1Association.value !== "selectAll" ||
+    filter1Agreement.value !== "selectAll";
+
+  const filter2Changed =
+    filter2Year.value !== "selectAll" || filter2Margin.value !== "selectAll";
+
+  const filter3Changed =
+    filter3Nmi.value !== "selectAll" ||
+    filter3FinancialYear.value !== "selectAll" ||
+    filter3Type.value !== "selectAll" ||
+    filter3Portfolio.value !== "selectAll" ||
+    filter3Status.value !== "selectAll" ||
+    filter3Agreement.value !== "selectAll" ||
+    filter3Association.value !== "selectAll";
+  // Set all filters to 'selectAll'
+  filter1Nmi.value = "selectAll";
+  filter1Portfolio.value = "selectAll";
+  filter1Status.value = "selectAll";
+  filter1Association.value = "selectAll";
+  filter1Agreement.value = "selectAll";
+
+  filter2Year.value = "selectAll";
+  filter2Margin.value = "selectAll";
+
+  filter3Nmi.value = "selectAll";
+  filter3FinancialYear.value = "selectAll";
+  filter3Type.value = "selectAll";
+  filter3Portfolio.value = "selectAll";
+  filter3Status.value = "selectAll";
+  filter3Agreement.value = "selectAll";
+  filter3Association.value = "selectAll";
+
+  console.log("filter1Changed:", filter1Changed);
+  console.log("filter2Changed:", filter2Changed);
+  console.log("filter3Changed:", filter3Changed);
+
+  // Only apply the filters if any of the corresponding filter sets are changed
+  if (filter1Changed) {
+    applyAllFilters();
+  }
+  if (filter2Changed) {
+    applyAllFilters2();
+  }
+  if (filter3Changed) {
+    applyAllFilters3();
+  }
+});
+
+exportButton.addEventListener("click", () => {
+  const captureElement = document.getElementById(currentPage);
+
+  // Use dom-to-image to capture the element as a PNG image
+  domtoimage
+    .toPng(captureElement)
+    .then((dataUrl) => {
+      const { jsPDF } = window.jspdf;
+      const pdf = new jsPDF();
+
+      const img = new Image();
+      img.src = dataUrl;
+
+      img.onload = function () {
+        const imgWidth = 210; // A4 size width in mm (210mm)
+        const imgHeight = (img.height * imgWidth) / img.width; // Maintain aspect ratio
+
+        // Add image to PDF
+        pdf.addImage(img, "PNG", 0, 0, imgWidth, imgHeight);
+
+        // Save the PDF
+        pdf.save("ExportedReportCharts.pdf");
+      };
+    })
+    .catch((error) => {
+      console.error("Error capturing element:", error);
+    });
+});
+
+exportDataButton.addEventListener("click", () => {
+  const chartIds = ["hpfy24a", "pfify24", "fy25avspoe", "fy26avspoe"];
+});
 
 // // Add event listeners if needed for actions when buttons are selected
 // document.getElementById("mtd").addEventListener("change", function () {

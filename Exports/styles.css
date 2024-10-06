@@ -9,6 +9,7 @@ body {
 .sidebar {
   width: 250px;
   min-width: 250px;
+  border-right: 1px solid #ababab;
 }
 
 .content {
@@ -105,7 +106,6 @@ th {
   gap: 1rem;
   margin: auto;
   padding: 30px 25px;
-  border-bottom: 1px solid #b9b9b9;
   position: sticky;
   top: 183px;
 }
@@ -149,6 +149,42 @@ th {
   padding: 10px;
   border-radius: 5px;
   margin-top: 5px;
+}
+
+#clearFilters {
+  position: fixed;
+  bottom: 105px;
+  left: 20px;
+}
+#exportButton {
+  position: fixed;
+  bottom: 60px;
+  left: 20px;
+}
+
+#exportDataButton {
+  position: fixed;
+  bottom: 15px;
+  left: 20px;
+}
+
+#clearFilters button {
+  border: 1px solid #ababab;
+  font-family: "Inter";
+  color: red;
+  cursor: pointer;
+  width: 210px;
+  padding: 8px;
+  border-radius: 5px;
+}
+#exportButton button,
+#exportDataButton button {
+  border: 1px solid #ababab;
+  font-family: "Inter";
+  cursor: pointer;
+  width: 210px;
+  padding: 8px;
+  border-radius: 5px;
 }
 
 .footer {
@@ -209,25 +245,33 @@ th {
   color: white;
   border-color: #353535;
 }
-/* Responsive styles */
-@media (max-width: 768px) {
-  #table1 thead,
-  #table1 tbody {
-    display: inline-grid;
-    width: 50%;
-  }
-  #table1 #headerRow,
-  #table1 #dataRow {
-    display: inline-grid;
-  }
-  .table-container {
-    overflow: scroll;
-  }
 
-  .container {
-    width: 98%;
-  }
+.header-table {
+  display: flex;
+  padding: 15px 10px;
+  flex-wrap: wrap;
+  justify-content: space-around;
+  align-items: center;
 }
+
+.header-items {
+  margin-bottom: 8px;
+}
+
+.header-item-label {
+  font-weight: 700;
+  font-size: 18px;
+  color: #6b6b6b;
+  min-width: 230px;
+}
+
+.header-item-value {
+  font-weight: 600;
+  font-size: 28px;
+  color: #67b7dc;
+  margin-top: 5px;
+}
+
 @media (max-width: 768px) {
   .footer-item {
     flex: 1 1 100%;
