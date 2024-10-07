@@ -17,6 +17,7 @@ Public Sub getData(setSheetName As Variant)
     Dim association As String
     Dim agreement As String
     Dim copiedSheetRange As String
+    Dim cell As Range
 
     On Error Goto ErrorHandler
 
@@ -24,21 +25,21 @@ Public Sub getData(setSheetName As Variant)
         Set wsConfig = Sheets("Configurations")
 
         ' Retrieve configuration values
-        targetSheetName = wsConfig.Range("B2").Value
-        startingPoint = wsConfig.Range("B4").Value
-        endPoint = wsConfig.Range("B3").Value
-        checksum = wsConfig.Range("B5").Value
-        portfolio = wsConfig.Range("B10").Value
-        statusCell = wsConfig.Range("B11").Value
-        association = wsConfig.Range("B12").Value
-        agreement = wsConfig.Range("B13").Value
-        copiedSheetRange = wsConfig.Range("B26").Value
+        targetSheetName = wsConfig.Range("B2").value
+        startingPoint = wsConfig.Range("B4").value
+        endPoint = wsConfig.Range("B3").value
+        checksum = wsConfig.Range("B5").value
+        portfolio = wsConfig.Range("B10").value
+        statusCell = wsConfig.Range("B11").value
+        association = wsConfig.Range("B12").value
+        agreement = wsConfig.Range("B13").value
+        copiedSheetRange = wsConfig.Range("B26").value
 
         ' Set the source sheet
         Set sourceSheet = Sheets(targetSheetName)
 
         ' Find the last row in the specified column
-        lastRow = sourceSheet.Cells(sourceSheet.Rows.Count, endPoint).End(xlUp).Row
+        lastRow = sourceSheet.Cells(sourceSheet.Rows.Count, endPoint).End(xlUp).row
 
         ' Define the range To copy
         Set rng = sourceSheet.Range(startingPoint & ":" & checksum & lastRow)
@@ -48,6 +49,7 @@ Public Sub getData(setSheetName As Variant)
         newSheet.Activate
         ' Copy And paste data ranges
         rng.Copy Destination:=newSheet.Range("A5")
+
         ' Remove duplicates
         newSheet.Range(copiedSheetRange & lastRow).RemoveDuplicates Columns:=Array(1, 2), Header:=xlNo
 
@@ -75,7 +77,8 @@ Public Sub GenerateTables()
     If response = vbYes Then
         ' Add the code To be executed If the user clicks Yes
         ' products = Array("Retail Margin")
-        products = Array("Retail Margin", "Network", "Capacity", "Wholesale Energy", "Market Fees", "Ancillary Services", "LGC", "STC", "Commission", "Revenue")
+        ' products = Array("Retail Margin", "Network", "Capacity", "Wholesale Energy", "Market Fees", "Ancillary Services", "LGC", "STC", "Commission", "Revenue")
+        products = GetSheetNameList
 
         For i = LBound(products) To UBound(products)
             TableTemplate products(i)
@@ -132,24 +135,24 @@ Public Sub TableTemplate(tableReference As Variant)
 
     GenerateColumnAddressesArray
     Set wsConfig = Sheets("Configurations")
-    targetSheetName = wsConfig.Range("B2").Value
-    analysisReference = wsConfig.Range("B7").Value
-    nmi = wsConfig.Range("B3").Value
-    marginStartingCell = wsConfig.Range("B6").Value
-    TPStartColumn = wsConfig.Range("B14").Value
-    TAMStartColumn = wsConfig.Range("B15").Value
-    TP90StartColumn = wsConfig.Range("B16").Value
-    TP50StartColumn = wsConfig.Range("B17").Value
-    TP10StartColumn = wsConfig.Range("B18").Value
-    NextTPStartColumn = wsConfig.Range("B20").Value
-    NextTAMStartColumn = wsConfig.Range("B21").Value
-    NextTP90StartColumn = wsConfig.Range("B22").Value
-    NextTP50StartColumn = wsConfig.Range("B23").Value
-    NextTP10StartColumn = wsConfig.Range("B24").Value
-    achievedCell = wsConfig.Range("B25").Value
+    targetSheetName = wsConfig.Range("B2").value
+    analysisReference = wsConfig.Range("B7").value
+    nmi = wsConfig.Range("B3").value
+    marginStartingCell = wsConfig.Range("B6").value
+    TPStartColumn = wsConfig.Range("B14").value
+    TAMStartColumn = wsConfig.Range("B15").value
+    TP90StartColumn = wsConfig.Range("B16").value
+    TP50StartColumn = wsConfig.Range("B17").value
+    TP10StartColumn = wsConfig.Range("B18").value
+    NextTPStartColumn = wsConfig.Range("B20").value
+    NextTAMStartColumn = wsConfig.Range("B21").value
+    NextTP90StartColumn = wsConfig.Range("B22").value
+    NextTP50StartColumn = wsConfig.Range("B23").value
+    NextTP10StartColumn = wsConfig.Range("B24").value
+    achievedCell = wsConfig.Range("B25").value
 
     Set sourceSheet = Sheets(targetSheetName)
-    sourceLastRow = sourceSheet.Cells(sourceSheet.Rows.Count, nmi).End(xlUp).Row
+    sourceLastRow = sourceSheet.Cells(sourceSheet.Rows.Count, nmi).End(xlUp).row
 
     Select Case tableReference
      Case "Ancillary Services"
@@ -166,7 +169,7 @@ Public Sub TableTemplate(tableReference As Variant)
     startRow = 5 ' Change this To your desired starting row
 
     ' Find the last row With data in column A Or B (whichever you expect To have the last row)
-    lastRow = ws.Cells(ws.Rows.Count, "A").End(xlUp).Row
+    lastRow = ws.Cells(ws.Rows.Count, "A").End(xlUp).row
 
     ws.Range("C" & startRow & ":C" & lastRow).Formula = "=A" & startRow & "&B" & startRow
     ws.Range("D" & startRow & ":D" & lastRow).Formula = "=If(C" & startRow & "="""","""",""" & Replace(criteria, " ", "") & """)"
@@ -255,8 +258,9 @@ Public Sub PopulateCombineTable()
     Dim rng As Range
     Dim i As Integer
 
-    sheetNames = Array("Retail Margin", "Network", "Capacity", "Wholesale Energy", _
-    "Market Fees", "ESS", "LGC", "STC", "Commission", "Revenue")
+    ' sheetNames = Array("Retail Margin", "Network", "Capacity", "Wholesale Energy", _
+    ' "Market Fees", "ESS", "LGC", "STC", "Commission", "Revenue")
+    sheetNames = GetSheetNameList
     Set combinedSheet = Sheets("Combined")
 
     pasteRow = 5
@@ -265,7 +269,7 @@ Public Sub PopulateCombineTable()
         Set ws = Sheets(sheetNames(i))
 
         With ws
-            lastRow = .Cells(.Rows.Count, "A").End(xlUp).Row
+            lastRow = .Cells(.Rows.Count, "A").End(xlUp).row
             lastCol = .Cells(5, .Columns.Count).End(xlToLeft).Column
             ' Check If there's data To copy
             If lastRow >= 5 And lastCol >= 1 Then
@@ -292,7 +296,7 @@ Public Sub RefreshAllPivotTablesAndSlicers()
     Dim pt As PivotTable
     Dim ws As Worksheet
     Dim cht As ChartObject
-    Dim sc As SlicerCache
+    Dim sc As slicerCache
     Dim conn As WorkbookConnection
     Dim tbl As ListObject
 
@@ -340,6 +344,7 @@ End Sub
 Public Sub DeleteData()
     Dim response As VbMsgBoxResult
     Dim sheetNames As Variant
+    Dim newItem As String
     Dim i As Integer
     ' Display a message box With Yes And No options
     response = MsgBox("Do you want To proceed With this DELETE action?", vbYesNo + vbQuestion, "Confirm Action")
@@ -347,10 +352,14 @@ Public Sub DeleteData()
     ' Check the user's response
     If response = vbYes Then
         ' Add the code To be executed If the user clicks Yes
-        sheetNames = Array("Retail Margin", "Network", "Capacity", "Wholesale Energy", _
-        "Market Fees", "ESS", "LGC", "STC", "Commission", "Revenue", "Combined")
+        sheetNames = GetSheetNameList
+
+        newItem = "Combined"
+        ReDim Preserve sheetNames(UBound(sheetNames))
+        sheetNames(13) = newItem
 
         For i = LBound(sheetNames) To UBound(sheetNames)
+            Debug.Print "Product " & i & ": " & sheetNames(i)
             Sheets(sheetNames(i)).Select
             Range("A5").Select
             Range(Selection, ActiveCell.SpecialCells(xlLastCell)).Select
@@ -358,7 +367,7 @@ Public Sub DeleteData()
         Next i
         Sheets("Retail Margin Only").Select
         Range(Selection, Selection.End(xlToRight)).Select
-        Range("$A$5:$I$1048576").Select        
+        Range("$A$5:$I$1048576").Select
         Selection.ClearContents
 
         RefreshAllPivotTablesAndSlicers
@@ -366,7 +375,7 @@ Public Sub DeleteData()
     Else
         ' Optionally, add code To be executed If the user clicks No
         MsgBox "Action cancelled.", vbInformation, "Cancelled"
-    End If    
+    End If
     Sheets("Run Sheet").Select
     RefreshAllPivotTablesAndSlicers
 End Sub
@@ -386,10 +395,10 @@ Public Sub GenerateColumnAddressesArray()
 
     Set wsConfig = Sheets("Configurations")
     ' AP
-    startRef = wsConfig.Range("B8").Value
+    startRef = wsConfig.Range("B8").value
     ' EC
-    endRef = wsConfig.Range("B9").Value
-    nextYearIncluded = wsConfig.Range("B19").Value
+    endRef = wsConfig.Range("B9").value
+    nextYearIncluded = wsConfig.Range("B19").value
 
     ' Define the starting And ending columns
     startCol = ColLetterToNum(startRef) ' Column number For "AP"
@@ -465,11 +474,11 @@ Public Sub PopulateRetailMarginOnly()
     Set retailMarginOnlyWorksheet = Sheets("Retail Margin Only")
     Set configurations = Sheets("Configurations")
 
-    retailMarginTypes = Application.Transpose(configurations.Range(configurations.Range("B28").Value).Value)
-    retailMarginColumn = Application.Transpose(configurations.Range(configurations.Range("B29").Value).Value)
+    retailMarginTypes = Application.Transpose(configurations.Range(configurations.Range("B28").value).value)
+    retailMarginColumn = Application.Transpose(configurations.Range(configurations.Range("B29").value).value)
     pasteRow = 5
 
-    lastRow = combinedWorksheet.Cells(combinedWorksheet.Rows.Count, "A").End(xlUp).Row
+    lastRow = combinedWorksheet.Cells(combinedWorksheet.Rows.Count, "A").End(xlUp).row
     Set rng = combinedWorksheet.Range("A5:H" & lastRow)
 
     For i = LBound(retailMarginTypes) To UBound(retailMarginTypes)
@@ -491,7 +500,7 @@ Public Sub PopulateRetailMarginOnly()
 
         ' Update column D With the exact value from retailMarginTypes
         With retailMarginOnlyWorksheet
-            .Range(.Cells(pasteRow, 4), .Cells(pasteRow + rng.Rows.Count - 1, 4)).Value = nameOfType
+            .Range(.Cells(pasteRow, 4), .Cells(pasteRow + rng.Rows.Count - 1, 4)).value = nameOfType
         End With
 
         ' Move pasteRow down For the Next block of data
@@ -503,19 +512,44 @@ Public Sub PopulateRetailMarginOnly()
 End Sub
 
 Public Sub ClearAllSlicerFilters()
-    Dim slicer As Slicer
-    Dim slicerCache As SlicerCache
-    
+    Dim slicer As slicer
+    Dim slicerCache As slicerCache
+
     ' Loop through all slicer caches in the workbook
     For Each slicerCache In ThisWorkbook.SlicerCaches
         ' Clear the slicer filter
         slicerCache.ClearManualFilter
     Next slicerCache
-    
+
     MsgBox "All slicer filters have been cleared!", vbInformation
 End Sub
 
 ' FUNCTIONS
+
+Function GetSheetNameList() As Variant
+    Dim ws As Worksheet
+    Dim productsRange As Range
+    Dim cell As Range
+    Dim products() As String
+    Dim i As Integer
+
+    ' Set the worksheet And range containing the product list
+    Set ws = ThisWorkbook.Sheets("Configurations") ' Update With your sheet name
+    Set productsRange = ws.Range("F2", ws.Cells(ws.Rows.Count, "F").End(xlUp))
+
+    ' Resize the array To match the number of products
+    ReDim products(1 To productsRange.Count)
+
+    ' Loop through the range And populate the array
+    i = 1
+    For Each cell In productsRange
+        products(i) = cell.Value
+        i = i + 1
+    Next cell
+
+    ' Return the array
+    GetSheetNameList = products
+End Function
 
 Function ColNumToLetter(colNum As Long) As String
     Dim colLetter As String
@@ -565,3 +599,4 @@ Function GenerateColumnSequence(col As String, rowNum As Long) As String
     ' Return the sequence
     GenerateColumnSequence = sequence
 End Function
+

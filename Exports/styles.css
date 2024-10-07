@@ -109,6 +109,12 @@ th {
   position: sticky;
   top: 183px;
 }
+#filter1 p,
+#filter2 p,
+#filter3 p {
+  margin: 0;
+  font-weight: bold;
+}
 #filter1 {
   display: flex;
 }

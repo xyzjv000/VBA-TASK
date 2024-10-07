@@ -1066,7 +1066,7 @@ function updateSidebarFilters() {
   var filter1 = document.getElementById("filter1");
   var filter2 = document.getElementById("filter2");
   var filter3 = document.getElementById("filter3");
-  var scrollPosition = (window.scrollY || window.pageYOffset) + filter0Height;
+  var scrollPosition = (window.scrollY || window.pageYOffset) + window.innerHeight;
 
   if (scrollPosition <= section1.offsetHeight) {
     filter1.style.display = "flex";

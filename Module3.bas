@@ -311,7 +311,10 @@ Function ExportPivotTableToJSON(sheetName As String, pivotTableName As String) A
     retailMarginIndex = 32
     revenueIndex = 37
     stcIndex = 42
-    wholesaleEnergyIndex = 47
+    wholesaleEnergyIndex = 52
+    ' securityDepositInterest = 57
+    ' securityDeposit = 62
+    ' roc = 67
 
     ' Initialize JSON string
     jsonData = "["
