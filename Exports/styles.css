@@ -160,18 +160,18 @@ th {
 #clearFilters {
   position: fixed;
   bottom: 105px;
-  left: 20px;
+  left: 25px;
 }
 #exportButton {
   position: fixed;
   bottom: 60px;
-  left: 20px;
+  left: 25px;
 }
 
 #exportDataButton {
   position: fixed;
   bottom: 15px;
-  left: 20px;
+  left: 25px;
 }
 
 #clearFilters button {
@@ -179,16 +179,17 @@ th {
   font-family: "Inter";
   color: red;
   cursor: pointer;
-  width: 210px;
+  width: 200px;
   padding: 8px;
   border-radius: 5px;
 }
 #exportButton button,
-#exportDataButton button {
+#exportDataButton button,
+#clearChartFilter button {
   border: 1px solid #ababab;
   font-family: "Inter";
   cursor: pointer;
-  width: 210px;
+  width: 200px;
   padding: 8px;
   border-radius: 5px;
 }

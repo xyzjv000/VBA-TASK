@@ -562,6 +562,12 @@ const nmiClusteredChart = (data, chartId) => {
   xAxis.renderer.cellStartLocation = 0.1;
   xAxis.renderer.cellEndLocation = 0.9;
   xAxis.renderer.grid.template.location = 0;
+  xAxis.renderer.labels.template.rotation = 90;
+  xAxis.renderer.labels.template.fontSize = 10;
+  xAxis.renderer.labels.template.wrap = true;
+  xAxis.renderer.minGridDistance = 15;
+  xAxis.renderer.labels.template.horizontalCenter = "left"; // Align labels in the middle of the cell
+  xAxis.renderer.labels.template.verticalCenter = "middle";
 
   function getExtremes(data) {
     const initialMax = -Infinity;
@@ -1066,7 +1072,8 @@ function updateSidebarFilters() {
   var filter1 = document.getElementById("filter1");
   var filter2 = document.getElementById("filter2");
   var filter3 = document.getElementById("filter3");
-  var scrollPosition = (window.scrollY || window.pageYOffset) + window.innerHeight;
+  var scrollPosition =
+    (window.scrollY || window.pageYOffset) + window.innerHeight;
 
   if (scrollPosition <= section1.offsetHeight) {
     filter1.style.display = "flex";
@@ -1087,6 +1094,7 @@ function updateSidebarFilters() {
     filter3.style.display = "flex";
     currentPage = "page3";
   }
+  console.log(currentPage);
 }
 function updateHeaderData(data) {
   nmiBaseChartData = {
@@ -1205,7 +1213,7 @@ let xyChartHpfy24a = xyChart(
   "hpfy24a",
   "Historical Performance FY2024 Actuals"
 );
-animatedPieChart(achievedMargin2024, "pfify24");
+let hpfy24aChart = animatedPieChart(achievedMargin2024, "pfify24");
 populateTable1Data(achievedMargin2024);
 let clusterChartFy25avspoe = clusteredChart(dataFy2025, "fy25avspoe");
 populateTable2Data(dataFy2025, "table2");
@@ -1229,7 +1237,7 @@ populateTable2Data(
   "table4"
 );
 
-nmiClusteredChart(dataRmperNMIBase, "rmpnmibase");
+let nmiClusterChartVar = nmiClusteredChart(dataRmperNMIBase, "rmpnmibase");
 getUniqueValue(dataRmperNMIBase, filter3Nmi);
 
 const footerContainer = document.querySelector(".footer-container");
@@ -1428,8 +1436,103 @@ exportButton.addEventListener("click", () => {
     });
 });
 
+document.getElementById("clearChartFilter").addEventListener("click", () => {
+  nmiClusterChartVar.series.each(function (series) {
+    series.show();
+  });
+});
+
+function convertToCSV(data) {
+  const csvRows = [];
+
+  for (const row of data) {
+    if (Array.isArray(row)) {
+      csvRows.push(row.join(",")); // Join array elements for each row
+    } else {
+      // If not an array, handle it as an object (for chart data)
+      const keys = Object.keys(row);
+      csvRows.push(
+        keys
+          .map((key) =>
+            JSON.stringify(row[key], (key, value) =>
+              value === null ? "" : value
+            )
+          )
+          .join(",")
+      );
+    }
+  }
+
+  return csvRows.join("\n");
+}
+
 exportDataButton.addEventListener("click", () => {
-  const chartIds = ["hpfy24a", "pfify24", "fy25avspoe", "fy26avspoe"];
+  let combinedData = [];
+
+  const firstPageCharts = [
+    { name: "Historical Performance FY2024 Actuals", chart: xyChartHpfy24a },
+    { name: "Percentage Fees in FY2024", chart: hpfy24aChart },
+    { name: "FY25 Actual vs POE", chart: clusterChartFy25avspoe },
+    { name: "FY26 Actual vs POE", chart: clusterChartFy26avspoe },
+  ];
+  const secondPageCharts = [
+    { name: "Actual Cost and Percentage", chart: animatedPieChartAcap },
+    { name: "Financial Year Actual Margin vs POE", chart: fyAMVP },
+  ];
+  const thirdPageCharts = [
+    { name: "Retail Margin per NMI Base", chart: nmiChartVar },
+  ];
+
+  function getChartData(chart) {
+    return chart.data; // Assuming your charts store their data in a property called `data`
+  }
+
+  function addChartData(chart, chartName) {
+    combinedData.push([chartName]); // Add the chart name as a new row
+    const chartData = getChartData(chart);
+
+    if (chartData.length > 0) {
+      // Add headers based on keys of the first object in the chart data
+      const headers = Object.keys(chartData[0]);
+      combinedData.push(headers);
+
+      // Add each row of data
+      chartData.forEach((row) => {
+        const rowData = headers.map((key) => row[key]);
+        combinedData.push(rowData);
+      });
+    }
+
+    combinedData.push([]); // Add an empty row for separation between charts
+  }
+
+  if (currentPage == "page1") {
+    firstPageCharts.forEach(({ name, chart }) => {
+      addChartData(chart, name || "Unnamed Chart"); // Use chart name or default to 'Unnamed Chart'
+    });
+  } else if (currentPage == "page2") {
+    secondPageCharts.forEach(({ name, chart }) => {
+      addChartData(chart, name || "Unnamed Chart");
+    });
+  } else {
+    thirdPageCharts.forEach(({ name, chart }) => {
+      addChartData(chart, name || "Unnamed Chart");
+    });
+  }
+
+  // Convert combined data to CSV with headers
+  const csvData = convertToCSV(combinedData);
+
+  // Trigger download of the CSV file
+  const blob = new Blob([csvData], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.setAttribute("href", url);
+  link.setAttribute("download", "ExportedDataCSV.csv");
+  link.style.visibility = "hidden";
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
 });
 
 // // Add event listeners if needed for actions when buttons are selected
