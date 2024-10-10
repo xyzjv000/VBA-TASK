@@ -155,12 +155,12 @@ Public Sub TableTemplate(tableReference As Variant)
     sourceLastRow = sourceSheet.Cells(sourceSheet.Rows.Count, nmi).End(xlUp).row
 
     Select Case tableReference
-     Case "Ancillary Services"
-        criteria = "ESS"
+     Case "ESS"
+        criteria = "Ancillary Services"
      Case Else
         criteria = tableReference
     End Select
-    getData criteria
+    getData tableReference
 
     ' Set your worksheet
     Set ws = ActiveSheet
@@ -172,7 +172,7 @@ Public Sub TableTemplate(tableReference As Variant)
     lastRow = ws.Cells(ws.Rows.Count, "A").End(xlUp).row
 
     ws.Range("C" & startRow & ":C" & lastRow).Formula = "=A" & startRow & "&B" & startRow
-    ws.Range("D" & startRow & ":D" & lastRow).Formula = "=If(C" & startRow & "="""","""",""" & Replace(criteria, " ", "") & """)"
+    ws.Range("D" & startRow & ":D" & lastRow).Formula = "=If(C" & startRow & "="""","""",""" & Replace(tableReference, " ", "") & """)"
     ws.Range("E" & startRow & ":E" & lastRow).Formula = "=If(A" & startRow & "="""","""",VLOOKUP($A" & startRow & ",'" & targetSheetName & "'!$D$13:$M$" & sourceLastRow & ",5,False))"
     ws.Range("F" & startRow & ":F" & lastRow).Formula = "=If(A" & startRow & "="""","""",VLOOKUP($A" & startRow & ",'" & targetSheetName & "'!$D$13:$M$" & sourceLastRow & ",6,False))"
     ws.Range("G" & startRow & ":G" & lastRow).Formula = "=If(A" & startRow & "="""","""",VLOOKUP($A" & startRow & ",'" & targetSheetName & "'!$D$13:$M$" & sourceLastRow & ",7,False))"
@@ -223,7 +223,7 @@ Public Sub TableTemplate(tableReference As Variant)
          Case Else
             formulaString = "=SUMIFS('" & targetSheetName & "'!" & colLetter & ":" & colLetter & _
             ", '" & targetSheetName & "'!$" & nmi & ":$" & nmi & ", A" & startRow & _
-            ", '" & targetSheetName & "'!$" & analysisReference & ":$" & analysisReference & ", """ & tableReference & """)"
+            ", '" & targetSheetName & "'!$" & analysisReference & ":$" & analysisReference & ", """ & criteria & """)"
 
         End Select
         ' Debug.Print formulaString
@@ -234,7 +234,7 @@ Public Sub TableTemplate(tableReference As Variant)
     Next i
     ws.Range("E5", ws.Range("E5").End(xlToRight).End(xlDown)).NumberFormat = "0"
     Range("A5", Range("A5").End(xlToRight).End(xlDown)).Copy
-    ReplaceOriginalTables criteria
+    ReplaceOriginalTables tableReference
 
 End Sub
 

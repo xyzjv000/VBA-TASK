@@ -209,7 +209,7 @@ const clusteredChart = (data, chartId) => {
     if (chartId == "rmpnmibase") {
       series.columns.template.tooltipText = "{name}: [bold]{valueY}[/]";
     } else {
-      series.columns.template.tooltipText = "{categoryX}: [bold]{valueY}[/]";
+      series.columns.template.tooltipText = "[bold]{valueY}[/]";
     }
 
     series.columns.template.fontSize = 14;
@@ -604,16 +604,16 @@ const nmiClusteredChart = (data, chartId) => {
     series.dataFields.valueY = value;
     series.dataFields.categoryX = "type";
     series.name = name;
-    series.columns.template.tooltipText = "{name}: [bold]{valueY}[/]";
-    series.columns.template.fontSize = 14;
 
-    series.events.on("hidden", arrangeColumns);
-    series.events.on("shown", arrangeColumns);
+    // Configure tooltip to show value when hovered
+    // series.columns.template.tooltipText = "{valueY}";
+    series.columns.template.tooltipText = "${valueY}";
 
+    // Optional: Hide labels on columns
+    series.columns.template.interactionsEnabled = true; // Ensure interaction is enabled
     var bullet = series.bullets.push(new am4charts.LabelBullet());
-    bullet.interactionsEnabled = true;
-    bullet.dy = 30;
-    bullet.label.fill = am4core.color("#ffffff");
+    bullet.label.text = ""; // No label shown by default
+    bullet.interactionsEnabled = false; // Disable interactions for the bullet
 
     return series;
   }
@@ -923,14 +923,13 @@ function applyAllFilters() {
     filteredData = filteredData.filter((data) => data.nmi === filter1Nmi.value);
   }
 
-  // Ensure filtered data is updated globally and reflect the final filtered result
-  filter1Data = filteredData;
+  if (searchInput.value !== "") {
+    filteredData = filteredData.filter((data) =>
+      data.nmi.includes(searchInput.value)
+    );
+  }
 
-  // setFilterData(filteredData, filter1Nmi, "nmi");
-  // setFilterData(filteredData, filter1Portfolio, "portfolio");
-  // setFilterData(filteredData, filter1Agreement, "agreement");
-  // setFilterData(filteredData, filter1Status, "status");
-  // setFilterData(filteredData, filter1Association, "association");
+  filter1Data = filteredData;
 
   // Refresh table or chart with the final filtered data
   refreshFilter1Data(filteredData);
@@ -983,6 +982,12 @@ function applyAllFilters2() {
         data: data.data.filter((item) => item.margin == filter2Margin.value),
       };
     });
+  }
+
+  if (searchInput2.value !== "") {
+    filteredData = filteredData.filter((data) =>
+      data.nmi.includes(searchInput2.value)
+    );
   }
 
   // Ensure filtered data is updated globally and reflect the final filtered result
@@ -1045,6 +1050,11 @@ function applyAllFilters3() {
       (data) => data.association === filter3Association.value
     );
   }
+  if (searchInput3.value !== "") {
+    filteredData = filteredData.filter((data) =>
+      data.nmi.includes(searchInput3.value)
+    );
+  }
 
   // Ensure filtered data is updated globally and reflect the final filtered result
   filter3Data = filteredData;
@@ -1079,6 +1089,9 @@ function updateSidebarFilters() {
     filter1.style.display = "flex";
     filter2.style.display = "none";
     filter3.style.display = "none";
+    searchNmi.style.display = "block";
+    searchNmi2.style.display = "none";
+    searchNmi3.style.display = "none";
     currentPage = "page1";
   } else if (
     scrollPosition > section1.offsetHeight &&
@@ -1087,11 +1100,17 @@ function updateSidebarFilters() {
     filter1.style.display = "none";
     filter2.style.display = "flex";
     filter3.style.display = "none";
+    searchNmi.style.display = "none";
+    searchNmi2.style.display = "block";
+    searchNmi3.style.display = "none";
     currentPage = "page2";
   } else {
     filter1.style.display = "none";
     filter2.style.display = "none";
     filter3.style.display = "flex";
+    searchNmi.style.display = "none";
+    searchNmi2.style.display = "none";
+    searchNmi3.style.display = "block";
     currentPage = "page3";
   }
   console.log(currentPage);
@@ -1197,6 +1216,9 @@ const filter3Portfolio = document.getElementById("filter3-portfolio");
 const filter3Status = document.getElementById("filter3-status");
 const filter3Agreement = document.getElementById("filter3-agreement");
 const filter3Association = document.getElementById("filter3-association");
+const searchInput = document.getElementById("searchNmi");
+const searchInput2 = document.getElementById("searchNmi2");
+const searchInput3 = document.getElementById("searchNmi3");
 setFilterData(nmiJsonData, filter3Portfolio, "portfolio");
 setFilterData(nmiJsonData, filter3Status, "status");
 setFilterData(nmiJsonData, filter3Agreement, "agreement");
@@ -1535,15 +1557,30 @@ exportDataButton.addEventListener("click", () => {
   document.body.removeChild(link);
 });
 
-// // Add event listeners if needed for actions when buttons are selected
-// document.getElementById("mtd").addEventListener("change", function () {
-//   if (this.checked) {
-//     console.log("MTD selected");
-//   }
-// });
+let typingTimer;
+const typingDelay = 1000;
 
-// document.getElementById("ytd").addEventListener("change", function () {
-//   if (this.checked) {
-//     console.log("YTD selected");
-//   }
-// });
+function handleSearch() {
+  if (currentPage == "page1") {
+    applyAllFilters();
+  } else if (currentPage == "page2") {
+    applyAllFilters2();
+  } else {
+    applyAllFilters3();
+  }
+}
+
+searchInput.addEventListener("input", function () {
+  clearTimeout(typingTimer);
+  typingTimer = setTimeout(handleSearch, typingDelay);
+});
+
+searchInput2.addEventListener("input", function () {
+  clearTimeout(typingTimer);
+  typingTimer = setTimeout(handleSearch, typingDelay);
+});
+
+searchInput3.addEventListener("input", function () {
+  clearTimeout(typingTimer);
+  typingTimer = setTimeout(handleSearch, typingDelay);
+});

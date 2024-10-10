@@ -28,15 +28,29 @@
           </div>
         </div>
         <div>
-          <p style="text-align: center; font-weight: bold; margin: 0 0 5px">
-            Benchmark
-          </p>
-          <div class="toggle-container">
-            <input type="radio" id="mtd1" name="benchmark" checked />
-            <label for="mtd1">MTD</label>
-
-            <input type="radio" id="ytd1" name="benchmark" />
-            <label for="ytd1">YTD</label>
+          <div class="searchNmi-container">
+            <input
+              type="search"
+              id="searchNmi"
+              name="searchNmi"
+              placeholder="Search NMI"
+            />
+          </div>
+          <div class="searchNmi-container">
+            <input
+              type="search"
+              id="searchNmi2"
+              name="searchNmi2"
+              placeholder="Search NMI"
+            />
+          </div>
+          <div class="searchNmi-container">
+            <input
+              type="search"
+              id="searchNmi3"
+              name="searchNmi2"
+              placeholder="Search NMI"
+            />
           </div>
         </div>
       </div>
@@ -78,7 +92,7 @@
       </div>
       <div id="filter3">
         <p>Retail Margin per NMI</p>
-        <div class="filter-container">
+        <div class="filter-container" style="display: none">
           <label for="filter3-nmi">NMI</label>
           <select name="filter3-nmi" id="filter3-nmi"></select>
         </div>
@@ -236,25 +250,30 @@
                   </div>
 
                   <div class="header-items">
-                    <div class="header-item-label">Actual Margin FY2025</div>
-                    <div class="header-item-value">$2,412,553.66</div>
-                  </div>
-
-                  <div class="header-items">
-                    <div class="header-item-label">Actual Margin FY2026</div>
-                    <div class="header-item-value">$2,412,553.66</div>
-                  </div>
-
-                  <div class="header-items">
                     <div class="header-item-label">
-                      Predicted Margin FY 2025
+                      Margin Aggregate to Current month
                     </div>
                     <div class="header-item-value">$2,412,553.66</div>
                   </div>
 
                   <div class="header-items">
+                    <div class="header-item-label">Margin Forecast POE90%</div>
+                    <div class="header-item-value">$2,412,553.66</div>
+                  </div>
+
+                  <div class="header-items">
+                    <div class="header-item-label">Margin Forecast 50%</div>
+                    <div class="header-item-value">$2,412,553.66</div>
+                  </div>
+
+                  <div class="header-items">
+                    <div class="header-item-label">Margin forecast 10%</div>
+                    <div class="header-item-value">$2,412,553.66</div>
+                  </div>
+
+                  <div class="header-items">
                     <div class="header-item-label">
-                      Predicted Margin FY 2026
+                      Margin Forecast Predicted TM
                     </div>
                     <div class="header-item-value">$2,412,553.66</div>
                   </div>

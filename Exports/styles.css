@@ -222,13 +222,26 @@ th {
   color: #666;
 }
 
-.toggle-container {
+.toggle-container,.searchNmi-container {
   display: flex;
   justify-content: center;
   align-items: center;
   width: 200px;
   margin: auto;
 }
+
+
+.searchNmi-container input {
+  font-family: 'Inter';
+  width: 100%;
+  height: 40px;
+  padding: 10px;
+  border-radius: 5px;
+  border: 1px solid #a9a9a9;
+  outline: none;
+  margin-top: 10px;
+}
+
 
 /* Hide default radio buttons */
 .toggle-container input[type="radio"] {
