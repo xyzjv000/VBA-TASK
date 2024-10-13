@@ -689,7 +689,6 @@ const nmiClusteredChart = (data, chartId) => {
   });
   if (chartId == "rmpnmibase") {
     updateHeaderData(data);
-    console.log(nmiBaseChartData);
   }
   return nmiChartVar;
 };
@@ -992,9 +991,6 @@ function applyAllFilters2() {
 
   // Ensure filtered data is updated globally and reflect the final filtered result
   filter2Data = filteredData;
-  console.log("Filtered data:", filter2Data);
-  // getYearFilter(filteredData, filter2Year, "year");
-  // getYearFilter(filteredData, filter2Margin, "margin");
   refreshFilter2Data(filteredData);
 }
 
@@ -1113,31 +1109,36 @@ function updateSidebarFilters() {
     searchNmi3.style.display = "block";
     currentPage = "page3";
   }
-  console.log(currentPage);
 }
 function updateHeaderData(data) {
   nmiBaseChartData = {
     achievedMarginFy2024: 0,
-    actualMarginFy2025: 0,
-    actualMarginFy2026: 0,
-    predictedMarginFy2025: 0,
-    predictedMarginFy2026: 0,
+    aggregateCurrentMonth: 0,
+    forecastPoe90: 0,
+    forecastPoe50: 0,
+    forecastPoe10: 0,
+    forecastPredicted: 0,
   };
 
   nmiBaseChartData.achievedMarginFy2024 = data
     .filter((item) => item.margin == "Achieved Margin FY2024")
     .reduce((sum, item) => sum + item.total, 0);
-  nmiBaseChartData.actualMarginFy2025 = data
-    .filter((item) => item.margin == "Total Actuals Margin FY2025")
+  nmiBaseChartData.aggregateCurrentMonth = data
+    .filter(
+      (item) => item.margin == "Margin Aggregate July24 to Current Month ($)"
+    )
     .reduce((sum, item) => sum + item.total, 0);
-  nmiBaseChartData.actualMarginFy2026 = data
-    .filter((item) => item.margin == "Total Actuals Margin FY2026")
+  nmiBaseChartData.forecastPoe90 = data
+    .filter((item) => item.margin == "Total POE 90% FY2025")
     .reduce((sum, item) => sum + item.total, 0);
-  nmiBaseChartData.predictedMarginFy2025 = data
+  nmiBaseChartData.forecastPoe50 = data
+    .filter((item) => item.margin == "Total POE 50% FY2025")
+    .reduce((sum, item) => sum + item.total, 0);
+  nmiBaseChartData.forecastPoe10 = data
+    .filter((item) => item.margin == "Total POE 10% FY2025")
+    .reduce((sum, item) => sum + item.total, 0);
+  nmiBaseChartData.forecastPredicted = data
     .filter((item) => item.margin == "Total Predicted TM FY2025")
-    .reduce((sum, item) => sum + item.total, 0);
-  nmiBaseChartData.predictedMarginFy2026 = data
-    .filter((item) => item.margin == "Total Predicted TM FY2026")
     .reduce((sum, item) => sum + item.total, 0);
 
   let items = document.querySelectorAll(".header-items");
@@ -1147,14 +1148,16 @@ function updateHeaderData(data) {
 
     if (label === "Achieved Margin FY2024") {
       valueElement.textContent = `$${nmiBaseChartData.achievedMarginFy2024.toLocaleString()}`;
-    } else if (label === "Actual Margin FY2025") {
-      valueElement.textContent = `$${nmiBaseChartData.actualMarginFy2025.toLocaleString()}`;
-    } else if (label === "Actual Margin FY2026") {
-      valueElement.textContent = `$${nmiBaseChartData.actualMarginFy2026.toLocaleString()}`;
-    } else if (label === "Predicted Margin FY 2025") {
-      valueElement.textContent = `$${nmiBaseChartData.predictedMarginFy2025.toLocaleString()}`;
-    } else if (label === "Predicted Margin FY 2026") {
-      valueElement.textContent = `$${nmiBaseChartData.predictedMarginFy2026.toLocaleString()}`;
+    } else if (label === "Margin Aggregate to Current month") {
+      valueElement.textContent = `$${nmiBaseChartData.aggregateCurrentMonth.toLocaleString()}`;
+    } else if (label === "Margin Forecast POE90%") {
+      valueElement.textContent = `$${nmiBaseChartData.forecastPoe90.toLocaleString()}`;
+    } else if (label === "Margin Forecast 50%") {
+      valueElement.textContent = `$${nmiBaseChartData.forecastPoe50.toLocaleString()}`;
+    } else if (label === "Margin forecast 10%") {
+      valueElement.textContent = `$${nmiBaseChartData.forecastPoe10.toLocaleString()}`;
+    } else if (label === "Margin Forecast Predicted TM") {
+      valueElement.textContent = `$${nmiBaseChartData.forecastPredicted.toLocaleString()}`;
     }
   });
 }
@@ -1167,7 +1170,6 @@ let nmiBaseChartData = {
   predictedMarginFy2025: 0,
   predictedMarginFy2026: 0,
 };
-console.log("combinedDataJsonFull", combinedDataJsonFull);
 var nmiChartVar;
 var xyChartVar;
 
@@ -1412,10 +1414,6 @@ clearFilterButton.addEventListener("click", () => {
   filter3Status.value = "selectAll";
   filter3Agreement.value = "selectAll";
   filter3Association.value = "selectAll";
-
-  console.log("filter1Changed:", filter1Changed);
-  console.log("filter2Changed:", filter2Changed);
-  console.log("filter3Changed:", filter3Changed);
 
   // Only apply the filters if any of the corresponding filter sets are changed
   if (filter1Changed) {
