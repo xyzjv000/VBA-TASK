@@ -17,14 +17,14 @@
       <div id="filter0">
         <div>
           <p style="text-align: center; font-weight: bold; margin: 0 0 5px">
-            Period
+            Extra Data
           </p>
           <div class="toggle-container">
-            <input type="radio" id="mtd" name="period" checked />
-            <label for="mtd">MTD</label>
+            <input type="radio" id="dataHide" name="period" />
+            <label for="dataHide">HIDE</label>
 
-            <input type="radio" id="ytd" name="period" />
-            <label for="ytd">YTD</label>
+            <input type="radio" id="dataShow" name="period" />
+            <label for="dataShow">SHOW</label>
           </div>
         </div>
         <div>
@@ -246,36 +246,48 @@
                 <div class="header-table">
                   <div class="header-items">
                     <div class="header-item-label">Achieved Margin FY2024</div>
-                    <div class="header-item-value" id="headerAchievedFy2024">$0</div>
+                    <div class="header-item-value" id="headerAchievedFy2024">
+                      $0
+                    </div>
                   </div>
 
                   <div class="header-items">
                     <div class="header-item-label">
                       Margin Aggregate to Current month
                     </div>
-                    <div class="header-item-value" id="headerCurrentMonth">$0</div>
+                    <div class="header-item-value" id="headerCurrentMonth">
+                      $0
+                    </div>
                   </div>
 
                   <div class="header-items">
                     <div class="header-item-label">Margin Forecast POE90%</div>
-                    <div class="header-item-value" id="headerForecast90">$0</div>
+                    <div class="header-item-value" id="headerForecast90">
+                      $0
+                    </div>
                   </div>
 
                   <div class="header-items">
                     <div class="header-item-label">Margin Forecast 50%</div>
-                    <div class="header-item-value" id="headerForecast50">$0</div>
+                    <div class="header-item-value" id="headerForecast50">
+                      $0
+                    </div>
                   </div>
 
                   <div class="header-items">
                     <div class="header-item-label">Margin forecast 10%</div>
-                    <div class="header-item-value" id="headerForecast10">$0</div>
+                    <div class="header-item-value" id="headerForecast10">
+                      $0
+                    </div>
                   </div>
 
                   <div class="header-items">
                     <div class="header-item-label">
                       Margin Forecast Predicted TM
                     </div>
-                    <div class="header-item-value" id="headerForecastTM">$0</div>
+                    <div class="header-item-value" id="headerForecastTM">
+                      $0
+                    </div>
                   </div>
                 </div>
               </div>
@@ -302,9 +314,36 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/dom-to-image/2.6.0/dom-to-image.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.5/xlsx.full.min.js"></script>
     <script>
-      var versionData = {{versionData}};
-      var nmiJsonData = {{nmiJson}}
-      var combinedDataJsonFull = {{combinedFullJson}}
+      let versionData = {{versionData}};
+      let nmiJsonData = {{nmiJson}}
+      let _combinedDataJsonFull = {{combinedFullJson}}
+      let combinedDataJsonFull = []
+      let extraData = JSON.parse(localStorage.getItem("extraData")) || false;
+      const dataHide = document.getElementById("dataHide");
+      const dataShow = document.getElementById("dataShow");
+
+      function removeNotImportantData(dataArray) {
+          return dataArray.map(item => {
+              item.data = item.data.map(dataEntry => {
+                  dataEntry.type = dataEntry.type.filter(typeEntry =>
+                      !["securityDepositInterest", "securityDeposit", "roc"].includes(typeEntry.name)
+                  );
+                  return dataEntry;
+              });
+              return item;
+          });
+      }
+
+      if(extraData) {
+        console.log(extraData);
+        combinedDataJsonFull = _combinedDataJsonFull
+        dataShow.checked = true;
+      }
+      else {
+        console.log(extraData);
+        combinedDataJsonFull = removeNotImportantData(_combinedDataJsonFull);
+        dataHide.checked = true;
+      }
       console.log("versionData",versionData);
       console.log("nmiJsonData",nmiJsonData);
       console.log("combinedDataJsonFull",combinedDataJsonFull);

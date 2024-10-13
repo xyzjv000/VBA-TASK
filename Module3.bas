@@ -255,6 +255,9 @@ Function ExportPivotTableToJSON(sheetName As String, pivotTableName As String) A
     Dim rowItemRevenue As Variant
     Dim rowItemStc As Variant
     Dim rowItemWholesaleEnergy As Variant
+    Dim rowItemSecurityDepositInterest As Variant
+    Dim rowItemSecurityDeposit As Variant
+    Dim rowItemRoc As Variant
     Dim rowItemPortfolio As Variant
     Dim rowItemStatus As Variant
     Dim rowItemAssociation As Variant
@@ -271,6 +274,9 @@ Function ExportPivotTableToJSON(sheetName As String, pivotTableName As String) A
     Dim valueRevenue As Variant
     Dim valueStc As Variant
     Dim valueWholesaleEnergy As Variant
+    Dim valueSecurityDepositInterest As Variant
+    Dim valueSecurityDeposit As Variant
+    Dim valueRoc As Variant
     Dim i As Long, j As Long, k As Long
     Dim lastRow As Long
     Dim colFieldName As String
@@ -296,6 +302,9 @@ Function ExportPivotTableToJSON(sheetName As String, pivotTableName As String) A
     Dim revenueIndex As Long
     Dim stcIndex As Long
     Dim wholesaleEnergyIndex As Long
+    Dim securityDepositInterestIndex As Long
+    Dim securityDepositIndex As Long
+    Dim rocIndex As Long
 
     nmiIndex = 1
     capacityIndex = 2
@@ -311,15 +320,15 @@ Function ExportPivotTableToJSON(sheetName As String, pivotTableName As String) A
     retailMarginIndex = 32
     revenueIndex = 37
     stcIndex = 42
-    wholesaleEnergyIndex = 52
-    ' securityDepositInterest = 57
-    ' securityDeposit = 62
-    ' roc = 67
+    wholesaleEnergyIndex = 47
+    securityDepositInterestIndex = 52
+    securityDepositIndex = 57
+    rocIndex = 62
 
     ' Initialize JSON string
     jsonData = "["
 
-    k = 51
+    k = 66
     ' Ensure row And column fields exist
     If pvt.rowFields.Count >= 6 And pvt.ColumnFields.Count >= 1 Then
         rowFieldNmi = pvt.rowFields(1).name
@@ -342,6 +351,9 @@ Function ExportPivotTableToJSON(sheetName As String, pivotTableName As String) A
             Set rowItemRevenue = pvt.DataBodyRange.Cells(revenueIndex, 0)
             Set rowItemStc = pvt.DataBodyRange.Cells(stcIndex, 0)
             Set rowItemWholesaleEnergy = pvt.DataBodyRange.Cells(wholesaleEnergyIndex, 0)
+            Set rowItemSecurityDepositInterest = pvt.DataBodyRange.Cells(securityDepositInterestIndex, 0)
+            Set rowItemSecurityDeposit = pvt.DataBodyRange.Cells(securityDepositIndex, 0)
+            Set rowItemRoc = pvt.DataBodyRange.Cells(rocIndex, 0)
 
             Set rowItemPortfolio = pvt.DataBodyRange.Cells(portfolioIndex, 0)
             Set rowItemStatus = pvt.DataBodyRange.Cells(statusIndex, 0)
@@ -364,6 +376,9 @@ Function ExportPivotTableToJSON(sheetName As String, pivotTableName As String) A
                 valueRevenue = pvt.GetPivotData(dataFieldName, rowFieldNmi, rowItemNmi, "Type", rowItemRevenue, colFieldName, dataFieldName)
                 valueStc = pvt.GetPivotData(dataFieldName, rowFieldNmi, rowItemNmi, "Type", rowItemStc, colFieldName, dataFieldName)
                 valueWholesaleEnergy = pvt.GetPivotData(dataFieldName, rowFieldNmi, rowItemNmi, "Type", rowItemWholesaleEnergy, colFieldName, dataFieldName)
+                valueSecurityDepositInterest = pvt.GetPivotData(dataFieldName, rowFieldNmi, rowItemNmi, "Type", rowItemSecurityDepositInterest, colFieldName, dataFieldName)
+                valueSecurityDeposit = pvt.GetPivotData(dataFieldName, rowFieldNmi, rowItemNmi, "Type", rowItemSecurityDeposit, colFieldName, dataFieldName)
+                valueRoc = pvt.GetPivotData(dataFieldName, rowFieldNmi, rowItemNmi, "Type", rowItemRoc, colFieldName, dataFieldName)
 
                 cellPortfolio = rowItemPortfolio
                 cellStatus = rowItemStatus
@@ -386,7 +401,10 @@ Function ExportPivotTableToJSON(sheetName As String, pivotTableName As String) A
                     "{""name"":""retailMargin"",""value"":" & valueRetailMargin & "}," & _
                     "{""name"":""revenue"",""value"":" & valueRevenue & "}," & _
                     "{""name"":""stc"",""value"":" & valueStc & "}," & _
-                    "{""name"":""wholesaleEnergy"",""value"":" & valueWholesaleEnergy & "}" & _
+                    "{""name"":""wholesaleEnergy"",""value"":" & valueWholesaleEnergy & "}," & _
+                    "{""name"":""securityDepositInterest"",""value"":" & valueSecurityDepositInterest & "}," & _
+                    "{""name"":""securityDeposit"",""value"":" & valueSecurityDeposit & "}," & _
+                    "{""name"":""roc"",""value"":" & valueRoc & "}" & _
                     "]},"
                 End If
             Next j
@@ -418,6 +436,9 @@ Function ExportPivotTableToJSON(sheetName As String, pivotTableName As String) A
             revenueIndex = revenueIndex + k
             stcIndex = stcIndex + k
             wholesaleEnergyIndex = wholesaleEnergyIndex + k
+            securityDepositInterestIndex = securityDepositInterestIndex + k
+            securityDepositIndex = securityDepositIndex + k
+            rocIndex = rocIndex + k
         Next i
     End If
 

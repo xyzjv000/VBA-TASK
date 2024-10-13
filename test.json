@@ -1,0 +1,519 @@
+{
+    "nmi": "8001000427",
+    "data": [
+        {
+            "margin": "Sum of Total Predicted TM FY2026",
+            "value": 47088,
+            "type": [
+                {
+                    "name": "capacity",
+                    "value": 3897
+                },
+                {
+                    "name": "commission",
+                    "value": 3951
+                },
+                {
+                    "name": "ess",
+                    "value": 0
+                },
+                {
+                    "name": "lgc",
+                    "value": 3933
+                },
+                {
+                    "name": "marketFees",
+                    "value": 3915
+                },
+                {
+                    "name": "network",
+                    "value": 3888
+                },
+                {
+                    "name": "retailMargin",
+                    "value": 3870
+                },
+                {
+                    "name": "revenue",
+                    "value": 3879
+                },
+                {
+                    "name": "stc",
+                    "value": 3942
+                },
+                {
+                    "name": "wholesaleEnergy",
+                    "value": 3906
+                }
+            ]
+        },
+        {
+            "margin": "Sum of Total POE 10% FY2026",
+            "value": 586257.760082259,
+            "type": [
+                {
+                    "name": "capacity",
+                    "value": 31408.7677231634
+                },
+                {
+                    "name": "commission",
+                    "value": 0
+                },
+                {
+                    "name": "ess",
+                    "value": 0
+                },
+                {
+                    "name": "lgc",
+                    "value": 7116.85424184743
+                },
+                {
+                    "name": "marketFees",
+                    "value": 1672.80235583775
+                },
+                {
+                    "name": "network",
+                    "value": 37010.5843325086
+                },
+                {
+                    "name": "retailMargin",
+                    "value": -94016.6762932383
+                },
+                {
+                    "name": "revenue",
+                    "value": 148824.041155741
+                },
+                {
+                    "name": "stc",
+                    "value": 3534.33930656669
+                },
+                {
+                    "name": "wholesaleEnergy",
+                    "value": 153885.614594616
+                }
+            ]
+        },
+        {
+            "margin": "Sum of Total POE 50% FY2026",
+            "value": 474088.178267221,
+            "type": [
+                {
+                    "name": "capacity",
+                    "value": 31408.7677231634
+                },
+                {
+                    "name": "commission",
+                    "value": 0
+                },
+                {
+                    "name": "ess",
+                    "value": 0
+                },
+                {
+                    "name": "lgc",
+                    "value": 7116.85424184743
+                },
+                {
+                    "name": "marketFees",
+                    "value": 1672.80235583775
+                },
+                {
+                    "name": "network",
+                    "value": 37010.5843325086
+                },
+                {
+                    "name": "retailMargin",
+                    "value": 4187.89028899596
+                },
+                {
+                    "name": "revenue",
+                    "value": 148824.041155741
+                },
+                {
+                    "name": "stc",
+                    "value": 3534.33930656669
+                },
+                {
+                    "name": "wholesaleEnergy",
+                    "value": 55681.0480123819
+                }
+            ]
+        },
+        {
+            "margin": "Sum of Total POE 90% FY2026",
+            "value": 378234.968325894,
+            "type": [
+                {
+                    "name": "capacity",
+                    "value": 31408.7677231634
+                },
+                {
+                    "name": "commission",
+                    "value": 0
+                },
+                {
+                    "name": "ess",
+                    "value": 0
+                },
+                {
+                    "name": "lgc",
+                    "value": 7116.85424184743
+                },
+                {
+                    "name": "marketFees",
+                    "value": 1672.80235583775
+                },
+                {
+                    "name": "network",
+                    "value": 37010.5843325086
+                },
+                {
+                    "name": "retailMargin",
+                    "value": 88171.3280255965
+                },
+                {
+                    "name": "revenue",
+                    "value": 148824.041155741
+                },
+                {
+                    "name": "stc",
+                    "value": 3534.33930656669
+                },
+                {
+                    "name": "wholesaleEnergy",
+                    "value": -28302.3897242187
+                },
+                {
+                    "name": "securityDepositInterest",
+                    "value": 0
+                }
+            ]
+        },
+        {
+            "margin": "Sum of Total Actuals Margin FY2026",
+            "value": 47088,
+            "type": [
+                {
+                    "name": "capacity",
+                    "value": 3897
+                },
+                {
+                    "name": "commission",
+                    "value": 3951
+                },
+                {
+                    "name": "ess",
+                    "value": 0
+                },
+                {
+                    "name": "lgc",
+                    "value": 3933
+                },
+                {
+                    "name": "marketFees",
+                    "value": 3915
+                },
+                {
+                    "name": "network",
+                    "value": 3888
+                },
+                {
+                    "name": "retailMargin",
+                    "value": 3870
+                },
+                {
+                    "name": "revenue",
+                    "value": 3879
+                },
+                {
+                    "name": "stc",
+                    "value": 3942
+                },
+                {
+                    "name": "wholesaleEnergy",
+                    "value": 3906
+                }
+            ]
+        },
+        {
+            "margin": "Sum of Total Predicted TM FY2025",
+            "value": 15696,
+            "type": [
+                {
+                    "name": "capacity",
+                    "value": 1299
+                },
+                {
+                    "name": "commission",
+                    "value": 1317
+                },
+                {
+                    "name": "ess",
+                    "value": 0
+                },
+                {
+                    "name": "lgc",
+                    "value": 1311
+                },
+                {
+                    "name": "marketFees",
+                    "value": 1305
+                },
+                {
+                    "name": "network",
+                    "value": 1296
+                },
+                {
+                    "name": "retailMargin",
+                    "value": 1290
+                },
+                {
+                    "name": "revenue",
+                    "value": 1293
+                },
+                {
+                    "name": "stc",
+                    "value": 1314
+                },
+                {
+                    "name": "wholesaleEnergy",
+                    "value": 1302
+                }
+            ]
+        },
+        {
+            "margin": "Sum of Total POE 10% FY2025",
+            "value": 1917525.86795832,
+            "type": [
+                {
+                    "name": "capacity",
+                    "value": 94284.8907658823
+                },
+                {
+                    "name": "commission",
+                    "value": 0
+                },
+                {
+                    "name": "ess",
+                    "value": 0
+                },
+                {
+                    "name": "lgc",
+                    "value": 26372.1661146591
+                },
+                {
+                    "name": "marketFees",
+                    "value": 6105.86057087628
+                },
+                {
+                    "name": "network",
+                    "value": 106403.695748151
+                },
+                {
+                    "name": "retailMargin",
+                    "value": -281643.545739547
+                },
+                {
+                    "name": "revenue",
+                    "value": 502036.179685163
+                },
+                {
+                    "name": "stc",
+                    "value": 14850.9440748603
+                },
+                {
+                    "name": "wholesaleEnergy",
+                    "value": 504531.493477017
+                }
+            ]
+        },
+        {
+            "margin": "Sum of Total POE 50% FY2025",
+            "value": 1540272.36839879,
+            "type": [
+                {
+                    "name": "capacity",
+                    "value": 94284.8907658823
+                },
+                {
+                    "name": "commission",
+                    "value": 0
+                },
+                {
+                    "name": "ess",
+                    "value": 0
+                },
+                {
+                    "name": "lgc",
+                    "value": 26372.1661146591
+                },
+                {
+                    "name": "marketFees",
+                    "value": 6105.86057087628
+                },
+                {
+                    "name": "network",
+                    "value": 106403.695748151
+                },
+                {
+                    "name": "retailMargin",
+                    "value": 42453.8064555261
+                },
+                {
+                    "name": "revenue",
+                    "value": 502036.179685163
+                },
+                {
+                    "name": "stc",
+                    "value": 14850.9440748603
+                },
+                {
+                    "name": "wholesaleEnergy",
+                    "value": 180434.141281943
+                }
+            ]
+        },
+        {
+            "margin": "Sum of Total POE 90% FY2025",
+            "value": 1238661.7559331,
+            "type": [
+                {
+                    "name": "capacity",
+                    "value": 94284.8907658823
+                },
+                {
+                    "name": "commission",
+                    "value": 0
+                },
+                {
+                    "name": "ess",
+                    "value": 0
+                },
+                {
+                    "name": "lgc",
+                    "value": 26372.1661146591
+                },
+                {
+                    "name": "marketFees",
+                    "value": 6105.86057087628
+                },
+                {
+                    "name": "network",
+                    "value": 106403.695748151
+                },
+                {
+                    "name": "retailMargin",
+                    "value": 308766.365395195
+                },
+                {
+                    "name": "revenue",
+                    "value": 502036.179685163
+                },
+                {
+                    "name": "stc",
+                    "value": 14850.9440748603
+                },
+                {
+                    "name": "wholesaleEnergy",
+                    "value": -85878.4176577261
+                }
+            ]
+        },
+        {
+            "margin": "Sum of Total Actuals Margin FY2025",
+            "value": 6761.80523757322,
+            "type": [
+                {
+                    "name": "capacity",
+                    "value": 241.889445456907
+                },
+                {
+                    "name": "commission",
+                    "value": 0
+                },
+                {
+                    "name": "ess",
+                    "value": 0
+                },
+                {
+                    "name": "lgc",
+                    "value": 79.6950287917056
+                },
+                {
+                    "name": "marketFees",
+                    "value": 12.0239874689486
+                },
+                {
+                    "name": "network",
+                    "value": 791.783326940092
+                },
+                {
+                    "name": "retailMargin",
+                    "value": -380.635458895824
+                },
+                {
+                    "name": "revenue",
+                    "value": 1503.22
+                },
+                {
+                    "name": "stc",
+                    "value": 42.1367094779904
+                },
+                {
+                    "name": "wholesaleEnergy",
+                    "value": 689.761951162945
+                }
+            ]
+        },
+        {
+            "margin": "Sum of Achieved Margin FY2024",
+            "value": 6761.80523757322,
+            "type": [
+                {
+                    "name": "capacity",
+                    "value": 241.889445456907
+                },
+                {
+                    "name": "commission",
+                    "value": 0
+                },
+                {
+                    "name": "ess",
+                    "value": 0
+                },
+                {
+                    "name": "lgc",
+                    "value": 79.6950287917056
+                },
+                {
+                    "name": "marketFees",
+                    "value": 12.0239874689486
+                },
+                {
+                    "name": "network",
+                    "value": 791.783326940092
+                },
+                {
+                    "name": "retailMargin",
+                    "value": -380.635458895824
+                },
+                {
+                    "name": "revenue",
+                    "value": 1503.22
+                },
+                {
+                    "name": "stc",
+                    "value": 42.1367094779904
+                },
+                {
+                    "name": "wholesaleEnergy",
+                    "value": 689.761951162945
+                }
+            ]
+        }
+    ],
+    "portfolio": "AE",
+    "status": "SUC",
+    "association": "0",
+    "agreement": "Bundled"
+}

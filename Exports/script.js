@@ -717,35 +717,76 @@ function totalValuesByName(data) {
       totals[item.name] = item.value;
     }
   });
-
-  return [
-    { type: "Capacity", total: totals["capacity"] || 0 },
-    { type: "Commission", total: totals["commission"] || 0 },
-    { type: "ESS", total: totals["ess"] || 0 },
-    { type: "LGC", total: totals["lgc"] || 0 },
-    { type: "Market Fees", total: totals["marketFees"] || 0 },
-    { type: "Network", total: totals["network"] || 0 },
-    { type: "Retail Margin", total: totals["retailMargin"] || 0 },
-    { type: "Revenue", total: totals["revenue"] || 0 },
-    { type: "STC", total: totals["stc"] || 0 },
-    { type: "Wholesale Energy", total: totals["wholesaleEnergy"] || 0 },
-  ];
+  let result = [];
+  if (extraData) {
+    result = [
+      { type: "Capacity", total: totals["capacity"] || 0 },
+      { type: "Commission", total: totals["commission"] || 0 },
+      { type: "ESS", total: totals["ess"] || 0 },
+      { type: "LGC", total: totals["lgc"] || 0 },
+      { type: "Market Fees", total: totals["marketFees"] || 0 },
+      { type: "Network", total: totals["network"] || 0 },
+      { type: "Retail Margin", total: totals["retailMargin"] || 0 },
+      { type: "Revenue", total: totals["revenue"] || 0 },
+      { type: "STC", total: totals["stc"] || 0 },
+      { type: "Wholesale Energy", total: totals["wholesaleEnergy"] || 0 },
+      {
+        type: "Security Deposit Interest",
+        total: totals["securityDepositInterest"] || 0,
+      },
+      { type: "Security Deposit", total: totals["securityDeposit"] || 0 },
+      { type: "ROC", total: totals["roc"] || 0 },
+    ];
+  } else {
+    result = [
+      { type: "Capacity", total: totals["capacity"] || 0 },
+      { type: "Commission", total: totals["commission"] || 0 },
+      { type: "ESS", total: totals["ess"] || 0 },
+      { type: "LGC", total: totals["lgc"] || 0 },
+      { type: "Market Fees", total: totals["marketFees"] || 0 },
+      { type: "Network", total: totals["network"] || 0 },
+      { type: "Retail Margin", total: totals["retailMargin"] || 0 },
+      { type: "Revenue", total: totals["revenue"] || 0 },
+      { type: "STC", total: totals["stc"] || 0 },
+      { type: "Wholesale Energy", total: totals["wholesaleEnergy"] || 0 },
+    ];
+  }
+  return result;
 }
 
 function totalValuesByType(data) {
   const totals = [];
-  const names = [
-    { type: "Capacity", name: "capacity" },
-    { type: "Commission", name: "commission" },
-    { type: "ESS", name: "ess" },
-    { type: "LGC", name: "lgc" },
-    { type: "Market Fees", name: "marketFees" },
-    { type: "Network", name: "network" },
-    { type: "Retail Margin", name: "retailMargin" },
-    { type: "Revenue", name: "revenue" },
-    { type: "STC", name: "stc" },
-    { type: "Wholesale Energy", name: "wholesaleEnergy" },
-  ];
+  let names = [];
+  if (extraData) {
+    names = [
+      { type: "Capacity", name: "capacity" },
+      { type: "Commission", name: "commission" },
+      { type: "ESS", name: "ess" },
+      { type: "LGC", name: "lgc" },
+      { type: "Market Fees", name: "marketFees" },
+      { type: "Network", name: "network" },
+      { type: "Retail Margin", name: "retailMargin" },
+      { type: "Revenue", name: "revenue" },
+      { type: "STC", name: "stc" },
+      { type: "Wholesale Energy", name: "wholesaleEnergy" },
+      { type: "Security Deposit Interest", name: "securityDepositInterest" },
+      { type: "Security Deposit", name: "securityDeposit" },
+      { type: "ROC", name: "roc" },
+    ];
+  } else {
+    names = [
+      { type: "Capacity", name: "capacity" },
+      { type: "Commission", name: "commission" },
+      { type: "ESS", name: "ess" },
+      { type: "LGC", name: "lgc" },
+      { type: "Market Fees", name: "marketFees" },
+      { type: "Network", name: "network" },
+      { type: "Retail Margin", name: "retailMargin" },
+      { type: "Revenue", name: "revenue" },
+      { type: "STC", name: "stc" },
+      { type: "Wholesale Energy", name: "wholesaleEnergy" },
+    ];
+  }
   data.forEach((item) => {
     item.type.forEach((typeObj) => {
       // Find if the same combination of margin and type already exists
@@ -780,18 +821,37 @@ function totalValuesByType(data) {
 
 function totalValuesByTypeNew(data) {
   const margins = {};
-  const names = [
-    { type: "Capacity", name: "capacity" },
-    { type: "Commission", name: "commission" },
-    { type: "ESS", name: "ess" },
-    { type: "LGC", name: "lgc" },
-    { type: "Market Fees", name: "marketFees" },
-    { type: "Network", name: "network" },
-    { type: "Retail Margin", name: "retailMargin" },
-    { type: "Revenue", name: "revenue" },
-    { type: "STC", name: "stc" },
-    { type: "Wholesale Energy", name: "wholesaleEnergy" },
-  ];
+  let names = [];
+  if (extraData) {
+    names = [
+      { type: "Capacity", name: "capacity" },
+      { type: "Commission", name: "commission" },
+      { type: "ESS", name: "ess" },
+      { type: "LGC", name: "lgc" },
+      { type: "Market Fees", name: "marketFees" },
+      { type: "Network", name: "network" },
+      { type: "Retail Margin", name: "retailMargin" },
+      { type: "Revenue", name: "revenue" },
+      { type: "STC", name: "stc" },
+      { type: "Wholesale Energy", name: "wholesaleEnergy" },
+      { type: "Security Deposit Interest", name: "securityDepositInterest" },
+      { type: "Security Deposit", name: "securityDeposit" },
+      { type: "ROC", name: "roc" },
+    ];
+  } else {
+    names = [
+      { type: "Capacity", name: "capacity" },
+      { type: "Commission", name: "commission" },
+      { type: "ESS", name: "ess" },
+      { type: "LGC", name: "lgc" },
+      { type: "Market Fees", name: "marketFees" },
+      { type: "Network", name: "network" },
+      { type: "Retail Margin", name: "retailMargin" },
+      { type: "Revenue", name: "revenue" },
+      { type: "STC", name: "stc" },
+      { type: "Wholesale Energy", name: "wholesaleEnergy" },
+    ];
+  }
 
   // Create a mapping of type names for easy lookup
   const typeMapping = Object.fromEntries(
@@ -1581,4 +1641,17 @@ searchInput2.addEventListener("input", function () {
 searchInput3.addEventListener("input", function () {
   clearTimeout(typingTimer);
   typingTimer = setTimeout(handleSearch, typingDelay);
+});
+
+document.querySelectorAll('input[name="period"]').forEach((radio) => {
+  radio.addEventListener("change", () => {
+    if (document.getElementById("dataShow").checked) {
+      console.log("SHOW");
+      localStorage.setItem("extraData", true);
+    } else {
+      console.log("HIDE");
+      localStorage.setItem("extraData", false);
+    }
+    location.reload(true);
+  });
 });
