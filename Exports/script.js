@@ -922,10 +922,12 @@ function refreshFilter1Data(filteredData) {
   if (xyChartHpfy24a) {
     xyChartHpfy24a.dispose();
   }
+  if (hpfy24aChart) {
+    hpfy24aChart.dispose();
+  }
   if (clusterChartFy25avspoe) {
     clusterChartFy25avspoe.dispose();
   }
-
   if (clusterChartFy26avspoe) {
     clusterChartFy26avspoe.dispose();
   }
@@ -935,7 +937,7 @@ function refreshFilter1Data(filteredData) {
     "hpfy24a",
     "Historical Performance FY2024 Actuals"
   );
-  // animatedPieChart(achievedMargin2024, "pfify24");
+  animatedPieChart(achievedMargin2024, "pfify24");
   populateTable1Data(achievedMargin2024);
   clusterChartFy25avspoe = clusteredChart(dataFy2025, "fy25avspoe");
   populateTable2Data(dataFy2025, "table2");
@@ -1043,9 +1045,9 @@ function applyAllFilters2() {
     });
   }
 
-  if (searchInput2.value !== "") {
+  if (searchInput.value !== "") {
     filteredData = filteredData.filter((data) =>
-      data.nmi.includes(searchInput2.value)
+      data.nmi.includes(searchInput.value)
     );
   }
 
@@ -1106,9 +1108,9 @@ function applyAllFilters3() {
       (data) => data.association === filter3Association.value
     );
   }
-  if (searchInput3.value !== "") {
+  if (searchInput.value !== "") {
     filteredData = filteredData.filter((data) =>
-      data.nmi.includes(searchInput3.value)
+      data.nmi.includes(searchInput.value)
     );
   }
 
@@ -1145,9 +1147,6 @@ function updateSidebarFilters() {
     filter1.style.display = "flex";
     filter2.style.display = "none";
     filter3.style.display = "none";
-    searchNmi.style.display = "block";
-    searchNmi2.style.display = "none";
-    searchNmi3.style.display = "none";
     currentPage = "page1";
   } else if (
     scrollPosition > section1.offsetHeight &&
@@ -1156,17 +1155,11 @@ function updateSidebarFilters() {
     filter1.style.display = "none";
     filter2.style.display = "flex";
     filter3.style.display = "none";
-    searchNmi.style.display = "none";
-    searchNmi2.style.display = "block";
-    searchNmi3.style.display = "none";
     currentPage = "page2";
   } else {
     filter1.style.display = "none";
     filter2.style.display = "none";
     filter3.style.display = "flex";
-    searchNmi.style.display = "none";
-    searchNmi2.style.display = "none";
-    searchNmi3.style.display = "block";
     currentPage = "page3";
   }
 }
@@ -1222,6 +1215,46 @@ function updateHeaderData(data) {
   });
 }
 updateSidebarFilters();
+const filterSelects = document.querySelectorAll(
+  "#filter1 select, #filter3 select"
+);
+function nmiSetSelected() {
+  let selectedData = filter1Data[0];
+  if (selectedData) {
+    filterSelects.forEach((select) => {
+      if (select.id.includes("portfolio")) {
+        select.value = selectedData.portfolio;
+        select.disabled = true;
+      }
+      if (select.id.includes("status")) {
+        select.value = selectedData.status;
+        select.disabled = true;
+      }
+      if (select.id.includes("agreement")) {
+        select.value = selectedData.agreement;
+        select.disabled = true;
+      }
+      if (select.id.includes("association")) {
+        select.value = selectedData.association;
+        select.disabled = true;
+      }
+    });
+  }
+}
+
+function nmiSetDefault() {
+  filterSelects.forEach((select) => {
+    if (
+      select.id.includes("portfolio") ||
+      select.id.includes("status") ||
+      select.id.includes("agreement") ||
+      select.id.includes("association")
+    ) {
+      select.value = "selectAll";
+      select.disabled = false;
+    }
+  });
+}
 
 let nmiBaseChartData = {
   achievedMarginFy2024: 0,
@@ -1279,8 +1312,6 @@ const filter3Status = document.getElementById("filter3-status");
 const filter3Agreement = document.getElementById("filter3-agreement");
 const filter3Association = document.getElementById("filter3-association");
 const searchInput = document.getElementById("searchNmi");
-const searchInput2 = document.getElementById("searchNmi2");
-const searchInput3 = document.getElementById("searchNmi3");
 setFilterData(nmiJsonData, filter3Portfolio, "portfolio");
 setFilterData(nmiJsonData, filter3Status, "status");
 setFilterData(nmiJsonData, filter3Agreement, "agreement");
@@ -1619,28 +1650,34 @@ let typingTimer;
 const typingDelay = 1000;
 
 function handleSearch() {
-  if (currentPage == "page1") {
-    applyAllFilters();
-  } else if (currentPage == "page2") {
-    applyAllFilters2();
-  } else {
-    applyAllFilters3();
-  }
+  applyAllFilters();
+  applyAllFilters2();
+  applyAllFilters3();
 }
 
 searchInput.addEventListener("input", function () {
   clearTimeout(typingTimer);
   typingTimer = setTimeout(handleSearch, typingDelay);
-});
+  const chartItems = document.querySelectorAll(".chart-item h3");
 
-searchInput2.addEventListener("input", function () {
-  clearTimeout(typingTimer);
-  typingTimer = setTimeout(handleSearch, typingDelay);
-});
+  chartItems.forEach((heading) => {
+    const originalText =
+      heading.getAttribute("data-original-text") || heading.textContent;
 
-searchInput3.addEventListener("input", function () {
-  clearTimeout(typingTimer);
-  typingTimer = setTimeout(handleSearch, typingDelay);
+    if (!heading.getAttribute("data-original-text")) {
+      heading.setAttribute("data-original-text", originalText);
+    }
+
+    heading.textContent = searchInput.value
+      ? `${originalText} (${searchInput.value})`
+      : originalText;
+  });
+
+  if (searchInput.value != "") {
+    nmiSetSelected();
+  } else {
+    nmiSetDefault();
+  }
 });
 
 document.querySelectorAll('input[name="period"]').forEach((radio) => {
