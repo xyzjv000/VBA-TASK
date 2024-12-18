@@ -68,6 +68,19 @@ Sub GenerateInsertData()
             ' Example of additional data in column M (optional)
             wsDestination.Range("M" & destinationRow).Value = Format(wsData.Range(startColumn & "10").Value, "mmm-yy")
 
+            destinationRow = destinationRow + 1
+        Next nmiCount
+    Next batch
+
+    Call CompareAndPopulateNMIData
+
+    destinationRow = 2
+    ' Outer loop: Repeat for 12 sets of columns
+    For batch = 1 To months
+        ' Set the starting column for this batch
+        startColumn = GetColumnLetter(Range("BB1").Column + (batch - 1) * 8)
+
+        For nmiCount = startRow To lastRow            
             ' Generate the combined string for column N
             combinedString = "(" ' Start the combined string
             rowValues = wsDestination.Range("A" & destinationRow & ":M" & destinationRow).Value ' Get values from A to M
@@ -99,8 +112,6 @@ Sub GenerateInsertData()
             destinationRow = destinationRow + 1
         Next nmiCount
     Next batch
-
-    Call CompareAndPopulateNMIData
 End Sub
 
 
@@ -241,7 +252,6 @@ Private Sub CompareAndPopulateNMIData()
         Next j
     Next i
 
-    MsgBox "NMI data has been updated successfully!", vbInformation
 End Sub
 
 Sub UpdateAchievedMarginToAzureSQL()
@@ -297,8 +307,8 @@ Sub UpdateAchievedMarginToAzureSQL()
     ' Loop through all rows in the destination sheet (ws) column N
     For i = 2 To lastRow
         ' Only add the value to the batch if it matches the next month's value
-        If Trim(ws.Range("N" & i).Value) <> "" And _
-           Format(ws.Range("N" & i).Value, "mmm-yy") = marginNextMonth Then
+        If Trim(ws.Range("M" & i).Value) <> "" And _
+           ws.Range("M" & i).Value = marginNextMonth Then
             
             ' Build VALUES string for the current row
             If values <> "" Then values = values & ", "
@@ -319,7 +329,16 @@ Sub UpdateAchievedMarginToAzureSQL()
         End If
     Next i
 
-    MsgBox "Data Inserted Successfully into Azure SQL Database!", vbInformation
+    ' If there are any remaining rows that didn't fill a full batch, insert them now
+    If values <> "" Then
+        sql = "INSERT INTO [dbo].[ForecastResult] " & _
+              "([Customer], [NMI], [Checksum], [AnalysisData], [AchievedMargin], " & _
+              "[Predicted90POE], [Predicted50POE], [Predicted10POE], [PredictedTM], " & _
+              "[LoadP_MWh], [LoadO_P_MWh], [LoadT_MWh], [Period]) VALUES " & values
+        conn.Execute sql
+    End If
+
+    MsgBox "New Data Inserted Successfully!", vbInformation
 
     ' Cleanup
     conn.Close
@@ -333,12 +352,3 @@ ErrorHandler:
         Set conn = Nothing
     End If
 End Sub
-
-
-
-
-
-
-
-
-
